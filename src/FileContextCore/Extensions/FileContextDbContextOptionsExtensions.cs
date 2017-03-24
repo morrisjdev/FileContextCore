@@ -1,4 +1,5 @@
-﻿using FileContextCore.FileManager;
+﻿using FileContextCore.CombinedManager;
+using FileContextCore.FileManager;
 using FileContextCore.Helper;
 using FileContextCore.Infrastructure;
 using FileContextCore.Serializer;
@@ -30,11 +31,29 @@ namespace FileContextCore.Extensions
             {
                 OptionsHelper.serializer = serializer;
             }
+            else
+            {
+                OptionsHelper.serializer = new JSONSerializer();
+            }
 
             if (fileManager != null)
             {
                 OptionsHelper.fileManager = fileManager;
             }
+            else
+            {
+                OptionsHelper.fileManager = new DefaultFileManager();
+            }
+
+            return optionsBuilder;
+        }
+
+        public static DbContextOptionsBuilder UseFileContext(this DbContextOptionsBuilder optionsBuilder, ICombinedManager manager)
+        {
+            ((IDbContextOptionsBuilderInfrastructure)optionsBuilder).AddOrUpdateExtension(
+                new FileContextOptionsExtension());
+
+            OptionsHelper.manager = manager;
 
             return optionsBuilder;
         }

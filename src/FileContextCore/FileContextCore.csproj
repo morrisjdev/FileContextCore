@@ -4,14 +4,14 @@
     <TargetFramework>netstandard1.6</TargetFramework>
     <AssemblyName>FileContextCore</AssemblyName>
     <PackageId>FileContextCore</PackageId>
-    <NetStandardImplicitPackageVersion>1.6.0</NetStandardImplicitPackageVersion>
+    <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
     <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <SignAssembly>False</SignAssembly>
     <DelaySign>True</DelaySign>
-    <Description>FileContextCore is a "Database"-Provider for Entity Framework Core and adds the ability to store information in files instead of being limited to databases.</Description>
+    <Description>FileContextCore is a "Database"-Provider for Entity Framework Core and adds the ability to store information in files instead of being limited to databases. It enables fast developments because of the advantage of just copy, edit and delete files.</Description>
     <Authors>morrisjdev</Authors>
     <PackageLicenseUrl>https://github.com/morrisjdev/FileContextCore/blob/master/LICENSE</PackageLicenseUrl>
     <Copyright>Copyright (c) 2017 Morris Janatzek</Copyright>
@@ -19,10 +19,13 @@
     <RepositoryUrl>https://github.com/morrisjdev/FileContextCore</RepositoryUrl>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
+    <Version>1.0.1</Version>
+    <PackageTags>ef, database, file, db, filedb, json, xml, csv, xlsx, excel, dbcontext, entity framework</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CsvHelper" Version="3.0.0-beta7" />
+    <PackageReference Include="CsvHelper" Version="2.16.3" />
+    <PackageReference Include="EPPlus.Core" Version="1.3.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="1.1.1" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.1" />
     <PackageReference Include="System.Xml.XmlSerializer" Version="4.3.0" />

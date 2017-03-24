@@ -18,7 +18,20 @@ namespace Example.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseFileContext(new FileContextCore.Serializer.XMLSerializer());
+            //Default: JSON-Serialize
+            //optionsBuilder.UseFileContext();
+
+            //JSON-Serialize + simple Encryption
+            //optionsBuilder.UseFileContext(new FileContextCore.Serializer.JSONSerializer(), new FileContextCore.FileManager.EncryptedFileManager());
+
+            //XML
+            //optionsBuilder.UseFileContext(new FileContextCore.Serializer.XMLSerializer());
+
+            //CSV
+            //optionsBuilder.UseFileContext(new FileContextCore.Serializer.CSVSerializer());
+
+            //Excel with password
+            optionsBuilder.UseFileContext(new FileContextCore.CombinedManager.ExcelManager());
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

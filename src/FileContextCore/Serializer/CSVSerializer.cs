@@ -27,31 +27,36 @@ namespace FileContextCore.Serializer
 
         public IList DeserializeList(string list, Type t)
         {
-            PropertyInfo[] properties = t.GetRuntimeProperties().Where(x => !x.SetMethod.IsVirtual).ToArray();
-
-            CsvClassMap map = Activator.CreateInstance(typeof(DefaultCsvClassMap<>).MakeGenericType(t)) as CsvClassMap;
-
-            foreach (PropertyInfo pi in properties)
+            if(list != "")
             {
-                CsvPropertyMap propMap = new CsvPropertyMap(pi);
-                propMap.Name(pi.Name);
-                propMap.Index(0);
-                map.PropertyMaps.Add(propMap);
+                PropertyInfo[] properties = t.GetRuntimeProperties().Where(x => !x.SetMethod.IsVirtual).ToArray();
+
+                CsvClassMap map = Activator.CreateInstance(typeof(DefaultCsvClassMap<>).MakeGenericType(t)) as CsvClassMap;
+
+                foreach (PropertyInfo pi in properties)
+                {
+                    CsvPropertyMap propMap = new CsvPropertyMap(pi);
+                    propMap.Name(pi.Name);
+                    propMap.Index(0);
+                    map.PropertyMaps.Add(propMap);
+                }
+
+                TextReader tr = new StringReader(list);
+                CsvReader reader = new CsvReader(tr);
+                reader.Configuration.Delimiter = delimiter;
+                reader.Configuration.RegisterClassMap(map);
+
+                IList result = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(t));
+
+                foreach (object record in reader.GetRecords(t))
+                {
+                    result.Add(record);
+                }
+
+                return result;
             }
 
-            TextReader tr = new StringReader(list);
-            CsvReader reader = new CsvReader(tr);
-            reader.Configuration.Delimiter = delimiter;
-            reader.Configuration.RegisterClassMap(map);
-
-            IList result = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(t));
-
-            foreach (object record in reader.GetRecords(t))
-            {
-                result.Add(record);
-            }
-
-            return result;
+            return (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(t));
         }
 
         public string SerializeList(IList list)

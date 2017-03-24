@@ -18,7 +18,7 @@ namespace Example
 
             //db.Database.EnsureDeleted();
 
-            List<User> users = db.Users.Include(x => x.Contents)/*.Include(x => x.Settings)*/.ToList();
+            List<User> users = db.Users.Include(x => x.Contents).Include(x => x.Settings).ToList();
 
             List<Content> contents = db.Contents.Include(x => x.User).ToList();
 

@@ -1,4 +1,5 @@
-﻿using FileContextCore.FileManager;
+﻿using FileContextCore.CombinedManager;
+using FileContextCore.FileManager;
 using FileContextCore.Helper;
 using FileContextCore.Infrastructure;
 using FileContextCore.Serializer;
@@ -22,18 +23,19 @@ namespace FileContextCore.Storage
 
         private ISerializer serializer;
         private IFileManager fileManager;
+        private ICombinedManager manager;
         private Dictionary<Type, IList> cache = new Dictionary<Type, IList>();
 
         public FileContextCache()
         {
+            manager = OptionsHelper.manager;
             serializer = OptionsHelper.serializer;
             fileManager = OptionsHelper.fileManager;
-
         }
 
         public IList Filter(Type t, Func<object, bool> filter)
         {
-            IList result = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(t));//(IList)typeof(List<>).MakeGenericType(t).GetConstructor(new Type[] { }).Invoke(new object[] { });
+            IList result = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(t));
             IList values = GetValues(t);
 
             for(int i = 0; i < values.Count; i++)
@@ -59,7 +61,21 @@ namespace FileContextCore.Storage
                 }
                 else
                 {
-                    IList result = serializer.DeserializeList(fileManager.LoadContent(t, serializer.FileType), t);
+                    IList result;
+
+                    if (manager != null)
+                    {
+                        result = manager.GetItems(t);
+                    }
+                    else if(serializer != null && fileManager != null)
+                    {
+                        result = serializer.DeserializeList(fileManager.LoadContent(t, serializer.FileType), t);
+                    }
+                    else
+                    {
+                        throw new NullReferenceException();
+                    }
+                    
 
                     if(result != null)
                     {
@@ -67,7 +83,7 @@ namespace FileContextCore.Storage
                     }
                     else
                     {
-                        cache[t] = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(t)); //(IList)typeof(List<>).MakeGenericType(t).GetConstructor(new Type[] { }).Invoke(new object[] { });
+                        cache[t] = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(t));
                     }
 
                     return cache[t];
@@ -79,7 +95,19 @@ namespace FileContextCore.Storage
         {
             lock (thisLock)
             {
-                fileManager.SaveContent(t, serializer.FileType, serializer.SerializeList(newList));
+                if (manager != null)
+                {
+                    manager.SaveItems(newList);
+                }
+                else if (serializer != null && fileManager != null)
+                {
+                    fileManager.SaveContent(t, serializer.FileType, serializer.SerializeList(newList));
+                }
+                else
+                {
+                    throw new NullReferenceException();
+                }
+
                 cache[t] = newList;
             }
         }
