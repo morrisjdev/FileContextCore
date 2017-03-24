@@ -24,7 +24,8 @@ namespace FileContextCore.Storage
 
         public bool EnsureCreated()
         {
-            return !fileManager.DatabaseExists();
+            return false;
+            //return !fileManager.DatabaseExists();
         }
 
         public Task<bool> EnsureCreatedAsync(CancellationToken cancellationToken = default(CancellationToken))
@@ -35,7 +36,8 @@ namespace FileContextCore.Storage
         public bool EnsureDeleted()
         {
             cache.Clear();
-            return fileManager.Clear();
+            return true;
+            //return fileManager.Clear();
         }
 
         public Task<bool> EnsureDeletedAsync(CancellationToken cancellationToken = default(CancellationToken))

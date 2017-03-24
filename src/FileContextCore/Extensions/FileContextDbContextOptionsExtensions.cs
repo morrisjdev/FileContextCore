@@ -14,14 +14,6 @@ namespace FileContextCore.Extensions
 {
     public static class FileContextDbContextOptionsExtensions
     {
-        public static DbContextOptionsBuilder UseFileContext(this DbContextOptionsBuilder optionsBuilder)
-        {
-            ((IDbContextOptionsBuilderInfrastructure)optionsBuilder).AddOrUpdateExtension(
-                new FileContextOptionsExtension());
-
-            return optionsBuilder;
-        }
-
         public static DbContextOptionsBuilder UseFileContext(this DbContextOptionsBuilder optionsBuilder, ISerializer serializer = null, IFileManager fileManager = null)
         {
             ((IDbContextOptionsBuilderInfrastructure)optionsBuilder).AddOrUpdateExtension(

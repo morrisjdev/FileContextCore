@@ -19,8 +19,9 @@
     <RepositoryUrl>https://github.com/morrisjdev/FileContextCore</RepositoryUrl>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <PackageTags>ef, database, file, db, filedb, json, xml, csv, xlsx, excel, dbcontext, entity framework</PackageTags>
+    <PackageIconUrl>https://morrisj.net/img/morrisjdev_logo.png</PackageIconUrl>
   </PropertyGroup>
 
   <ItemGroup>

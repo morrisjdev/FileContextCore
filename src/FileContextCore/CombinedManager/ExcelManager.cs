@@ -1,4 +1,5 @@
-﻿using OfficeOpenXml;
+﻿using FileContextCore.Helper;
+using OfficeOpenXml;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -55,7 +56,14 @@ namespace FileContextCore.CombinedManager
                     
                     foreach(KeyValuePair<int, PropertyInfo> prop in properties)
                     {
-                        prop.Value.SetValue(item, Convert.ChangeType(ws.Cells[i + 1, prop.Key].Value, prop.Value.PropertyType));
+                        if(prop.Value.PropertyType == typeof(TimeSpan))
+                        {
+                            prop.Value.SetValue(item, TimeSpan.Parse((string)ws.Cells[i + 1, prop.Key].Value));
+                        }
+                        else
+                        {
+                            prop.Value.SetValue(item, Convert.ChangeType(ws.Cells[i + 1, prop.Key].Value, prop.Value.PropertyType));
+                        }
                     }
 
                     result.Add(item);

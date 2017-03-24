@@ -16,6 +16,8 @@ namespace Example.Data
 
         public DbSet<Setting> Settings { get; set; }
 
+        public DbSet<Messurement> Messurements { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             //Default: JSON-Serialize
@@ -30,7 +32,7 @@ namespace Example.Data
             //CSV
             //optionsBuilder.UseFileContext(new FileContextCore.Serializer.CSVSerializer());
 
-            //Excel with password
+            //Excel
             optionsBuilder.UseFileContext(new FileContextCore.CombinedManager.ExcelManager());
         }
 

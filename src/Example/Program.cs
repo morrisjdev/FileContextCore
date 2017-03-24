@@ -1,8 +1,10 @@
 ﻿using Example.Data;
 using Example.Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -14,15 +16,22 @@ namespace Example
         {
             Context db = new Context();
 
-            //db.Database.EnsureCreated();
+            Messurement current = new Messurement();
 
-            //db.Database.EnsureDeleted();
+            Stopwatch watch = new Stopwatch();
+
+            watch.Start();
 
             List<User> users = db.Users.Include(x => x.Contents).Include(x => x.Settings).ToList();
 
             List<Content> contents = db.Contents.Include(x => x.User).ToList();
 
-            IEnumerable<User> test = db.Users;
+            watch.Stop();
+            current.TimeRead = watch.Elapsed;
+            current.EntryCount = users.Count + contents.Count;
+            Console.WriteLine((users.Count + contents.Count) + " Werte in " + watch.ElapsedMilliseconds + " ms gelesen");
+
+            watch.Restart();
 
             User us = new User()
             {
@@ -37,15 +46,6 @@ namespace Example
                 Text = "Test",
                 UserId = us.Id
             });
-
-            db.SaveChanges();
-
-            Console.WriteLine(db.Contents.Count());
-            Console.WriteLine(db.Users.Count());
-
-            Context db2 = new Context();
-            Console.WriteLine(db2.Contents.Count());
-            Console.WriteLine(db2.Users.Count());
 
             db.Users.Add(new User()
             {
@@ -67,10 +67,12 @@ namespace Example
 
             db.SaveChanges();
 
-            Console.WriteLine(db.Users.Count());
-            Console.WriteLine(db2.Users.Count());
+            watch.Stop();
+            current.TimeWrite = watch.Elapsed;
+            Console.WriteLine("Werte in " + watch.ElapsedMilliseconds + " ms geschrieben");
 
-            Console.ReadKey();
+            db.Messurements.Add(current);
+            db.SaveChanges();
         }
     }
 }
