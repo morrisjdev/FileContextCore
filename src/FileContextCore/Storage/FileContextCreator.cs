@@ -1,4 +1,5 @@
-﻿using FileContextCore.FileManager;
+﻿using FileContextCore.CombinedManager;
+using FileContextCore.FileManager;
 using FileContextCore.Helper;
 using FileContextCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -14,18 +15,17 @@ namespace FileContextCore.Storage
     class FileContextCreator : IDatabaseCreator
     {
         private FileContextCache cache;
-        private IFileManager fileManager;
+        private ICombinedManager manager;
 
         public FileContextCreator(FileContextCache _cache)
         {
             cache = _cache;
-            fileManager = OptionsHelper.fileManager;
+            manager = OptionsHelper.manager;
         }
 
         public bool EnsureCreated()
         {
-            return false;
-            //return !fileManager.DatabaseExists();
+            return !manager.Exists();
         }
 
         public Task<bool> EnsureCreatedAsync(CancellationToken cancellationToken = default(CancellationToken))
@@ -36,8 +36,7 @@ namespace FileContextCore.Storage
         public bool EnsureDeleted()
         {
             cache.Clear();
-            return true;
-            //return fileManager.Clear();
+            return manager.Clear();
         }
 
         public Task<bool> EnsureDeletedAsync(CancellationToken cancellationToken = default(CancellationToken))

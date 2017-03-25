@@ -9,10 +9,6 @@ namespace FileContextCore.Helper
 {
     static class OptionsHelper
     {
-        public static IFileManager fileManager = null;
-
-        public static ISerializer serializer = null;
-
-        public static ICombinedManager manager = null;
+        public static ICombinedManager manager = new SerializerManager(new JSONSerializer(), new DefaultFileManager());
     }
 }

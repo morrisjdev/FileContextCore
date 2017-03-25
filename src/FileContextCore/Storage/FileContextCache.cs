@@ -21,16 +21,12 @@ namespace FileContextCore.Storage
     {
         private object thisLock = new object();
 
-        private ISerializer serializer;
-        private IFileManager fileManager;
         private ICombinedManager manager;
         private Dictionary<Type, IList> cache = new Dictionary<Type, IList>();
 
         public FileContextCache()
         {
             manager = OptionsHelper.manager;
-            serializer = OptionsHelper.serializer;
-            fileManager = OptionsHelper.fileManager;
         }
 
         public IList Filter(Type t, Func<object, bool> filter)
@@ -61,21 +57,7 @@ namespace FileContextCore.Storage
                 }
                 else
                 {
-                    IList result;
-
-                    if (manager != null)
-                    {
-                        result = manager.GetItems(t);
-                    }
-                    else if(serializer != null && fileManager != null)
-                    {
-                        result = serializer.DeserializeList(fileManager.LoadContent(t, serializer.FileType), t);
-                    }
-                    else
-                    {
-                        throw new NullReferenceException();
-                    }
-                    
+                    IList result = manager.GetItems(t);
 
                     if(result != null)
                     {
@@ -95,18 +77,7 @@ namespace FileContextCore.Storage
         {
             lock (thisLock)
             {
-                if (manager != null)
-                {
-                    manager.SaveItems(newList);
-                }
-                else if (serializer != null && fileManager != null)
-                {
-                    fileManager.SaveContent(t, serializer.FileType, serializer.SerializeList(newList));
-                }
-                else
-                {
-                    throw new NullReferenceException();
-                }
+                manager.SaveItems(newList);
 
                 cache[t] = newList;
             }
@@ -138,54 +109,57 @@ namespace FileContextCore.Storage
 
         public int ExecuteTransaction(IEnumerable<IUpdateEntry> entries)
         {
-            int changedCount = 0;
-
-            IEnumerable<IGrouping<IEntityType, IUpdateEntry>> changes = entries.GroupBy(x => x.EntityType);
-
-            foreach (IGrouping<IEntityType, IUpdateEntry> tableChange in changes)
+            lock (thisLock)
             {
-                IEntityType tableType = tableChange.Key;
-                Type entityType = tableType.ClrType;
+                int changedCount = 0;
 
-                IList values = GetValues(entityType);
+                IEnumerable<IGrouping<IEntityType, IUpdateEntry>> changes = entries.GroupBy(x => x.EntityType);
 
-                foreach (IUpdateEntry e in tableChange)
+                foreach (IGrouping<IEntityType, IUpdateEntry> tableChange in changes)
                 {
-                    object obj = Activator.CreateInstance(entityType);
+                    IEntityType tableType = tableChange.Key;
+                    Type entityType = tableType.ClrType;
 
-                    tableType.GetProperties().ToList().ForEach(x =>
+                    IList values = GetValues(entityType);
+
+                    foreach (IUpdateEntry e in tableChange)
                     {
-                        entityType.GetRuntimeProperty(x.Name).SetValue(obj, e.GetCurrentValue(x));
-                    });
+                        object obj = Activator.CreateInstance(entityType);
 
-                    if (e.EntityState == EntityState.Added)
-                    {
-                        values.Add(obj);
-                    }
-                    else if (e.EntityState == EntityState.Deleted)
-
-                    {
-                        int index = values.GetIndex(tableType, obj);
-
-                        if (index != -1)
+                        tableType.GetProperties().ToList().ForEach(x =>
                         {
-                            values.RemoveAt(index);
+                            entityType.GetRuntimeProperty(x.Name).SetValue(obj, e.GetCurrentValue(x));
+                        });
+
+                        if (e.EntityState == EntityState.Added)
+                        {
+                            values.Add(obj);
                         }
-                    }
-                    else if (e.EntityState == EntityState.Modified)
-                    {
-                        int position = values.GetIndex(tableType, obj);
-                        values.RemoveAt(position);
-                        values.Insert(position, obj);
+                        else if (e.EntityState == EntityState.Deleted)
+
+                        {
+                            int index = values.GetIndex(tableType, obj);
+
+                            if (index != -1)
+                            {
+                                values.RemoveAt(index);
+                            }
+                        }
+                        else if (e.EntityState == EntityState.Modified)
+                        {
+                            int position = values.GetIndex(tableType, obj);
+                            values.RemoveAt(position);
+                            values.Insert(position, obj);
+                        }
+
+                        changedCount++;
                     }
 
-                    changedCount++;
+                    UpdateValues(entityType, values);
                 }
 
-                UpdateValues(entityType, values);
+                return changedCount;
             }
-
-            return changedCount;
         }
     }
 }

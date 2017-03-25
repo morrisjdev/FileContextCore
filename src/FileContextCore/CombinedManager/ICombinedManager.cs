@@ -10,5 +10,9 @@ namespace FileContextCore.CombinedManager
         IList GetItems(Type t);
 
         void SaveItems(IList list);
+
+        bool Clear();
+
+        bool Exists();
     }
 }

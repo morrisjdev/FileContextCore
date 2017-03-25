@@ -19,22 +19,17 @@ namespace FileContextCore.Extensions
             ((IDbContextOptionsBuilderInfrastructure)optionsBuilder).AddOrUpdateExtension(
                 new FileContextOptionsExtension());
 
-            if(serializer != null)
+            if(serializer != null && fileManager != null)
             {
-                OptionsHelper.serializer = serializer;
+                OptionsHelper.manager = new SerializerManager(serializer, fileManager);
             }
-            else
+            else if(serializer != null)
             {
-                OptionsHelper.serializer = new JSONSerializer();
+                OptionsHelper.manager = new SerializerManager(serializer, new DefaultFileManager());
             }
-
-            if (fileManager != null)
+            else if(fileManager != null)
             {
-                OptionsHelper.fileManager = fileManager;
-            }
-            else
-            {
-                OptionsHelper.fileManager = new DefaultFileManager();
+                OptionsHelper.manager = new SerializerManager(new JSONSerializer(), fileManager);
             }
 
             return optionsBuilder;

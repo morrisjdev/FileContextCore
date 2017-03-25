@@ -29,16 +29,7 @@ namespace FileContextCore.Helper
                         object arrayValue = entityType.GetRuntimeProperty(y.Name).GetValue(obj);
                         object compareValue = entityType.GetRuntimeProperty(y.Name).GetValue(o);
 
-                        if (y.ClrType == typeof(Guid))
-                        {
-                            if (((Guid)arrayValue).CompareTo((Guid)compareValue) == 0)
-                            {
-                                testCounter++;
-                                return;
-                            }
-                        }
-
-                        if (arrayValue == compareValue)
+                        if (Equals(arrayValue, compareValue))
                         {
                             testCounter++;
                         }

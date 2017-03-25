@@ -12,18 +12,11 @@ namespace FileContextCore.CombinedManager
 {
     public class ExcelManager : ICombinedManager
     {
-        private ExcelPackage package;
+        private string password = "";
 
-        public ExcelManager(string password = "")
+        public ExcelManager(string _password = "")
         {
-            if (password != "")
-            {
-                package = new ExcelPackage(GetFilePath("data.xlsx"), password);
-            }
-            else
-            {
-                package = new ExcelPackage(GetFilePath("data.xlsx"));
-            }
+            password = _password;
         }
 
         FileInfo GetFilePath(string fileName)
@@ -36,14 +29,25 @@ namespace FileContextCore.CombinedManager
 
         public IList GetItems(Type t)
         {
+            ExcelPackage package;
+
+            if (password != "")
+            {
+                package = new ExcelPackage(GetFilePath("data.xlsx"), password);
+            }
+            else
+            {
+                package = new ExcelPackage(GetFilePath("data.xlsx"));
+            }
+
             ExcelWorksheet ws = package.Workbook.Worksheets[t.Name];
 
-            if(ws != null)
+            if (ws != null)
             {
                 List<PropertyInfo> props = t.GetRuntimeProperties().Where(x => !x.SetMethod.IsVirtual).ToList();
                 Dictionary<int, PropertyInfo> properties = new Dictionary<int, PropertyInfo>();
-                
-                for(int i = 0; i < ws.Dimension.Columns; i++)
+
+                for (int i = 0; i < ws.Dimension.Columns; i++)
                 {
                     properties.Add(i + 1, props.FirstOrDefault(x => x.Name == (string)ws.Cells[1, i + 1].Value));
                 }
@@ -53,12 +57,16 @@ namespace FileContextCore.CombinedManager
                 for (int i = 1; i < ws.Dimension.Rows; i++)
                 {
                     object item = Activator.CreateInstance(t);
-                    
-                    foreach(KeyValuePair<int, PropertyInfo> prop in properties)
+
+                    foreach (KeyValuePair<int, PropertyInfo> prop in properties)
                     {
-                        if(prop.Value.PropertyType == typeof(TimeSpan))
+                        if (prop.Value.PropertyType == typeof(TimeSpan))
                         {
                             prop.Value.SetValue(item, TimeSpan.Parse((string)ws.Cells[i + 1, prop.Key].Value));
+                        }
+                        else if (prop.Value.PropertyType == typeof(Guid))
+                        {
+                            prop.Value.SetValue(item, Guid.Parse((string)ws.Cells[i + 1, prop.Key].Value));
                         }
                         else
                         {
@@ -68,6 +76,8 @@ namespace FileContextCore.CombinedManager
 
                     result.Add(item);
                 }
+
+                package.Dispose();
 
                 return result;
             }
@@ -86,13 +96,34 @@ namespace FileContextCore.CombinedManager
 
                 ws.View.FreezePanes(2, 1);
 
-                package.Save();
+                if (password != "")
+                {
+                    package.Save(password);
+                }
+                else
+                {
+                    package.Save();
+                }
+
+                package.Dispose();
+
                 return (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(t));
-            }            
+            }
         }
 
         public void SaveItems(IList list)
         {
+            ExcelPackage package;
+
+            if (password != "")
+            {
+                package = new ExcelPackage(GetFilePath("data.xlsx"), password);
+            }
+            else
+            {
+                package = new ExcelPackage(GetFilePath("data.xlsx"));
+            }
+
             Type t = list.GetType().GenericTypeArguments[0];
             PropertyInfo[] props = t.GetRuntimeProperties().Where(x => !x.SetMethod.IsVirtual).ToArray();
 
@@ -110,12 +141,80 @@ namespace FileContextCore.CombinedManager
                 }
             }
 
-            for (int i = 0; i < ws.Dimension.Columns; i++)
+            for (int y = 0; y < ws.Dimension.Columns; y++)
             {
-                ws.Column(i + 1).AutoFit();
+                ws.Column(y + 1).AutoFit();
             }
 
-            package.Save();
+            if (password != "")
+            {
+                package.Save(password);
+            }
+            else
+            {
+                package.Save();
+            }
+
+            package.Dispose();
+        }
+
+        public bool Clear()
+        {
+            bool result = false;
+            ExcelPackage package;
+
+            if (password != "")
+            {
+                package = new ExcelPackage(GetFilePath("data.xlsx"), password);
+            }
+            else
+            {
+                package = new ExcelPackage(GetFilePath("data.xlsx"));
+            }
+
+            if(package.Workbook.Worksheets.Count > 0)
+            {
+                for (int i = 0; i < package.Workbook.Worksheets.Count; i++)
+                {
+                    package.Workbook.Worksheets.Delete(i + 1);
+                }
+
+                if (password != "")
+                {
+                    package.Save(password);
+                }
+                else
+                {
+                    package.Save();
+                }
+
+                result = true;
+            }   
+
+            package.Dispose();
+
+            return result;
+        }
+
+        public bool Exists()
+        {
+            bool result = false;
+            ExcelPackage package;
+
+            if (password != "")
+            {
+                package = new ExcelPackage(GetFilePath("data.xlsx"), password);
+            }
+            else
+            {
+                package = new ExcelPackage(GetFilePath("data.xlsx"));
+            }
+
+            result = package.Workbook.Worksheets.Count > 0;
+
+            package.Dispose();
+
+            return result;
         }
     }
 }

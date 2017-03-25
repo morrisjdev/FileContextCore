@@ -22,7 +22,7 @@ namespace Example
 
             watch.Start();
 
-            List<User> users = db.Users.Include(x => x.Contents).Include(x => x.Settings).ToList();
+            List<User> users = db.Users.ToList(); //db.Users.Include(x => x.Contents).Include(x => x.Settings).ToList();
 
             List<Content> contents = db.Contents.Include(x => x.User).ToList();
 
@@ -40,6 +40,10 @@ namespace Example
             };
 
             db.Users.Add(us);
+
+            //db.Users.Remove(db.Users.FirstOrDefault());
+
+            db.SaveChanges();
 
             db.Contents.Add(new Content()
             {
@@ -73,6 +77,26 @@ namespace Example
 
             db.Messurements.Add(current);
             db.SaveChanges();
+
+            while (true)
+            {
+                string result = Console.ReadLine();
+
+                if(result != "q")
+                {
+                    db.Users.Add(new User()
+                    {
+                        Username = "testuser",
+                        Name = "Test User"
+                    });
+
+                    db.SaveChanges();
+
+                    continue;
+                }
+
+                break;
+            }
         }
     }
 }

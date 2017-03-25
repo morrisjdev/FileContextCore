@@ -53,7 +53,6 @@ namespace FileContextCore.FileManager
             lock (thisLock)
             {
                 string path = GetFilePath(fileName);
-
                 File.WriteAllText(path, content);
             }
         }

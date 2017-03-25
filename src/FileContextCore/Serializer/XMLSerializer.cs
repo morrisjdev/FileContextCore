@@ -36,7 +36,10 @@ namespace FileContextCore.Serializer
                 XmlSerializer xs = new XmlSerializer(typeof(List<>).MakeGenericType(t));
                 MemoryStream memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(list));
 
-                return (IList)xs.Deserialize(memoryStream);
+                IList result = (IList)xs.Deserialize(memoryStream);
+                memoryStream.Dispose();
+
+                return result;
             }
 
             return (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(t));
@@ -63,6 +66,7 @@ namespace FileContextCore.Serializer
             StringWriter sw = new StringWriter();
             XmlWriter writer = XmlWriter.Create(sw, settings);
             xs.Serialize(writer, list);
+
             return sw.ToString();
         }
 
@@ -73,7 +77,10 @@ namespace FileContextCore.Serializer
                 XmlSerializer xs = new XmlSerializer(t);
                 MemoryStream memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(obj));
 
-                return xs.Deserialize(memoryStream);
+                object result = xs.Deserialize(memoryStream);
+                memoryStream.Dispose();
+
+                return result;
             }
 
             return null;
@@ -100,6 +107,7 @@ namespace FileContextCore.Serializer
             StringWriter sw = new StringWriter();
             XmlWriter writer = XmlWriter.Create(sw, settings);
             xs.Serialize(writer, obj);
+
             return sw.ToString();
         }
     }
