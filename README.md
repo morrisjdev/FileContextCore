@@ -20,6 +20,8 @@ This framework bases on the idea of FileContext by DevMentor ([https://github.co
 
 ## Install
 
+[https://www.nuget.org/packages/FileContextCore/](https://www.nuget.org/packages/FileContextCore/)
+
 ```
 PM > Install-Package FileContextCore
 ```
