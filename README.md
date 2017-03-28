@@ -119,6 +119,13 @@ optionsBuilder.UseFileContext(new FileContextCore.CombinedManager.ExcelManager()
 optionsBuilder.UseFileContext(new FileContextCore.CombinedManager.ExcelManager("password"));
 ```
 
+To run on Linux-Systems
+
+```
+sudo apt-get update
+sudo apt-get install libgdiplus
+```
+
 ## Custom implementation
 
 For customization you can implement the Interfaces `ISerializer`, `IFileManager` and `ICombinedManager`
