@@ -28,16 +28,14 @@ namespace FileContextCore.CombinedManager
             return fileManager.DatabaseExists();
         }
 
-        public IList GetItems(Type t)
+        public List<T> GetItems<T>()
         {
-            return serializer.DeserializeList(fileManager.LoadContent(t, serializer.FileType), t);
+            return serializer.DeserializeList<T>(fileManager.LoadContent<T>(serializer.FileType));
         }
 
-        public void SaveItems(IList list)
+        public void SaveItems<T>(List<T> list)
         {
-            Type t = list.GetType().GenericTypeArguments[0];
-
-            fileManager.SaveContent(t, serializer.FileType, serializer.SerializeList(list));
+            fileManager.SaveContent<T>(serializer.FileType, serializer.SerializeList(list));
         }
     }
 }

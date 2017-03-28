@@ -7,9 +7,9 @@ namespace FileContextCore.CombinedManager
 {
     public interface ICombinedManager
     {
-        IList GetItems(Type t);
+        List<T> GetItems<T>();
 
-        void SaveItems(IList list);
+        void SaveItems<T>(List<T> list);
 
         bool Clear();
 

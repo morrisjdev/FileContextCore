@@ -7,60 +7,60 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using FileContextCore.Storage;
+using FileContextCore.Helper;
+using System.Reflection;
 
 namespace FileContextCore.ValueGeneration
 {
     class FileContextIntegerValueGeneratorFactory
     {
-        private FileContextCache cache;
-
-        public FileContextIntegerValueGeneratorFactory(FileContextCache _cache)
+        public FileContextIntegerValueGeneratorFactory()
         {
-            cache = _cache;
         }
 
         public ValueGenerator Create(IProperty property, IEntityType entityType)
         {
             Type t = property.ClrType;
+            long lastId = (long)QueryHelper.cache.GetType().GetMethod(nameof(QueryHelper.cache.GetLastId)).MakeGenericMethod(entityType.ClrType).Invoke(QueryHelper.cache, new object[] { property });
 
-            if(t == typeof(int))
+            if (t == typeof(int))
             {
-                return new FileContextIntegerValueGenerator<int>(cache.GetLastId(entityType.ClrType, property));
+                return new FileContextIntegerValueGenerator<int>(lastId);
             }
 
             if(t == typeof(long))
             {
-                return new FileContextIntegerValueGenerator<long>(cache.GetLastId(entityType.ClrType, property));
+                return new FileContextIntegerValueGenerator<long>(lastId);
             }
 
             if (t == typeof(short))
             {
-                return new FileContextIntegerValueGenerator<short>(cache.GetLastId(entityType.ClrType, property));
+                return new FileContextIntegerValueGenerator<short>(lastId);
             }
 
             if (t == typeof(byte))
             {
-                return new FileContextIntegerValueGenerator<byte>(cache.GetLastId(entityType.ClrType, property));
+                return new FileContextIntegerValueGenerator<byte>(lastId);
             }
 
             if (t == typeof(ulong))
             {
-                return new FileContextIntegerValueGenerator<ulong>(cache.GetLastId(entityType.ClrType, property));
+                return new FileContextIntegerValueGenerator<ulong>(lastId);
             }
 
             if (t == typeof(uint))
             {
-                return new FileContextIntegerValueGenerator<uint>(cache.GetLastId(entityType.ClrType, property));
+                return new FileContextIntegerValueGenerator<uint>(lastId);
             }
 
             if (t == typeof(ushort))
             {
-                return new FileContextIntegerValueGenerator<ushort>(cache.GetLastId(entityType.ClrType, property));
+                return new FileContextIntegerValueGenerator<ushort>(lastId);
             }
 
             if (t == typeof(sbyte))
             {
-                return new FileContextIntegerValueGenerator<sbyte>(cache.GetLastId(entityType.ClrType, property));
+                return new FileContextIntegerValueGenerator<sbyte>(lastId);
             }
 
             throw new ArgumentException(CoreStrings.InvalidValueGeneratorFactoryProperty(

@@ -27,8 +27,9 @@ namespace FileContextCore.CombinedManager
             return new FileInfo(Path.Combine(path, fileName));
         }
 
-        public IList GetItems(Type t)
+        public List<T> GetItems<T>()
         {
+            Type t = typeof(T);
             ExcelPackage package;
 
             if (password != "")
@@ -52,11 +53,11 @@ namespace FileContextCore.CombinedManager
                     properties.Add(i + 1, props.FirstOrDefault(x => x.Name == (string)ws.Cells[1, i + 1].Value));
                 }
 
-                IList result = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(t));
+                List<T> result = new List<T>();// (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(t));
 
                 for (int i = 1; i < ws.Dimension.Rows; i++)
                 {
-                    object item = Activator.CreateInstance(t);
+                    T item = (T)Activator.CreateInstance(t);
 
                     foreach (KeyValuePair<int, PropertyInfo> prop in properties)
                     {
@@ -107,11 +108,11 @@ namespace FileContextCore.CombinedManager
 
                 package.Dispose();
 
-                return (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(t));
+                return new List<T>();
             }
         }
 
-        public void SaveItems(IList list)
+        public void SaveItems<T>(List<T> list)
         {
             ExcelPackage package;
 
@@ -131,7 +132,7 @@ namespace FileContextCore.CombinedManager
 
             for (int i = 0; i < list.Count; i++)
             {
-                object item = list[i];
+                T item = list[i];
 
                 for (int x = 0; x < props.Count(); x++)
                 {

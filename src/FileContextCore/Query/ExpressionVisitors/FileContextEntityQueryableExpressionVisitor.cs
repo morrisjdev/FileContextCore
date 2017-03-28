@@ -6,11 +6,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
-using System.Linq.Expressions;
 using FileContextCore.Serializer;
 using FileContextCore.Infrastructure;
 using FileContextCore.Storage;
 using Remotion.Linq.Clauses.Expressions;
+using FileContextCore.Helper;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore;
+using System.Reflection;
+using System.Collections;
+using System.Linq.Expressions;
+using Remotion.Linq;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.EntityFrameworkCore.Query.ExpressionVisitors.Internal;
+using Microsoft.EntityFrameworkCore.Query.Internal;
 
 namespace FileContextCore.Query.ExpressionVisitors
 {
@@ -18,18 +27,17 @@ namespace FileContextCore.Query.ExpressionVisitors
     {
         private EntityQueryModelVisitor queryModelVisitor;
         private IQuerySource querySource;
-        private FileContextCache cache;
 
-        public FileContextEntityQueryableExpressionVisitor(EntityQueryModelVisitor _queryModelVisitor, IQuerySource _querySource, FileContextCache _cache) : base(_queryModelVisitor)
+        public FileContextEntityQueryableExpressionVisitor(EntityQueryModelVisitor _queryModelVisitor, IQuerySource _querySource) : base(_queryModelVisitor)
         {
             queryModelVisitor = _queryModelVisitor;
             querySource = _querySource;
-            cache = _cache;
         }
 
         protected override Expression VisitEntityQueryable(Type elementType)
         {
-            return Expression.Constant(cache.GetValues(elementType));
+            MethodInfo info = typeof(QueryHelper).GetMethod(nameof(QueryHelper.GetValues)).MakeGenericMethod(elementType);
+            return Expression.Call(info);
         }
     }
 }

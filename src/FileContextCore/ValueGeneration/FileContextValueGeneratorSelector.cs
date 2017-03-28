@@ -12,9 +12,9 @@ namespace FileContextCore.ValueGeneration
     {
         private FileContextIntegerValueGeneratorFactory genFactory;
 
-        public FileContextValueGeneratorSelector(IValueGeneratorCache cache, FileContextCache _cache) : base(cache)
+        public FileContextValueGeneratorSelector(IValueGeneratorCache cache) : base(cache)
         {
-            genFactory = new FileContextIntegerValueGeneratorFactory(_cache);
+            genFactory = new FileContextIntegerValueGeneratorFactory();
         }
 
         public override ValueGenerator Create(IProperty property, IEntityType entityType)

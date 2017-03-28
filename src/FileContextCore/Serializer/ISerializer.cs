@@ -10,12 +10,12 @@ namespace FileContextCore.Serializer
     {
         string FileType { get; }
 
-        IList DeserializeList(string list, Type t);
+        List<T> DeserializeList<T>(string list);
 
-        string SerializeList(IList list);
+        string SerializeList<T>(List<T> list);
 
-        object Deserialize(string obj, Type t);
+        T Deserialize<T>(string obj);
 
-        string Serialize(object obj);
+        string Serialize<T>(T obj);
     }
 }

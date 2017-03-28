@@ -14,12 +14,10 @@ namespace FileContextCore.Storage
 {
     class FileContextCreator : IDatabaseCreator
     {
-        private FileContextCache cache;
         private ICombinedManager manager;
 
-        public FileContextCreator(FileContextCache _cache)
+        public FileContextCreator()
         {
-            cache = _cache;
             manager = OptionsHelper.manager;
         }
 
@@ -35,7 +33,7 @@ namespace FileContextCore.Storage
 
         public bool EnsureDeleted()
         {
-            cache.Clear();
+            QueryHelper.cache.Clear();
             return manager.Clear();
         }
 

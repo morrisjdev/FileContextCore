@@ -1,4 +1,5 @@
-﻿using FileContextCore.Infrastructure;
+﻿using FileContextCore.Helper;
+using FileContextCore.Infrastructure;
 using FileContextCore.Query;
 using FileContextCore.Query.ExpressionVisitors;
 using FileContextCore.Storage;
@@ -24,7 +25,7 @@ namespace FileContextCore.Extensions
                 .Singleton<IDatabaseProvider, DatabaseProvider<FileContextProviderServices, FileContextOptionsExtension>>());
 
             services.TryAdd(new ServiceCollection()
-                .AddSingleton<FileContextCache>()
+                //.AddSingleton<FileContextCache>()
                 .AddSingleton<FileContextModelSource>()
                 .AddSingleton<FileValueGeneratorCache>()
                 .AddScoped<FileContextValueGeneratorSelector>()
@@ -35,6 +36,8 @@ namespace FileContextCore.Extensions
                 .AddScoped<FileContextEntityQueryModelVisitorFactory>()
                 .AddScoped<FileContextQueryContextFactory>()
                 .AddScoped<FileContextTransactionManager>());
+
+            QueryHelper.cache = new FileContextCache();
 
             return services;
         }

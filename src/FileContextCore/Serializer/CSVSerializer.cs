@@ -25,13 +25,13 @@ namespace FileContextCore.Serializer
 
         public string FileType { get { return "csv"; } }
 
-        public IList DeserializeList(string list, Type t)
+        public List<T> DeserializeList<T>(string list)
         {
             if(list != "")
             {
-                PropertyInfo[] properties = t.GetRuntimeProperties().Where(x => !x.SetMethod.IsVirtual).ToArray();
+                PropertyInfo[] properties = typeof(T).GetRuntimeProperties().Where(x => !x.SetMethod.IsVirtual).ToArray();
 
-                CsvClassMap map = Activator.CreateInstance(typeof(DefaultCsvClassMap<>).MakeGenericType(t)) as CsvClassMap;
+                CsvClassMap map = new DefaultCsvClassMap<T>();
 
                 foreach (PropertyInfo pi in properties)
                 {
@@ -46,9 +46,9 @@ namespace FileContextCore.Serializer
                 reader.Configuration.Delimiter = delimiter;
                 reader.Configuration.RegisterClassMap(map);
 
-                IList result = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(t));
+                List<T> result = new List<T>();
 
-                foreach (object record in reader.GetRecords(t))
+                foreach (T record in reader.GetRecords<T>())
                 {
                     result.Add(record);
                 }
@@ -56,15 +56,15 @@ namespace FileContextCore.Serializer
                 return result;
             }
 
-            return (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(t));
+            return new List<T>();
         }
 
-        public string SerializeList(IList list)
+        public string SerializeList<T>(List<T> list)
         {
-            Type t = list.GetType().GenericTypeArguments[0];
+            Type t = typeof(T);
             PropertyInfo[] properties = t.GetRuntimeProperties().Where(x => !x.SetMethod.IsVirtual).ToArray();
 
-            CsvClassMap map = Activator.CreateInstance(typeof(DefaultCsvClassMap<>).MakeGenericType(t)) as CsvClassMap;
+            CsvClassMap map = new DefaultCsvClassMap<T>();
 
             foreach (PropertyInfo pi in properties)
             {
@@ -84,14 +84,17 @@ namespace FileContextCore.Serializer
             return sw.ToString();
         }
 
-        public object Deserialize(string obj, Type t)
+        public T Deserialize<T>(string obj)
         {
-            throw new NotSupportedException();
+            return DeserializeList<T>(obj).FirstOrDefault();
         }
 
-        public string Serialize(object obj)
+        public string Serialize<T>(T obj)
         {
-            throw new NotSupportedException();
+            List<T> list = new List<T>();
+            list.Add(obj);
+
+            return SerializeList<T>(list);
         }
     }
 }

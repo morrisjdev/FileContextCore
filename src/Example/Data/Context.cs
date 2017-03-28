@@ -30,10 +30,10 @@ namespace Example.Data
             //optionsBuilder.UseFileContext(new FileContextCore.Serializer.XMLSerializer());
 
             //CSV
-            //optionsBuilder.UseFileContext(new FileContextCore.Serializer.CSVSerializer());
+            optionsBuilder.UseFileContext(new FileContextCore.Serializer.CSVSerializer());
 
             //Excel
-            optionsBuilder.UseFileContext(new FileContextCore.CombinedManager.ExcelManager());
+            //optionsBuilder.UseFileContext(new FileContextCore.CombinedManager.ExcelManager());
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

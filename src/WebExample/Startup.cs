@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Example.Data;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 
 namespace WebExample
 {
@@ -16,12 +17,13 @@ namespace WebExample
     {
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddMvc();
             services.AddEntityFramework().AddDbContext<Context>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            Context db = app.ApplicationServices.GetService<Context>();
+            //Context db = app.ApplicationServices.GetService<Context>();
 
             
 
@@ -32,14 +34,26 @@ namespace WebExample
                 app.UseDeveloperExceptionPage();
             }
 
-            app.Map("/add", context =>
+            /*app.Map("/add", context =>
             {
                 context.Run(async (ctx) => {
-                    db.Users.Add(new Example.Data.Entities.User()
+
+                    for(int i = 0; i < 20; i++)
                     {
-                        Username = "testuser",
-                        Name = "Das ist ein test"
-                    });
+                        var newUser = new Example.Data.Entities.User()
+                        {
+                            Username = "testuser",
+                            Name = "Das ist ein test"
+                        };
+
+                        db.Users.Add(newUser);
+
+                        db.Contents.Add(new Example.Data.Entities.Content()
+                        {
+                            UserId = newUser.Id,
+                            Text = "das ist ein test"
+                        });
+                    }                   
 
                     db.SaveChanges();
 
@@ -47,10 +61,36 @@ namespace WebExample
                 });
             });
 
-            app.Run(async (context) =>
+            app.Map("/list", context =>
+            {
+
+                context.Run(async (ctx) =>
+                {
+                    string response = "";
+
+                    db.Users.Include(x => x.Contents).ToList().ForEach(u =>
+                    {
+                        response += u.Username + " ---- ";
+
+                        u.Contents.ForEach(x =>
+                        {
+                            response += x.Text;
+                        });
+
+                        response += "<br>";
+                    });
+
+                    ctx.Response.ContentType = "text/html";
+                    await ctx.Response.WriteAsync(response);
+                });
+            });*/
+
+            app.UseMvcWithDefaultRoute();
+
+            /*app.Run(async (context) =>
             {
                 await context.Response.WriteAsync("User Count: " + db.Users.Count());
-            });
+            });*/
         }
     }
 }

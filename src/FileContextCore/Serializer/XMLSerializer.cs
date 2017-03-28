@@ -29,27 +29,27 @@ namespace FileContextCore.Serializer
 
         public string FileType { get { return "xml"; } }
 
-        public IList DeserializeList(string list, Type t)
+        public List<T> DeserializeList<T>(string list)
         {
             if(list != "")
             {
-                XmlSerializer xs = new XmlSerializer(typeof(List<>).MakeGenericType(t));
+                XmlSerializer xs = new XmlSerializer(typeof(List<T>));
                 MemoryStream memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(list));
 
-                IList result = (IList)xs.Deserialize(memoryStream);
+                List<T> result = (List<T>)xs.Deserialize(memoryStream);
                 memoryStream.Dispose();
 
                 return result;
             }
 
-            return (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(t));
+            return new List<T>();
         }
 
-        public string SerializeList(IList list)
+        public string SerializeList<T>(List<T> list)
         {
             XmlAttributeOverrides overrides = new XmlAttributeOverrides();
 
-            Type t = list.GetType().GenericTypeArguments[0];
+            Type t = typeof(T);
             PropertyInfo[] virtualProperties = t.GetRuntimeProperties().Where(x => x.SetMethod.IsVirtual).ToArray();
 
             XmlAttributes attributes = new XmlAttributes()
@@ -70,23 +70,23 @@ namespace FileContextCore.Serializer
             return sw.ToString();
         }
 
-        public object Deserialize(string obj, Type t)
+        public T Deserialize<T>(string obj)
         {
             if(obj != "")
             {
-                XmlSerializer xs = new XmlSerializer(t);
+                XmlSerializer xs = new XmlSerializer(typeof(T));
                 MemoryStream memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(obj));
 
-                object result = xs.Deserialize(memoryStream);
+                T result = (T)xs.Deserialize(memoryStream);
                 memoryStream.Dispose();
 
                 return result;
             }
 
-            return null;
+            return default(T);
         }
 
-        public string Serialize(object obj)
+        public string Serialize<T>(T obj)
         {
             XmlAttributeOverrides overrides = new XmlAttributeOverrides();
 

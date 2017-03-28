@@ -15,13 +15,13 @@ using System.Collections;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using FileContextCore.Storage;
+using Remotion.Linq.Clauses;
+using FileContextCore.Helper;
 
 namespace FileContextCore.Query
 {
     class FileContextEntityQueryModelVisitor : EntityQueryModelVisitor
     {
-        private FileContextCache cache;
-
         public FileContextEntityQueryModelVisitor(
             IQueryOptimizer queryOptimizer,
             INavigationRewritingExpressionVisitorFactory navigationRewritingExpressionVisitorFactory,
@@ -37,8 +37,7 @@ namespace FileContextCore.Query
             IResultOperatorHandler resultOperatorHandler,
             IEntityMaterializerSource entityMaterializerSource,
             IExpressionPrinter expressionPrinter,
-            QueryCompilationContext queryCompilationContext,
-            FileContextCache _cache)
+            QueryCompilationContext queryCompilationContext)
             : base(queryOptimizer,
                 navigationRewritingExpressionVisitorFactory,
                 subQueryMemberPushDownExpressionVisitor,
@@ -55,7 +54,6 @@ namespace FileContextCore.Query
                 expressionPrinter,
                 queryCompilationContext)
         {
-            cache = _cache;
         }
 
         protected override void IncludeNavigations(IncludeSpecification includeSpecification, Type resultType, Expression accessorExpression, bool querySourceRequiresTracking)
@@ -64,8 +62,7 @@ namespace FileContextCore.Query
                = new SelectorIncludeInjectingExpressionVisitor(
                     includeSpecification,
                     accessorExpression,
-                    querySourceRequiresTracking,
-                    cache);
+                    querySourceRequiresTracking);
 
             Expression = includeExpressionVisitor.Visit(Expression);
         }
@@ -75,112 +72,21 @@ namespace FileContextCore.Query
             private readonly IncludeSpecification includeSpecification;
             private readonly Expression accessorExpression;
             private readonly bool querySourceRequiresTracking;
-            private FileContextCache cache;
 
-            public SelectorIncludeInjectingExpressionVisitor(IncludeSpecification _includeSpecification, Expression _accessorExpression, bool _querySourceRequiresTracking, FileContextCache _cache)
+            public SelectorIncludeInjectingExpressionVisitor(IncludeSpecification _includeSpecification, Expression _accessorExpression, bool _querySourceRequiresTracking)
             {
                 includeSpecification = _includeSpecification;
                 accessorExpression = _accessorExpression;
                 querySourceRequiresTracking = _querySourceRequiresTracking;
-                cache = _cache;
             }
 
             public override Expression Visit(Expression node)
             {
-                IEnumerable values = (IEnumerable)((ConstantExpression)node).Value;
+                MethodCallExpression expr = (MethodCallExpression)node;
+                Type t = expr.Type.GenericTypeArguments[0];
+                MethodInfo info = typeof(QueryHelper).GetMethod(nameof(QueryHelper.LoadRelatedData)).MakeGenericMethod(t);
 
-                foreach (INavigation nav in includeSpecification.NavigationPath)
-                {
-                    IEntityType t;
-                    IClrPropertyGetter[] objProps;
-                    IClrPropertyGetter[] refObjProps;
-
-                    if (nav.IsDependentToPrincipal())
-                    {
-                        t = nav.ForeignKey.PrincipalEntityType;
-
-                        objProps = nav.ForeignKey.Properties.Select(x => x.GetGetter()).ToArray();
-                        refObjProps = nav.ForeignKey.PrincipalKey.Properties.Select(x => x.GetGetter()).ToArray();
-                    }
-                    else
-                    {
-                        t = nav.ForeignKey.DeclaringEntityType;
-
-                        objProps = nav.ForeignKey.PrincipalKey.Properties.Select(x => x.GetGetter()).ToArray();
-                        refObjProps = nav.ForeignKey.Properties.Select(x => x.GetGetter()).ToArray();
-                    }
-
-                    if(objProps.Count() != refObjProps.Count())
-                    {
-                        return Expression.Constant(values);
-                    }
-
-                    IClrPropertySetter valueSetter = nav.GetSetter();
-
-                    if (nav.IsCollection())
-                    {
-                        foreach (object obj in values)
-                        {
-                            object[] objValues = objProps.Select(x => x.GetClrValue(obj)).ToArray();
-
-                            valueSetter.SetClrValue(obj, cache.Filter(t.ClrType, x => {
-
-                                int result = 0;
-
-                                object[] refValues = refObjProps.Select(y => y.GetClrValue(x)).ToArray();
-
-                                if(refValues.Count() == objValues.Count())
-                                {
-
-                                    for (int i = 0; i < refValues.Count(); i++)
-                                    {
-                                        if(Equals(objValues[i], refValues[i]))
-                                        {
-                                            result++;
-                                        }
-                                    }
-                                }
-
-                                return result == refValues.Count();
-                            }));
-                        }
-                    }
-                    else
-                    {
-                        foreach (object obj in values)
-                        {
-                            object[] objValues = objProps.Select(x => x.GetClrValue(obj)).ToArray();
-
-                            IList matching = cache.Filter(t.ClrType, x => {
-
-                                int result = 0;
-
-                                object[] refValues = refObjProps.Select(y => y.GetClrValue(x)).ToArray();
-
-                                if (refValues.Count() == objValues.Count())
-                                {
-
-                                    for (int i = 0; i < refValues.Count(); i++)
-                                    {
-                                        if (Equals(objValues[i], refValues[i]))
-                                        {
-                                            result++;
-                                        }
-                                    }
-                                }
-
-                                return result == refValues.Count();
-                            });
-
-                            if (matching.Count > 0)
-                            {
-                                valueSetter.SetClrValue(obj, matching[0]);
-                            }
-                        }
-                    }
-                }
-
-                return Expression.Constant(values);
+                return Expression.Call(info, node, Expression.Constant(includeSpecification));
             }
         }
     }

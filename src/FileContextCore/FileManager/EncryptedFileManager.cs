@@ -66,9 +66,9 @@ namespace FileContextCore.FileManager
 
         private object thisLock = new object();
 
-        public string GetFileName(Type t, string fileType)
+        public string GetFileName<T>(string fileType)
         {
-            return GetFilePath(t.Name + "." + fileType + "." + "crypt");
+            return GetFilePath(typeof(T).Name + "." + fileType + "." + "crypt");
         }
 
         public string GetFilePath(string fileName)
@@ -79,9 +79,9 @@ namespace FileContextCore.FileManager
             return Path.Combine(path, fileName);
         }
 
-        public string LoadContent(Type t, string fileType)
+        public string LoadContent<T>(string fileType)
         {
-            return LoadContent(GetFileName(t, fileType));
+            return LoadContent(GetFileName<T>(fileType));
         }
 
         public string LoadContent(string fileName)
@@ -99,9 +99,9 @@ namespace FileContextCore.FileManager
             }
         }
 
-        public void SaveContent(Type t, string fileType, string content)
+        public void SaveContent<T>(string fileType, string content)
         {
-            SaveContent(GetFileName(t, fileType), content);
+            SaveContent(GetFileName<T>(fileType), content);
         }
 
         public void SaveContent(string fileName, string content)

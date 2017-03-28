@@ -32,7 +32,7 @@ namespace FileContextCore.Storage
         public IList Filter(Type t, Func<object, bool> filter)
         {
             IList result = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(t));
-            IList values = GetValues(t);
+            IList values = (IList)GetType().GetMethod(nameof(GetValues)).MakeGenericMethod(t).Invoke(this, new object[] { });
 
             for(int i = 0; i < values.Count; i++)
             {
@@ -47,17 +47,19 @@ namespace FileContextCore.Storage
             return result;
         }
 
-        public IList GetValues(Type t)
+        public List<T> GetValues<T>()
         {
             lock (thisLock)
             {
+                Type t = typeof(T);
+
                 if (cache.ContainsKey(t))
                 {
-                    return cache[t];
+                    return (List<T>)cache[t];
                 }
                 else
                 {
-                    IList result = manager.GetItems(t);
+                    List<T> result = manager.GetItems<T>();
 
                     if(result != null)
                     {
@@ -65,27 +67,30 @@ namespace FileContextCore.Storage
                     }
                     else
                     {
-                        cache[t] = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(t));
+                        cache[t] = new List<T>();
                     }
 
-                    return cache[t];
+                    return (List<T>)cache[t];
                 }
             }
         }
 
-        public void UpdateValues(Type t, IList newList)
+        public void UpdateValues<T>(List<T> newList)
         {
             lock (thisLock)
             {
+                Type t = typeof(T);
+
                 manager.SaveItems(newList);
 
                 cache[t] = newList;
             }
         }
 
-        public long GetLastId(Type t, IProperty p)
+        public long GetLastId<T>(IProperty p)
         {
-            IList values = GetValues(t);
+            Type t = typeof(T);
+            List<T> values = GetValues<T>();
 
             long lastId = 0;
 
@@ -120,7 +125,7 @@ namespace FileContextCore.Storage
                     IEntityType tableType = tableChange.Key;
                     Type entityType = tableType.ClrType;
 
-                    IList values = GetValues(entityType);
+                    IList values = (IList)GetType().GetMethod(nameof(GetValues)).MakeGenericMethod(entityType).Invoke(this, new object[] { });
 
                     foreach (IUpdateEntry e in tableChange)
                     {
@@ -155,11 +160,12 @@ namespace FileContextCore.Storage
                         changedCount++;
                     }
 
-                    UpdateValues(entityType, values);
+                    GetType().GetMethod(nameof(UpdateValues)).MakeGenericMethod(entityType).Invoke(this, new object[] { values });
                 }
 
                 return changedCount;
             }
         }
     }
+    
 }

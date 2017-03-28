@@ -13,8 +13,6 @@ namespace FileContextCore.Query
 {
     class FileContextEntityQueryModelVisitorFactory : EntityQueryModelVisitorFactory
     {
-        private FileContextCache cache;
-
         public FileContextEntityQueryModelVisitorFactory(
             IQueryOptimizer queryOptimizer,
             INavigationRewritingExpressionVisitorFactory navigationRewritingExpressionVisitorFactory,
@@ -29,8 +27,7 @@ namespace FileContextCore.Query
             IQueryAnnotationExtractor queryAnnotationExtractor,
             IResultOperatorHandler resultOperatorHandler,
             IEntityMaterializerSource entityMaterializerSource,
-            IExpressionPrinter expressionPrinter,
-            FileContextCache _cache)
+            IExpressionPrinter expressionPrinter)
             : base(
                 queryOptimizer,
                 navigationRewritingExpressionVisitorFactory,
@@ -47,7 +44,6 @@ namespace FileContextCore.Query
                 entityMaterializerSource,
                 expressionPrinter)
         {
-            cache = _cache;
         }
 
         public override EntityQueryModelVisitor Create(QueryCompilationContext queryCompilationContext,
@@ -66,7 +62,6 @@ namespace FileContextCore.Query
                 ResultOperatorHandler,
                 EntityMaterializerSource,
                 ExpressionPrinter,
-                queryCompilationContext,
-                cache);
+                queryCompilationContext);
     }
 }

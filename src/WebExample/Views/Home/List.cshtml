@@ -1,0 +1,15 @@
+﻿@model IEnumerable<User>
+
+<h1>Liste</h1>
+
+@foreach(User u in Model)
+{
+    @u.Id @u.Username <br />
+    @foreach(Content c in u.Contents)
+    {
+        @c.Text
+
+    }
+
+    <hr />
+}

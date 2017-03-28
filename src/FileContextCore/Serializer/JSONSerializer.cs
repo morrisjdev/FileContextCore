@@ -25,22 +25,22 @@ namespace FileContextCore.Serializer
 
         public string FileType { get { return "json"; } }
 
-        public IList DeserializeList(string list, Type t)
+        public List<T> DeserializeList<T>(string list)
         {
-            return JsonConvert.DeserializeObject(list, typeof(List<>).MakeGenericType(t), settings) as IList;
+            return JsonConvert.DeserializeObject<List<T>>(list, settings);
         }
 
-        public string SerializeList(IList list)
+        public string SerializeList<T>(List<T> list)
         {
             return JsonConvert.SerializeObject(list, settings);
         }
 
-        public object Deserialize(string obj, Type t)
+        public T Deserialize<T>(string obj)
         {
-            return JsonConvert.DeserializeObject(obj, t, settings);
+            return JsonConvert.DeserializeObject<T>(obj, settings);
         }
 
-        public string Serialize(object obj)
+        public string Serialize<T>(T obj)
         {
             return JsonConvert.SerializeObject(obj, settings);
         }

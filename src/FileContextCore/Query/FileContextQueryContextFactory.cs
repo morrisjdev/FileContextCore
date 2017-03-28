@@ -14,7 +14,6 @@ namespace FileContextCore.Query
         public FileContextQueryContextFactory(IStateManager stateManager, ICurrentDbContext context, IConcurrencyDetector concurrencyDetector, IChangeDetector changeDetector)
             : base(context, concurrencyDetector)
         {
-
         }
 
         public override QueryContext Create()

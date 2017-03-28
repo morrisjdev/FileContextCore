@@ -22,21 +22,18 @@ namespace FileContextCore.Storage
 {
     class FileContextDatabase : Database
     {
-        private FileContextCache cache;
-
-        public FileContextDatabase(IQueryCompilationContextFactory queryCompilationContextFactory, FileContextCache _cache) : base(queryCompilationContextFactory)
+        public FileContextDatabase(IQueryCompilationContextFactory queryCompilationContextFactory) : base(queryCompilationContextFactory)
         {
-            cache = _cache;
         }
 
         public override int SaveChanges(IReadOnlyList<IUpdateEntry> entries)
         {
-            return cache.ExecuteTransaction(entries);
+            return QueryHelper.cache.ExecuteTransaction(entries);
         }
 
         public override Task<int> SaveChangesAsync(IReadOnlyList<IUpdateEntry> entries, CancellationToken cancellationToken = new CancellationToken())
         {
-            return Task.FromResult(cache.ExecuteTransaction(entries));
+            return Task.FromResult(QueryHelper.cache.ExecuteTransaction(entries));
         }
     }
 }
