@@ -14,17 +14,29 @@ namespace FileContextCore.CombinedManager
     {
         private string password = "";
 
-        public ExcelManager(string _password = "")
+        private string fileName = "";
+
+        private string folder = Path.Combine(AppContext.BaseDirectory, "appdata");
+
+        public ExcelManager(string _password = "", string _fileName = "data.xlsx", string _folder = "")
         {
             password = _password;
+            fileName = _fileName;
+
+            if(_folder != "")
+            {
+                folder = _folder;
+            }
         }
 
         FileInfo GetFilePath(string fileName)
         {
-            string path = Path.Combine(AppContext.BaseDirectory, "appdata");
-            Directory.CreateDirectory(path);
+            if (!Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(folder);
+            }
 
-            return new FileInfo(Path.Combine(path, fileName));
+            return new FileInfo(Path.Combine(folder, fileName));
         }
 
         public List<T> GetItems<T>()
@@ -34,11 +46,11 @@ namespace FileContextCore.CombinedManager
 
             if (password != "")
             {
-                package = new ExcelPackage(GetFilePath("data.xlsx"), password);
+                package = new ExcelPackage(GetFilePath(fileName), password);
             }
             else
             {
-                package = new ExcelPackage(GetFilePath("data.xlsx"));
+                package = new ExcelPackage(GetFilePath(fileName));
             }
 
             ExcelWorksheet ws = package.Workbook.Worksheets[t.Name];
@@ -53,7 +65,7 @@ namespace FileContextCore.CombinedManager
                     properties.Add(i + 1, props.FirstOrDefault(x => x.Name == (string)ws.Cells[1, i + 1].Value));
                 }
 
-                List<T> result = new List<T>();// (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(t));
+                List<T> result = new List<T>();
 
                 for (int i = 1; i < ws.Dimension.Rows; i++)
                 {
@@ -61,17 +73,18 @@ namespace FileContextCore.CombinedManager
 
                     foreach (KeyValuePair<int, PropertyInfo> prop in properties)
                     {
-                        if (prop.Value.PropertyType == typeof(TimeSpan))
+                        Type type = prop.Value.PropertyType;
+                        if (type == typeof(TimeSpan))
                         {
                             prop.Value.SetValue(item, TimeSpan.Parse((string)ws.Cells[i + 1, prop.Key].Value));
                         }
-                        else if (prop.Value.PropertyType == typeof(Guid))
+                        else if (type == typeof(Guid))
                         {
                             prop.Value.SetValue(item, Guid.Parse((string)ws.Cells[i + 1, prop.Key].Value));
                         }
                         else
                         {
-                            prop.Value.SetValue(item, Convert.ChangeType(ws.Cells[i + 1, prop.Key].Value, prop.Value.PropertyType));
+                            prop.Value.SetValue(item, Convert.ChangeType(ws.Cells[i + 1, prop.Key].Value, type));
                         }
                     }
 
@@ -118,11 +131,11 @@ namespace FileContextCore.CombinedManager
 
             if (password != "")
             {
-                package = new ExcelPackage(GetFilePath("data.xlsx"), password);
+                package = new ExcelPackage(GetFilePath(fileName), password);
             }
             else
             {
-                package = new ExcelPackage(GetFilePath("data.xlsx"));
+                package = new ExcelPackage(GetFilePath(fileName));
             }
 
             Type t = list.GetType().GenericTypeArguments[0];
@@ -166,11 +179,11 @@ namespace FileContextCore.CombinedManager
 
             if (password != "")
             {
-                package = new ExcelPackage(GetFilePath("data.xlsx"), password);
+                package = new ExcelPackage(GetFilePath(fileName), password);
             }
             else
             {
-                package = new ExcelPackage(GetFilePath("data.xlsx"));
+                package = new ExcelPackage(GetFilePath(fileName));
             }
 
             if(package.Workbook.Worksheets.Count > 0)
@@ -204,11 +217,11 @@ namespace FileContextCore.CombinedManager
 
             if (password != "")
             {
-                package = new ExcelPackage(GetFilePath("data.xlsx"), password);
+                package = new ExcelPackage(GetFilePath(fileName), password);
             }
             else
             {
-                package = new ExcelPackage(GetFilePath("data.xlsx"));
+                package = new ExcelPackage(GetFilePath(fileName));
             }
 
             result = package.Workbook.Worksheets.Count > 0;
