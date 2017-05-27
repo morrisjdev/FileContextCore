@@ -20,6 +20,7 @@ using Remotion.Linq;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Query.ExpressionVisitors.Internal;
 using Microsoft.EntityFrameworkCore.Query.Internal;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace FileContextCore.Query.ExpressionVisitors
 {
@@ -28,7 +29,7 @@ namespace FileContextCore.Query.ExpressionVisitors
         private EntityQueryModelVisitor queryModelVisitor;
         private IQuerySource querySource;
 
-        public FileContextEntityQueryableExpressionVisitor(EntityQueryModelVisitor _queryModelVisitor, IQuerySource _querySource) : base(_queryModelVisitor)
+        public FileContextEntityQueryableExpressionVisitor(EntityQueryModelVisitor _queryModelVisitor, IQuerySource _querySource/*, IModel _model, IMaterializerFactory _materializerFactory*/) : base(_queryModelVisitor)
         {
             queryModelVisitor = _queryModelVisitor;
             querySource = _querySource;

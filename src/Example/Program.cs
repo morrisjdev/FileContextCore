@@ -78,6 +78,21 @@ namespace Example
             db.Messurements.Add(current);
             db.SaveChanges();
 
+            db.Generics.Add(new GenericTest<int>()
+            {
+                Value = 1
+            });
+
+            db.Generics.Add(new GenericTest<int>()
+            {
+                Value = 2
+            });
+
+
+            db.SaveChanges();
+
+            Console.WriteLine(db.Generics.Count());
+
             while (true)
             {
                 string result = Console.ReadLine();

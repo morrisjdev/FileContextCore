@@ -53,7 +53,9 @@ namespace FileContextCore.Serializer
             JsonProperty prop = base.CreateProperty(member, memberSerialization);
             PropertyInfo propInfo = (PropertyInfo)member;
 
-            if(propInfo != null)
+            prop.Ignored = false;
+
+            if (propInfo != null)
             {
                 if(propInfo.GetMethod.IsVirtual && !propInfo.GetMethod.IsFinal)
                 {

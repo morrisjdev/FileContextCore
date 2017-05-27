@@ -19,6 +19,6 @@ namespace FileContextCore.Query.ExpressionVisitors
 
         }
 
-        public ExpressionVisitor Create(EntityQueryModelVisitor queryModelVisitor, IQuerySource querySource) => new FileContextEntityQueryableExpressionVisitor(queryModelVisitor, querySource);
+        public ExpressionVisitor Create(EntityQueryModelVisitor queryModelVisitor, IQuerySource querySource) => new FileContextEntityQueryableExpressionVisitor(queryModelVisitor, querySource/*, model, materializerFactory*/);
     }
 }

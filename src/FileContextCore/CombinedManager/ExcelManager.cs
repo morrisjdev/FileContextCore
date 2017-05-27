@@ -10,6 +10,9 @@ using System.Text;
 
 namespace FileContextCore.CombinedManager
 {
+    /// <summary>
+    /// Used to read and write data of FileContext into Excel-Files (.xlsx)
+    /// </summary>
     public class ExcelManager : ICombinedManager
     {
         private string password = "";

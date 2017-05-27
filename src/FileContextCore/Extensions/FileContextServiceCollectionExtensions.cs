@@ -25,7 +25,6 @@ namespace FileContextCore.Extensions
                 .Singleton<IDatabaseProvider, DatabaseProvider<FileContextProviderServices, FileContextOptionsExtension>>());
 
             services.TryAdd(new ServiceCollection()
-                //.AddSingleton<FileContextCache>()
                 .AddSingleton<FileContextModelSource>()
                 .AddSingleton<FileValueGeneratorCache>()
                 .AddScoped<FileContextValueGeneratorSelector>()
