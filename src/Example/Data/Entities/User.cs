@@ -14,6 +14,8 @@ namespace Example.Data.Entities
 
         public string Name { get; set; }
 
+        public int? test { get; set; }
+
         public virtual List<Content> Contents { get; set; }
 
         public virtual List<Setting> Settings { get; set; }

@@ -23,7 +23,7 @@ namespace Example.Data
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             //Default: JSON-Serialize
-            optionsBuilder.UseFileContext();
+            //optionsBuilder.UseFileContext();
 
             //JSON-Serialize + simple Encryption
             //optionsBuilder.UseFileContext(new FileContextCore.Serializer.JSONSerializer(), new FileContextCore.FileManager.EncryptedFileManager());
@@ -35,7 +35,7 @@ namespace Example.Data
             //optionsBuilder.UseFileContext(new FileContextCore.Serializer.CSVSerializer());
 
             //Excel
-            //optionsBuilder.UseFileContext(new FileContextCore.CombinedManager.ExcelManager());
+            optionsBuilder.UseFileContext(new FileContextCore.CombinedManager.ExcelManager());
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -87,7 +87,8 @@ namespace FileContextCore.CombinedManager
                         }
                         else
                         {
-                            prop.Value.SetValue(item, Convert.ChangeType(ws.Cells[i + 1, prop.Key].Value, type));
+                            object value = ws.Cells[i + 1, prop.Key].Value;
+                            prop.Value.SetValue(item, value != null ? Convert.ChangeType(value, type) : value);
                         }
                     }
 
@@ -154,7 +155,7 @@ namespace FileContextCore.CombinedManager
                 {
                     PropertyInfo pi = props[x];
 
-                    ws.SetValue(i + 2, x + 1, pi.GetValue(item).ToString());
+                    ws.SetValue(i + 2, x + 1, pi.GetValue(item)?.ToString());
                 }
             }
 

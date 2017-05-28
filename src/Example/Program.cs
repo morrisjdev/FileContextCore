@@ -36,7 +36,7 @@ namespace Example
             User us = new User()
             {
                 Name = "Morris Janatzek",
-                Username = "astalawixer"
+                Username = null
             };
 
             db.Users.Add(us);
