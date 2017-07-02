@@ -3,6 +3,7 @@ using OfficeOpenXml;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -60,7 +61,7 @@ namespace FileContextCore.CombinedManager
 
             if (ws != null)
             {
-                List<PropertyInfo> props = t.GetRuntimeProperties().Where(x => !x.SetMethod.IsVirtual).ToList();
+                PropertyInfo[] props = t.GetPropertiesForSerialize();
                 Dictionary<int, PropertyInfo> properties = new Dictionary<int, PropertyInfo>();
 
                 for (int i = 0; i < ws.Dimension.Columns; i++)
@@ -103,7 +104,7 @@ namespace FileContextCore.CombinedManager
             {
                 ws = package.Workbook.Worksheets.Add(t.Name);
 
-                PropertyInfo[] props = t.GetRuntimeProperties().Where(x => !x.SetMethod.IsVirtual).ToArray();
+                PropertyInfo[] props = t.GetPropertiesForSerialize();
 
                 for (int i = 0; i < props.Count(); i++)
                 {
@@ -143,7 +144,7 @@ namespace FileContextCore.CombinedManager
             }
 
             Type t = list.GetType().GenericTypeArguments[0];
-            PropertyInfo[] props = t.GetRuntimeProperties().Where(x => !x.SetMethod.IsVirtual).ToArray();
+            PropertyInfo[] props = t.GetPropertiesForSerialize();
 
             ExcelWorksheet ws = package.Workbook.Worksheets[t.Name];
 

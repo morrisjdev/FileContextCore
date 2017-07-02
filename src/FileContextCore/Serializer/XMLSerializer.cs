@@ -50,7 +50,7 @@ namespace FileContextCore.Serializer
             XmlAttributeOverrides overrides = new XmlAttributeOverrides();
 
             Type t = typeof(T);
-            PropertyInfo[] virtualProperties = t.GetRuntimeProperties().Where(x => x.SetMethod.IsVirtual).ToArray();
+            PropertyInfo[] virtualProperties = t.GetPropertiesNotForSerialize();
 
             XmlAttributes attributes = new XmlAttributes()
             {
@@ -91,7 +91,7 @@ namespace FileContextCore.Serializer
             XmlAttributeOverrides overrides = new XmlAttributeOverrides();
 
             Type t = obj.GetType();
-            PropertyInfo[] virtualProperties = t.GetRuntimeProperties().Where(x => x.SetMethod.IsVirtual).ToArray();
+            PropertyInfo[] virtualProperties = t.GetPropertiesNotForSerialize();
 
             XmlAttributes attributes = new XmlAttributes()
             {

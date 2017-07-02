@@ -14,6 +14,8 @@ namespace Example.Data
 
         public DbSet<Content> Contents { get; set; }
 
+        public DbSet<ContentEntry> ContentEntries { get; set; }
+
         public DbSet<Setting> Settings { get; set; }
 
         public DbSet<Messurement> Messurements { get; set; }

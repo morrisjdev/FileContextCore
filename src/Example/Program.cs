@@ -22,7 +22,10 @@ namespace Example
 
             watch.Start();
 
-            List<User> users = db.Users.ToList(); //db.Users.Include(x => x.Contents).Include(x => x.Settings).ToList();
+            List<User> users2 = db.Users.Include("Contents.Entries").Include("Contents").Include("Settings").ToList();
+
+
+            List<User> users = db.Users.Include(x => x.Contents).ThenInclude(x => x.Entries).Include(x => x.Settings).ToList(); //db.Users.Include(x => x.Contents).Include(x => x.Settings).ToList();
 
             List<Content> contents = db.Contents.Include(x => x.User).ToList();
 
@@ -45,10 +48,18 @@ namespace Example
 
             db.SaveChanges();
 
-            db.Contents.Add(new Content()
+            Content c = new Content()
             {
                 Text = "Test",
                 UserId = us.Id
+            };
+
+            db.Contents.Add(c);
+
+            db.ContentEntries.Add(new ContentEntry()
+            {
+                Text = "das ist in set",
+                ContentId = c.Id
             });
 
             db.Users.Add(new User()

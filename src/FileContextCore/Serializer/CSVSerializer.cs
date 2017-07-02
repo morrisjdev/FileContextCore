@@ -29,7 +29,7 @@ namespace FileContextCore.Serializer
         {
             if(list != "")
             {
-                PropertyInfo[] properties = typeof(T).GetRuntimeProperties().Where(x => !x.SetMethod.IsVirtual).ToArray();
+                PropertyInfo[] properties = typeof(T).GetPropertiesForSerialize();
 
                 CsvClassMap map = new DefaultCsvClassMap<T>();
 
@@ -62,7 +62,7 @@ namespace FileContextCore.Serializer
         public string SerializeList<T>(List<T> list)
         {
             Type t = typeof(T);
-            PropertyInfo[] properties = t.GetRuntimeProperties().Where(x => !x.SetMethod.IsVirtual).ToArray();
+            PropertyInfo[] properties = t.GetPropertiesForSerialize();
 
             CsvClassMap map = new DefaultCsvClassMap<T>();
 
@@ -91,9 +91,10 @@ namespace FileContextCore.Serializer
 
         public string Serialize<T>(T obj)
         {
-            List<T> list = new List<T>();
-            list.Add(obj);
-
+            List<T> list = new List<T>
+            {
+                obj
+            };
             return SerializeList<T>(list);
         }
     }

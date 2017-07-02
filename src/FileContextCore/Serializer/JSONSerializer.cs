@@ -57,7 +57,7 @@ namespace FileContextCore.Serializer
 
             if (propInfo != null)
             {
-                if(propInfo.GetMethod.IsVirtual && !propInfo.GetMethod.IsFinal)
+                if(!propInfo.ShouldSerialize())
                 {
                     prop.ShouldSerialize = obj => false;
                 }

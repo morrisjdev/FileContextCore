@@ -24,9 +24,11 @@ namespace FileContextCore.Helper
             return cache.GetValues<T>();
         }
 
-        public static IEnumerable<T> LoadRelatedData<T>(IEnumerable<T> values, IncludeSpecification includeSpecification)
+        private static IList LoadData(IList values, IEnumerable<INavigation> navs)
         {
-            foreach (INavigation nav in includeSpecification.NavigationPath)
+            INavigation nav = navs.FirstOrDefault();
+
+            if (nav != null)
             {
                 IEntityType t;
                 IClrPropertyGetter[] objProps;
@@ -56,11 +58,11 @@ namespace FileContextCore.Helper
 
                 if (nav.IsCollection())
                 {
-                    foreach (T obj in values)
+                    foreach (object obj in values)
                     {
                         object[] objValues = objProps.Select(x => x.GetClrValue(obj)).ToArray();
 
-                        valueSetter.SetClrValue(obj, cache.Filter(t.ClrType, x =>
+                        IList rValues = cache.Filter(t.ClrType, x =>
                         {
                             int result = 0;
 
@@ -78,12 +80,19 @@ namespace FileContextCore.Helper
                             }
 
                             return result == refValues.Count();
-                        }));
+                        });
+
+                        if(navs.Count() > 1)
+                        {
+                            rValues = LoadData(rValues, navs.Skip(1));
+                        }
+
+                        valueSetter.SetClrValue(obj, rValues);
                     }
                 }
                 else
                 {
-                    foreach (T obj in values)
+                    foreach (object obj in values)
                     {
                         object[] objValues = objProps.Select(x => x.GetClrValue(obj)).ToArray();
 
@@ -109,13 +118,25 @@ namespace FileContextCore.Helper
 
                         if (matching.Count > 0)
                         {
-                            valueSetter.SetClrValue(obj, matching[0]);
+                            object value = matching[0];
+
+                            if(navs.Count() > 1)
+                            {
+                                value = LoadData(new object[] { value }, navs.Skip(1))[0];
+                            }
+
+                            valueSetter.SetClrValue(obj, value);
                         }
                     }
                 }
             }
 
             return values;
+        }
+
+        public static IEnumerable<T> LoadRelatedData<T>(IEnumerable<T> values, IncludeSpecification includeSpecification)
+        {
+            return LoadData(values.ToList(), includeSpecification.NavigationPath).Cast<T>();
         }
     }
 }
