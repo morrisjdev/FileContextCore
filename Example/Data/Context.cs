@@ -22,19 +22,19 @@ namespace Example.Data
         {
             //Default: JSON-Serialize
             //optionsBuilder.UseFileContext();
-            optionsBuilder.UseFileContext("xml");
 
             //JSON-Serialize + simple Encryption
-            //optionsBuilder.UseFileContext(new FileContextCore.Serializer.JSONSerializer(), new FileContextCore.FileManager.EncryptedFileManager());
+            //optionsBuilder.UseFileContext("json", "encrypted");
 
             //XML
-            //optionsBuilder.UseFileContext(new FileContextCore.Serializer.XMLSerializer());
+            //optionsBuilder.UseFileContext("xml");
+            optionsBuilder.UseFileContext("xml", "private");
 
             //CSV
-            //optionsBuilder.UseFileContext(new FileContextCore.Serializer.CSVSerializer());
+            //optionsBuilder.UseFileContext("csv");
 
             //Excel
-            //optionsBuilder.UseFileContext(new FileContextCore.CombinedManager.ExcelManager());
+            //optionsBuilder.UseFileContext("excel");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

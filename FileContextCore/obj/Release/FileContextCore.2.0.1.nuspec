@@ -26,6 +26,6 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="D:\temp\dev\FileContextCore\FileContextCore\bin\Release\netcoreapp2.0\FileContextCore.dll" target="lib\netcoreapp2.0\FileContextCore.dll" />
+    <file src="D:\projects\productive\FileContextCore\FileContextCore\bin\Release\netcoreapp2.0\FileContextCore.dll" target="lib\netcoreapp2.0\FileContextCore.dll" />
   </files>
 </package>
