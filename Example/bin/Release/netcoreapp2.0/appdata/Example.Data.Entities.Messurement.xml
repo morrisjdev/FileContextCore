@@ -1,0 +1,29 @@
+<ArrayOfContent>
+  <Messurement>
+    <Key>1</Key>
+    <Id>1</Id>
+    <CreatedOn>13.01.2018 17:36:29</CreatedOn>
+    <EntryCount>0</EntryCount>
+    <TimeRead>00:00:00.2587226</TimeRead>
+    <TimeWrite>00:00:00.0543596</TimeWrite>
+    <UpdatedOn>01.01.0001 00:00:00</UpdatedOn>
+  </Messurement>
+  <Messurement>
+    <Key>2</Key>
+    <Id>2</Id>
+    <CreatedOn>13.01.2018 17:41:03</CreatedOn>
+    <EntryCount>5</EntryCount>
+    <TimeRead>00:00:00.3958124</TimeRead>
+    <TimeWrite>00:00:00.0314282</TimeWrite>
+    <UpdatedOn>01.01.0001 00:00:00</UpdatedOn>
+  </Messurement>
+  <Messurement>
+    <Key>3</Key>
+    <Id>3</Id>
+    <CreatedOn>13.01.2018 17:42:46</CreatedOn>
+    <EntryCount>10</EntryCount>
+    <TimeRead>00:00:00.4051970</TimeRead>
+    <TimeWrite>00:00:00.0342365</TimeWrite>
+    <UpdatedOn>01.01.0001 00:00:00</UpdatedOn>
+  </Messurement>
+</ArrayOfContent>
