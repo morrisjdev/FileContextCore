@@ -53,10 +53,7 @@ By default the extension uses `JSON`-serialization and the `DefaultFileManager`
 Serializes data using System.XML
 
 ```cs
-optionsBuilder.UseFileContext(new FileContextCore.Serializer.XMLSerializer());
-
-//disable indent
-optionsBuilder.UseFileContext(new FileContextCore.Serializer.XMLSerializer(false));
+optionsBuilder.UseFileContext("xml");
 ```
 
 ### CSVSerializer
@@ -64,10 +61,7 @@ optionsBuilder.UseFileContext(new FileContextCore.Serializer.XMLSerializer(false
 Serializes data using CsvHelper ([https://joshclose.github.io/CsvHelper/](https://joshclose.github.io/CsvHelper/))
 
 ```cs
-optionsBuilder.UseFileContext(new FileContextCore.Serializer.CSVSerializer());
-
-//change default delimiter (,)
-optionsBuilder.UseFileContext(new FileContextCore.Serializer.CSVSerializer(";"));
+optionsBuilder.UseFileContext("csv");
 ```
 
 ### JSONSerializer
@@ -75,48 +69,28 @@ optionsBuilder.UseFileContext(new FileContextCore.Serializer.CSVSerializer(";"))
 Serializes data using Newtonsoft Json.NET ([http://www.newtonsoft.com/json](http://www.newtonsoft.com/json))
 
 ```cs
-optionsBuilder.UseFileContext(new FileContextCore.Serializer.JSONSerializer());
-
-//change formatting
-optionsBuilder.UseFileContext(
-    new FileContextCore.Serializer.JSONSerializer(Newtonsoft.Json.Formatting.None)
-);
+optionsBuilder.UseFileContext("json");
 ```
 
-## File Manager
+### BSONSerializer
 
-### DefaultFileManager
-
-Saves the data into files
+Serializes data to bson using Newtonsoft Json.NET ([http://www.newtonsoft.com/json](http://www.newtonsoft.com/json))
 
 ```cs
-optionsBuilder.UseFileContext(fileManager: new FileContextCore.FileManager.DefaultFileManager());
+optionsBuilder.UseFileContext("bson");
 ```
 
-### EncryptedFileManager
-
-Encrypts the data and saves them into files
-
-```cs
-optionsBuilder.UseFileContext(fileManager: new FileContextCore.FileManager.EncryptedFileManager());
-
-//change key
-optionsBuilder.UseFileContext(fileManager: new FileContextCore.FileManager.EncryptedFileManager("key"));
-```
-
-## Combined Manager
-
-### Excel Manager
+### EXCELSerializer
 
 Saves files into an .xlsx-file and enables the quick editing of the data using Excel
 
 Uses [EEPlus](http://epplus.codeplex.com/documentation) implementation for .Net Core ([https://github.com/VahidN/EPPlus.Core](https://github.com/VahidN/EPPlus.Core))
 
 ```cs
-optionsBuilder.UseFileContext(new FileContextCore.CombinedManager.ExcelManager());
+optionsBuilder.UseFileContext("excel");
 
 //use password
-optionsBuilder.UseFileContext(new FileContextCore.CombinedManager.ExcelManager("password"));
+optionsBuilder.UseFileContext("excel:password");
 ```
 
 To run on Linux-Systems
@@ -126,9 +100,29 @@ sudo apt-get update
 sudo apt-get install libgdiplus
 ```
 
+## File Manager
+
+### DefaultFileManager
+
+Saves the data into files
+
+```cs
+optionsBuilder.UseFileContext("json", "default");
+```
+
+### EncryptedFileManager
+
+Encrypts the data and saves them into files
+
+```cs
+optionsBuilder.UseFileContext("json", "encrypted:password");
+```
+
+## Combined Manager
+
 ## Custom implementation
 
-For customization you can implement the Interfaces `ISerializer`, `IFileManager` and `ICombinedManager`
+For customization you can implement the Interfaces `ISerializer` and `IFileManager`
 
 ## Author
 
