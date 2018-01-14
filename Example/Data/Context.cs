@@ -27,8 +27,8 @@ namespace Example.Data
             //optionsBuilder.UseFileContext("json", "encrypted");
 
             //XML
-            //optionsBuilder.UseFileContext("xml");
-            optionsBuilder.UseFileContext("xml", "private");
+            optionsBuilder.UseFileContext("xml");
+            //optionsBuilder.UseFileContext("xml", "private");
 
             //CSV
             //optionsBuilder.UseFileContext("csv");

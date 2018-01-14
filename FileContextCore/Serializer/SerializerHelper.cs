@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 
 namespace FileContextCore.Serializer
@@ -15,7 +16,7 @@ namespace FileContextCore.Serializer
 
             if (type == typeof(TimeSpan))
             {
-                return TimeSpan.Parse(input);
+                return TimeSpan.Parse(input, CultureInfo.InvariantCulture);
             }
             else if(type == typeof(Guid))
             {
@@ -23,7 +24,7 @@ namespace FileContextCore.Serializer
             }
             else
             {
-                return Convert.ChangeType(input, type);
+                return Convert.ChangeType(input, type, CultureInfo.InvariantCulture);
             }
         }
 
@@ -31,7 +32,9 @@ namespace FileContextCore.Serializer
         {
             if(input != null)
             {
-                return input.ToString();
+                IFormattable formattable = input as IFormattable;
+
+                return formattable != null ? formattable.ToString(null, CultureInfo.InvariantCulture) : input.ToString();
             }
 
             return "";
