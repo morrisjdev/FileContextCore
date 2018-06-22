@@ -10,7 +10,7 @@ namespace FileContextCore.Serializer
     {
         private IEntityType entityType;
         private string[] propertyKeys;
-        private Type[] typeList;
+        private readonly Type[] typeList;
 
         public JSONSerializer(IEntityType _entityType)
         {

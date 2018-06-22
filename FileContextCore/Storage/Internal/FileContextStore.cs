@@ -4,8 +4,10 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using FileContextCore.Extensions.Internal;
+using FileContextCore.Infrastructure.Internal;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -21,8 +23,8 @@ namespace FileContextCore.Storage.Internal
     class FileContextStore : IFileContextStore
     {
         private readonly IFileContextTableFactory _tableFactory;
-
-        private readonly object _lock = new object();
+		private readonly FileContextOptionsExtension options;
+		private readonly object _lock = new object();
 
         private LazyRef<Dictionary<IEntityType, IFileContextTable>> _tables = CreateTables();
 
@@ -30,9 +32,10 @@ namespace FileContextCore.Storage.Internal
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        public FileContextStore([NotNull] IFileContextTableFactory tableFactory)
+        public FileContextStore([NotNull] IFileContextTableFactory tableFactory, FileContextOptionsExtension _options)
         {
             _tableFactory = tableFactory;
+			options = _options;
         }
 
         /// <summary>
@@ -90,7 +93,7 @@ namespace FileContextCore.Storage.Internal
 
                     if (!_tables.Value.TryGetValue(et, out IFileContextTable table))
                     {
-                        _tables.Value.Add(entityType, table = _tableFactory.Create(entityType));
+                        _tables.Value.Add(entityType, table = _tableFactory.Create(entityType, options));
                     }
 
                     data.Add(new FileContextTableSnapshot(et, table.SnapshotRows()));
@@ -120,10 +123,20 @@ namespace FileContextCore.Storage.Internal
 
                     if (!_tables.Value.TryGetValue(entityType, out IFileContextTable table))
                     {
-                        _tables.Value.Add(entityType, table = _tableFactory.Create(entityType));
+                        _tables.Value.Add(entityType, table = _tableFactory.Create(entityType, options));
                     }
 
-                    switch (entry.EntityState)
+					if (entry.SharedIdentityEntry != null)
+					{
+						if (entry.EntityState == EntityState.Deleted)
+						{
+							continue;
+						}
+
+						table.Delete(entry);
+					}
+
+					switch (entry.EntityState)
                     {
                         case EntityState.Added:
                             table.Create(entry);

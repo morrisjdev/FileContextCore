@@ -69,10 +69,11 @@ namespace FileContextCore.Extensions
                 .TryAdd<IEntityQueryableExpressionVisitorFactory, FileContextEntityQueryableExpressionVisitorFactory>()
                 .TryAdd<IEvaluatableExpressionFilter, EvaluatableExpressionFilter>()
                 .TryAddProviderSpecificServices(b => b
-                    .TryAddSingleton<IFileContextStoreCache, FileContextStoreCache>()
-                    .TryAddSingleton<IFileContextTableFactory, FileContextTableFactory>()
+                    .TryAddScoped<IFileContextStoreCache, FileContextStoreCache>()
+                    .TryAddScoped<IFileContextTableFactory, FileContextTableFactory>()
                     .TryAddScoped<IFileContextDatabase, FileContextDatabase>()
-                    .TryAddScoped<IMaterializerFactory, MaterializerFactory>());
+                    .TryAddScoped<IMaterializerFactory, MaterializerFactory>()
+					.TryAddScoped<FileContextIntegerValueGeneratorCache, FileContextIntegerValueGeneratorCache>());
 
             builder.TryAddCoreServices();
 

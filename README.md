@@ -15,6 +15,7 @@ This framework bases on the idea of FileContext by DevMentor ([https://github.co
 - diferrent serializer supported (XML, JSON, CSV, Excel)
 - supports encryption
 - supports relations
+- supports multiple databases
 
 !This extension is not intended to be used in production systems!
 
@@ -118,11 +119,13 @@ Encrypts the data and saves them into files
 optionsBuilder.UseFileContext("json", "encrypted:password");
 ```
 
-## Combined Manager
+## Multiple Databases
 
-## Custom implementation
+You can define a name for your database and all the corresponding data will saved in a subfolder. So you are able to use FileContext with multiple DbContext-configurations.
 
-For customization you can implement the Interfaces `ISerializer` and `IFileManager`
+```cs
+optionsBuilder.UseFileContext(databasename: "database");
+```
 
 ## Author
 

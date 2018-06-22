@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
+using FileContextCore.Infrastructure.Internal;
 using FileContextCore.Storage.Internal;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -20,11 +21,12 @@ namespace FileContextCore.ValueGeneration.Internal
     {
         private long current = 0;
         private IProperty property;
-        private IFileContextStoreCache storeCache;
+        private readonly IFileContextStoreCache storeCache;
+		private FileContextIntegerValueGeneratorCache idCache;
 
         private void ComputeLast()
         {
-            if (FileContextIntegerValueGeneratorFactory.LastIds.TryGetValue(property.DeclaringEntityType.Name, out Dictionary<string, long> props))
+            if (idCache.LastIds.TryGetValue(property.DeclaringEntityType.Name, out Dictionary<string, long> props))
             {
                 if (props.TryGetValue(property.Name, out long last))
                 {
@@ -33,19 +35,20 @@ namespace FileContextCore.ValueGeneration.Internal
             }
         }
 
-        public FileContextIntegerValueGenerator(IProperty _property, IFileContextStoreCache _storeCache)
+        public FileContextIntegerValueGenerator(IProperty _property, IFileContextStoreCache _storeCache, FileContextIntegerValueGeneratorCache _idCache, FileContextOptionsExtension options)
         {
             property = _property;
             storeCache = _storeCache;
+			idCache = _idCache;
 
-            if (FileContextIntegerValueGeneratorFactory.LastIds.ContainsKey(property.DeclaringEntityType.Name))
+            if (idCache.LastIds.ContainsKey(property.DeclaringEntityType.Name))
             {
                 ComputeLast();
             }
             else
             {
-                storeCache.GetStore().GetTables(property.DeclaringEntityType);
-                ComputeLast();
+				storeCache.GetStore(options).GetTables(property.DeclaringEntityType);
+				ComputeLast();
             }
         }
 
@@ -57,7 +60,7 @@ namespace FileContextCore.ValueGeneration.Internal
         {
             TValue next = (TValue)Convert.ChangeType(Interlocked.Increment(ref current), typeof(TValue), CultureInfo.InvariantCulture);
 
-            if (FileContextIntegerValueGeneratorFactory.LastIds.TryGetValue(property.DeclaringEntityType.Name, out Dictionary<string, long> props))
+            if (idCache.LastIds.TryGetValue(property.DeclaringEntityType.Name, out Dictionary<string, long> props))
             {
                 if (props.ContainsKey(property.Name))
                 {

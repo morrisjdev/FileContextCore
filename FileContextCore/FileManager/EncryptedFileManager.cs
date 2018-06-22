@@ -8,17 +8,19 @@ namespace FileContextCore.FileManager
 {
     class EncryptedFileManager : IFileManager
     {
-        private object thisLock = new object();
+        private readonly object thisLock = new object();
 
         IEntityType type;
-        private string filetype;
-        private string key;
+        private readonly string filetype;
+        private readonly string key;
+		private readonly string databasename;
 
-        public EncryptedFileManager(IEntityType _type, string _filetype, string _key)
+        public EncryptedFileManager(IEntityType _type, string _filetype, string _key, string _databasename)
         {
             type = _type;
             filetype = _filetype;
             key = _key;
+			databasename = _databasename;
         }
 
         public string GetFileName()
@@ -30,8 +32,9 @@ namespace FileContextCore.FileManager
                 name = name.Replace(c, '_');
             }
 
-            string path = Path.Combine(AppContext.BaseDirectory, "appdata");
-            Directory.CreateDirectory(path);
+			string path = Path.Combine(AppContext.BaseDirectory, "appdata", databasename);
+
+			Directory.CreateDirectory(path);
 
             return Path.Combine(path, name + "." + filetype + ".crypted");
         }

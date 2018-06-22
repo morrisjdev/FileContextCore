@@ -12,10 +12,10 @@ namespace FileContextCore.Serializer
     {
         private IEntityType entityType;
         private string[] propertyKeys;
-        private Type[] typeList;
-        private string password;
+        private readonly Type[] typeList;
+        private readonly string password;
 
-        public static ExcelPackage package;
+        private ExcelPackage package;
         private ExcelWorksheet worksheet;
         
 

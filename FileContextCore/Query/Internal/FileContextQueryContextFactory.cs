@@ -28,11 +28,8 @@ namespace FileContextCore.Query.Internal
             [NotNull] IDbContextOptions contextOptions)
             : base(dependencies)
         {
-            Options = contextOptions.Extensions.OfType<FileContextOptionsExtension>().First();
-            _store = storeCache.GetStore();
+            _store = storeCache.GetStore(contextOptions.Extensions.OfType<FileContextOptionsExtension>().First());
         }
-
-        public static FileContextOptionsExtension Options { get; set; }
 
         /// <summary>
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used

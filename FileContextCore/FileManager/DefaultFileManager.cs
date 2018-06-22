@@ -6,15 +6,17 @@ namespace FileContextCore.FileManager
 {
     class DefaultFileManager : IFileManager
     {
-        private object thisLock = new object();
+        private readonly object thisLock = new object();
 
         IEntityType type;
-        private string filetype;
+        private readonly string filetype;
+		private readonly string databasename;
 
-        public DefaultFileManager(IEntityType _type, string _filetype)
+        public DefaultFileManager(IEntityType _type, string _filetype, string _databasename)
         {
             type = _type;
             filetype = _filetype;
+			databasename = _databasename;
         }
 
         public string GetFileName()
@@ -26,7 +28,8 @@ namespace FileContextCore.FileManager
                 name = name.Replace(c, '_');
             }
 
-            string path = Path.Combine(AppContext.BaseDirectory, "appdata");
+			string path = Path.Combine(AppContext.BaseDirectory, "appdata", databasename);
+            
             Directory.CreateDirectory(path);
 
             return Path.Combine(path, name + "." + filetype);

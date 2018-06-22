@@ -16,8 +16,8 @@ namespace FileContextCore.Extensions
 	/// </summary>
 	public static class FileContextDbContextOptionsExtensions
 	{
-		//private const string LegacySharedName = "___Shared_Database___";
-		
+		private const string LegacySharedName = "___Shared_Database___";
+
 		/// <summary>
 		///     Configures the context to use FileContext.
 		///     The data are saved into files.
@@ -49,14 +49,14 @@ namespace FileContextCore.Extensions
 		/// <param name="filemanager">The selection the of the file-manager to encrypt the files for example.</param>
 		/// <returns> The options builder so that further configuration can be chained. </returns>
 		public static DbContextOptionsBuilder UseFileContext(
-			[NotNull] this DbContextOptionsBuilder optionsBuilder, string serializer = "json", string filemanager = "default")
+			[NotNull] this DbContextOptionsBuilder optionsBuilder, string serializer = "json", string filemanager = "default", string databasename = "")
 		{
 			Check.NotNull(optionsBuilder, nameof(optionsBuilder));
 
 			FileContextOptionsExtension extension = optionsBuilder.Options.FindExtension<FileContextOptionsExtension>()
 				?? new FileContextOptionsExtension();
 
-			extension = extension.WithSerializerAndFileManager(serializer, filemanager);
+			extension = extension.WithSerializerAndFileManager(serializer, filemanager, databasename);
 
 			((IDbContextOptionsBuilderInfrastructure)optionsBuilder).AddOrUpdateExtension(extension);
 

@@ -3,8 +3,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using FileContextCore.Infrastructure.Internal;
 using FileContextCore.Storage.Internal;
 using FileContextCore.Utilities;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -18,13 +21,18 @@ namespace FileContextCore.ValueGeneration.Internal
     /// </summary>
     class FileContextIntegerValueGeneratorFactory : ValueGeneratorFactory
     {
-        public static Dictionary<string, Dictionary<string, long>> LastIds = new Dictionary<string, Dictionary<string, long>>();
-        private IFileContextStoreCache storeCache;
+        //public static Dictionary<string, Dictionary<string, long>> LastIds = new Dictionary<string, Dictionary<string, long>>();
+        private readonly IFileContextStoreCache storeCache;
+		public readonly FileContextIntegerValueGeneratorCache idCache;
+		private readonly FileContextOptionsExtension options;
 
-        public FileContextIntegerValueGeneratorFactory(IFileContextStoreCache _storeCache)
+
+		public FileContextIntegerValueGeneratorFactory(IFileContextStoreCache _storeCache, FileContextIntegerValueGeneratorCache _idCache, IDbContextOptions _contextOptions)
         {
             storeCache = _storeCache;
-        }
+			idCache = _idCache;
+			options = _contextOptions.Extensions.OfType<FileContextOptionsExtension>().First();
+		}
 
         /// <summary>
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
@@ -38,42 +46,42 @@ namespace FileContextCore.ValueGeneration.Internal
 
             if (type == typeof(long))
             {
-                return new FileContextIntegerValueGenerator<long>(property, storeCache);
+                return new FileContextIntegerValueGenerator<long>(property, storeCache, idCache, options);
             }
 
             if (type == typeof(int))
             {
-                return new FileContextIntegerValueGenerator<int>(property, storeCache);
+                return new FileContextIntegerValueGenerator<int>(property, storeCache, idCache, options);
             }
 
             if (type == typeof(short))
             {
-                return new FileContextIntegerValueGenerator<short>(property, storeCache);
+                return new FileContextIntegerValueGenerator<short>(property, storeCache, idCache, options);
             }
 
             if (type == typeof(byte))
             {
-                return new FileContextIntegerValueGenerator<byte>(property, storeCache);
+                return new FileContextIntegerValueGenerator<byte>(property, storeCache, idCache, options);
             }
 
             if (type == typeof(ulong))
             {
-                return new FileContextIntegerValueGenerator<ulong>(property, storeCache);
+                return new FileContextIntegerValueGenerator<ulong>(property, storeCache, idCache, options);
             }
 
             if (type == typeof(uint))
             {
-                return new FileContextIntegerValueGenerator<uint>(property, storeCache);
+                return new FileContextIntegerValueGenerator<uint>(property, storeCache, idCache, options);
             }
 
             if (type == typeof(ushort))
             {
-                return new FileContextIntegerValueGenerator<ushort>(property, storeCache);
+                return new FileContextIntegerValueGenerator<ushort>(property, storeCache, idCache, options);
             }
 
             if (type == typeof(sbyte))
             {
-                return new FileContextIntegerValueGenerator<sbyte>(property, storeCache);
+                return new FileContextIntegerValueGenerator<sbyte>(property, storeCache, idCache, options);
             }
 
             throw new ArgumentException(CoreStrings.InvalidValueGeneratorFactoryProperty(

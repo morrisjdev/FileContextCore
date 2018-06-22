@@ -18,7 +18,9 @@ namespace FileContextCore.Infrastructure.Internal
     {
         private string _serializer = "json";
         private string _filemanager = "default";
-        private string _logFragment;
+		private string _databasename = "";
+
+		private string _logFragment;
 
         /// <summary>
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
@@ -52,18 +54,21 @@ namespace FileContextCore.Infrastructure.Internal
 
         public virtual string FileManager => _filemanager;
 
-        /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
-        public virtual FileContextOptionsExtension WithSerializerAndFileManager(string serializer, string filemanager)
+		public virtual string DatabaseName => _databasename;
+
+		/// <summary>
+		///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+		///     directly from your code. This API may change or be removed in future releases.
+		/// </summary>
+		public virtual FileContextOptionsExtension WithSerializerAndFileManager(string serializer, string filemanager, string databasename)
         {
             FileContextOptionsExtension clone = Clone();
 
             clone._serializer = serializer;
             clone._filemanager = filemanager;
+			clone._databasename = databasename;
 
-            return clone;
+			return clone;
         }
 
         /// <summary>
@@ -83,7 +88,7 @@ namespace FileContextCore.Infrastructure.Internal
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        public virtual long GetServiceProviderHashCode() => 0;
+        public virtual long GetServiceProviderHashCode() => DatabaseName.GetHashCode();
 
         /// <summary>
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
@@ -105,7 +110,7 @@ namespace FileContextCore.Infrastructure.Internal
                 {
                     StringBuilder builder = new StringBuilder();
 
-                    builder.Append("serializer=").Append(_serializer).Append(";filemanager=").Append(_filemanager).Append(' ');
+                    builder.Append("serializer=").Append(_serializer).Append(";filemanager=").Append(_filemanager).Append(";databasename=").Append(_databasename).Append(' ');
 
                     _logFragment = builder.ToString();
                 }

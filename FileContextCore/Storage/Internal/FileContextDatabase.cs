@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using FileContextCore.Infrastructure.Internal;
 using FileContextCore.Utilities;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
@@ -43,7 +44,7 @@ namespace FileContextCore.Storage.Internal
             Check.NotNull(options, nameof(options));
             Check.NotNull(updateLogger, nameof(updateLogger));
 
-            _store = storeCache.GetStore(options);
+            _store = storeCache.GetStore(options.Extensions.OfType<FileContextOptionsExtension>().First());
             _updateLogger = updateLogger;
         }
 
