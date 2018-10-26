@@ -13,9 +13,9 @@ namespace Example
         static void Main(string[] args)
         {
             Context db = new Context();
-			NewContext db2 = new NewContext();
+            NewContext db2 = new NewContext();
 
-			Messurement current = new Messurement();
+            Messurement current = new Messurement();
 
             Stopwatch watch = new Stopwatch();
 
@@ -25,12 +25,12 @@ namespace Example
 
             List<User> users2 = db.Users.Include("Contents.Entries").Include("Contents").Include("Contents").ToList();
 
-			List<User> user3 = db2.Users.ToList();
+            List<User> user3 = db2.Users.ToList();
 
-			db.Users.RemoveRange(db.Users.Skip(40));
-			db.SaveChanges();
+            db.Users.RemoveRange(db.Users.Skip(40));
+            db.SaveChanges();
 
-			List<User> users = db.Users.Include(x => x.Contents).ThenInclude(x => x.Entries).Include(x => x.Settings).ToList(); //db.Users.Include(x => x.Contents).Include(x => x.Settings).ToList();
+            List<User> users = db.Users.Include(x => x.Contents).ThenInclude(x => x.Entries).Include(x => x.Settings).ToList(); //db.Users.Include(x => x.Contents).Include(x => x.Settings).ToList();
 
             List<Content> contents = db.Contents.Include(x => x.User).ToList();
 
@@ -49,19 +49,21 @@ namespace Example
 
             db.Users.Add(us);
 
-			User us3 = new User()
-			{
-				Name = "Morris Janatzek",
-				Username = ""
-			};
+            User us3 = new User()
+            {
+                Name = "Morris Janatzek",
+                Username = ""
+            };
 
-			db2.Users.Add(us3);
+            db2.Users.Add(us3);
 
-			db2.SaveChanges();
+            db2.SaveChanges();
 
-			db.Users.Remove(db.Users.FirstOrDefault());
+            db.SaveChanges();
 
-			db.SaveChanges();
+            db.Users.Remove(db.Users.FirstOrDefault());
+
+            db.SaveChanges();
 
             Content c = new Content()
             {
@@ -138,6 +140,21 @@ namespace Example
 
                 break;
             }
+
+            Context db3 = new Context();
+            Context db4 = new Context();
+
+            List<User> users3 = db3.Users.ToList();
+
+            db4.Users.Add(new User()
+            {
+                Name = "Morris Janatzek",
+                Username = "morrisj"
+            });
+
+            db4.SaveChanges();
+
+            users3 = db3.Users.ToList();
         }
     }
 }

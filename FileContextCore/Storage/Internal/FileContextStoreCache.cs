@@ -15,8 +15,7 @@ namespace FileContextCore.Storage.Internal
     class FileContextStoreCache : IFileContextStoreCache
     {
         private readonly IFileContextTableFactory _tableFactory;
-
-		private readonly ConcurrentDictionary<string, IFileContextStore> _namedStores;
+        private readonly FileContextStoreStorage _fileContextStoreStorage;
 
 		//private IFileContextStore _store;
 
@@ -24,10 +23,10 @@ namespace FileContextCore.Storage.Internal
 		///     This API supports the Entity Framework Core infrastructure and is not intended to be used
 		///     directly from your code. This API may change or be removed in future releases.
 		/// </summary>
-		public FileContextStoreCache([NotNull] IFileContextTableFactory tableFactory)
+		public FileContextStoreCache([NotNull] IFileContextTableFactory tableFactory, FileContextStoreStorage fileContextStoreStorage)
         {
             _tableFactory = tableFactory;
-			_namedStores = new ConcurrentDictionary<string, IFileContextStore>();
+            _fileContextStoreStorage = fileContextStoreStorage;
 		}
 
         /// <summary>
@@ -42,7 +41,7 @@ namespace FileContextCore.Storage.Internal
 			//}
 
 			//return _store;
-			return _namedStores.GetOrAdd(options.DatabaseName, n => new FileContextStore(_tableFactory, options));
+			return _fileContextStoreStorage.namedStores.GetOrAdd(options.DatabaseName, n => new FileContextStore(_tableFactory, options));
 		}
     }
 }
