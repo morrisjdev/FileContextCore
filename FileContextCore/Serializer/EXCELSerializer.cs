@@ -14,14 +14,16 @@ namespace FileContextCore.Serializer
         private string[] propertyKeys;
         private readonly Type[] typeList;
         private readonly string password;
+        private readonly string databaseName;
 
+        private static Dictionary<string, ExcelPackage> packages = new Dictionary<string, ExcelPackage>();
         private ExcelPackage package;
         private ExcelWorksheet worksheet;
         
 
         FileInfo GetFilePath()
         {
-            string folder = Path.Combine(AppContext.BaseDirectory, "appdata");
+            string folder = Path.Combine(AppContext.BaseDirectory, "appdata", databaseName);
 
             if (!Directory.Exists(folder))
             {
@@ -31,23 +33,30 @@ namespace FileContextCore.Serializer
             return new FileInfo(Path.Combine(folder, "data.xlsx"));
         }
 
-        public EXCELSerializer(IEntityType _entityType, string _password)
+        public EXCELSerializer(IEntityType _entityType, string _password, string databaseName)
         {
             entityType = _entityType;
             propertyKeys = entityType.GetProperties().Select(p => p.Name).ToArray();
             typeList = entityType.GetProperties().Select(p => p.ClrType).ToArray();
             password = _password;
+            this.databaseName = databaseName;
 
-            if (package == null)
+            if (!packages.ContainsKey(databaseName))
             {
                 if (!String.IsNullOrEmpty(password))
                 {
                     package = new ExcelPackage(GetFilePath(), password);
+                    packages.Add(databaseName, package);
                 }
                 else
                 {
                     package = new ExcelPackage(GetFilePath());
+                    packages.Add(databaseName, package);
                 }
+            }
+            else
+            {
+                package = packages[databaseName];
             }
 
             string[] nameParts = entityType.Name.Split('.');

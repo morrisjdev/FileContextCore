@@ -41,7 +41,7 @@ namespace FileContextCore.Serializer
                     {
                         JObject json = (JObject)current.Value;
 
-                        TKey key = (TKey)json.Value<string>("Key").Deserialize(typeof(TKey));
+                        TKey key = (TKey)json.Value<string>("__Key__").Deserialize(typeof(TKey));
                         List<object> value = new List<object>();
 
                         for (int i = 0; i < propertyKeys.Length; i++)
@@ -72,7 +72,7 @@ namespace FileContextCore.Serializer
                 {
                     writer.WriteStartObject();
 
-                    writer.WritePropertyName("Key");
+                    writer.WritePropertyName("__Key__");
                     writer.WriteValue(val.Key.Serialize());
 
                     for (int i = 0; i < propertyKeys.Length; i++)

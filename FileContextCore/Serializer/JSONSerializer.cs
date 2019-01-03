@@ -27,7 +27,7 @@ namespace FileContextCore.Serializer
 
                 foreach (JObject json in array)
                 {
-                    TKey key = (TKey)json.Value<string>("Key").Deserialize(typeof(TKey));
+                    TKey key = (TKey)json.Value<string>("__Key__").Deserialize(typeof(TKey));
                     List<object> value = new List<object>();
 
                     for (int i = 0; i < propertyKeys.Length; i++)
@@ -51,7 +51,7 @@ namespace FileContextCore.Serializer
             {
                 JObject json = new JObject
                 {
-                    new JProperty("Key", val.Key.Serialize())
+                    new JProperty("__Key__", val.Key.Serialize())
                 };
 
                 for (int i = 0; i < propertyKeys.Length; i++)

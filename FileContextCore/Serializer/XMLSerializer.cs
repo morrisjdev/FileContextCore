@@ -34,9 +34,9 @@ namespace FileContextCore.Serializer
 
                 while (current != null)
                 {
+                    TKey key = (TKey)current.Attributes().FirstOrDefault(attr => attr.Name == "Key")?.Value.Deserialize(typeof(TKey));
                     Dictionary<string, string> values = current.Nodes().Select(x => (XElement)x).ToDictionary(x => x.Name.LocalName, x => x.Value);
 
-                    TKey key = (TKey)values["Key"].Deserialize(typeof(TKey));
                     List<object> value = new List<object>();
 
                     for (int i = 0; i < propertyKeys.Length; i++)
@@ -70,10 +70,7 @@ namespace FileContextCore.Serializer
             foreach (KeyValuePair<TKey, object[]> val in list)
             {
                 writer.WriteStartElement(name);
-
-                writer.WriteStartElement("Key");
-                writer.WriteValue(val.Key.Serialize());
-                writer.WriteEndElement();
+                writer.WriteAttributeString("Key", val.Key.Serialize());
 
                 for (int i = 0; i < propertyKeys.Length; i++)
                 {

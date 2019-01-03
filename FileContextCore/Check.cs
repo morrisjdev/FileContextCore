@@ -17,7 +17,7 @@ namespace FileContextCore.Utilities
         [ContractAnnotation("value:null => halt")]
         public static T NotNull<T>([NoEnumeration] T value, [InvokerParameterName] [NotNull] string parameterName)
         {
-            if (ReferenceEquals(value, null))
+            if (value == null)
             {
                 NotEmpty(parameterName, nameof(parameterName));
 
@@ -33,7 +33,7 @@ namespace FileContextCore.Utilities
             [InvokerParameterName] [NotNull] string parameterName,
             [NotNull] string propertyName)
         {
-            if (ReferenceEquals(value, null))
+            if (value == null)
             {
                 NotEmpty(parameterName, nameof(parameterName));
                 NotEmpty(propertyName, nameof(propertyName));
@@ -63,7 +63,7 @@ namespace FileContextCore.Utilities
         public static string NotEmpty(string value, [InvokerParameterName] [NotNull] string parameterName)
         {
             Exception e = null;
-            if (ReferenceEquals(value, null))
+            if (value == null)
             {
                 e = new ArgumentNullException(parameterName);
             }
@@ -84,8 +84,7 @@ namespace FileContextCore.Utilities
 
         public static string NullButNotEmpty(string value, [InvokerParameterName] [NotNull] string parameterName)
         {
-            if (!ReferenceEquals(value, null)
-                && value.Length == 0)
+            if (value != null && value.Length == 0)
             {
                 NotEmpty(parameterName, nameof(parameterName));
 
@@ -116,7 +115,7 @@ namespace FileContextCore.Utilities
             {
                 NotEmpty(parameterName, nameof(parameterName));
 
-                throw new ArgumentException(CoreStrings.InvalidEntityType(value, parameterName));
+                throw new ArgumentException(CoreStrings.InvalidEntityType(value));
             }
 
             return value;

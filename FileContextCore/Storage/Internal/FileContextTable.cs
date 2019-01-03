@@ -166,9 +166,12 @@ namespace FileContextCore.Storage.Internal
                     }
                 }
 
-                if (!idCache.LastIds.TryAdd(entityType.Name, values))
+                if (idCache.LastIds.ContainsKey(entityType.Name))
                 {
 					idCache.LastIds[entityType.Name] = values;
+                }
+                else {
+                    idCache.LastIds.Add(entityType.Name, values);
                 }
             }
         }
@@ -186,7 +189,7 @@ namespace FileContextCore.Storage.Internal
                     password = filetype.Substring(6);
                 }
 
-                EXCELSerializer excel = new EXCELSerializer(entityType, password);
+                EXCELSerializer excel = new EXCELSerializer(entityType, password, options.DatabaseName);
 
                 UpdateMethod = new Action<Dictionary<TKey, object[]>>((list) =>
                 {

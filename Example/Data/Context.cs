@@ -20,22 +20,22 @@ namespace Example.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-			//Default: JSON-Serialize
-			//optionsBuilder.UseFileContext();
+            //Default: JSON-Serialize
+            optionsBuilder.UseFileContext();
 
-			//JSON-Serialize + simple Encryption
-			//optionsBuilder.UseFileContext("json", "encrypted");
+            //JSON-Serialize + simple Encryption
+            //optionsBuilder.UseFileContext("json", "encrypted");
 
-			//XML
-			optionsBuilder.UseFileContext("xml");
-			//optionsBuilder.UseFileContext("xml", "private");
+            //XML
+            //optionsBuilder.UseFileContext("xml");
+            //optionsBuilder.UseFileContext("xml", "private");
 
-			//CSV
-			//optionsBuilder.UseFileContext("csv");
+            //CSV
+            //optionsBuilder.UseFileContext("csv");
 
-			//Excel
-			//optionsBuilder.UseFileContext("excel");
-		}
+            //Excel
+            //optionsBuilder.UseFileContext("excel");
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

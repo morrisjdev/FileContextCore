@@ -71,9 +71,11 @@ namespace FileContextCore.Query.Internal
                                     .QueryBuffer
                                     .GetEntity(
                                         key,
+#pragma warning disable CS0618 // Typ oder Element ist veraltet
                                         new EntityLoadInfo(
                                             valueBuffer,
                                             vr => materializer(t.EntityType, vr)),
+#pragma warning restore CS0618 // Typ oder Element ist veraltet
                                         queryStateManager,
                                         throwOnNullKey: false);
                             }));
