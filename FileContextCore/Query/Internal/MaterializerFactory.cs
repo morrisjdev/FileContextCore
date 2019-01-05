@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using FileContextCore.Utilities;
@@ -60,8 +61,37 @@ namespace FileContextCore.Query.Internal
 
             LabelTarget returnLabelTarget = Expression.Label(typeof(object));
 
-            Expression[] blockExpressions
-                = new Expression[]
+            Expression[] blockExpressions = CreateExpressions(entityTypeParameter, concreteEntityTypes, returnLabelTarget, valueBufferParameter);
+
+            foreach (IEntityType concreteEntityType in concreteEntityTypes.Skip(1))
+            {
+                blockExpressions[0] = ProcessExpression(entityTypeParameter, concreteEntityType, returnLabelTarget, valueBufferParameter, blockExpressions);
+            }
+
+            return Expression.Lambda<Func<IEntityType, ValueBuffer, object>>(
+                Expression.Block(blockExpressions),
+                entityTypeParameter,
+                valueBufferParameter);
+        }
+
+        private Expression ProcessExpression(ParameterExpression entityTypeParameter, IEntityType concreteEntityType,
+            LabelTarget returnLabelTarget, ParameterExpression valueBufferParameter, Expression[] blockExpressions)
+        {
+            return Expression.IfThenElse(
+                        Expression.Equal(
+                            entityTypeParameter,
+                            Expression.Constant(concreteEntityType)),
+                        Expression.Return(
+                            returnLabelTarget,
+                            _entityMaterializerSource
+                                .CreateMaterializeExpression(concreteEntityType, valueBufferParameter)),
+                        blockExpressions[0]);
+        }
+
+        private Expression[] CreateExpressions(ParameterExpression entityTypeParameter, List<IEntityType> concreteEntityTypes, 
+            LabelTarget returnLabelTarget, ParameterExpression valueBufferParameter)
+        {
+            return new Expression[]
                 {
                     Expression.IfThen(
                         Expression.Equal(
@@ -76,25 +106,6 @@ namespace FileContextCore.Query.Internal
                         returnLabelTarget,
                         Expression.Default(returnLabelTarget.Type))
                 };
-
-            foreach (IEntityType concreteEntityType in concreteEntityTypes.Skip(1))
-            {
-                blockExpressions[0]
-                    = Expression.IfThenElse(
-                        Expression.Equal(
-                            entityTypeParameter,
-                            Expression.Constant(concreteEntityType)),
-                        Expression.Return(
-                            returnLabelTarget,
-                            _entityMaterializerSource
-                                .CreateMaterializeExpression(concreteEntityType, valueBufferParameter)),
-                        blockExpressions[0]);
-            }
-
-            return Expression.Lambda<Func<IEntityType, ValueBuffer, object>>(
-                Expression.Block(blockExpressions),
-                entityTypeParameter,
-                valueBufferParameter);
         }
     }
 }

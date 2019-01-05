@@ -21,7 +21,9 @@ namespace Example.Data
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             //Default: JSON-Serialize
-            optionsBuilder.UseFileContext();
+            //optionsBuilder.UseFileContext();
+
+            optionsBuilder.UseFileContext("bson");
 
             //JSON-Serialize + simple Encryption
             //optionsBuilder.UseFileContext("json", "encrypted");

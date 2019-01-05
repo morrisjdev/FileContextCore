@@ -13,7 +13,7 @@ namespace FileContextCore.Serializer
     {
         private IEntityType entityType;
         private string[] propertyKeys;
-        private Type[] typeList;
+        private readonly Type[] typeList;
 
         public BSONSerializer(IEntityType _entityType)
         {
@@ -35,29 +35,35 @@ namespace FileContextCore.Serializer
 
                 if (array != null)
                 {
-                    JProperty current = (JProperty)array.First;
+                    DeserializeValues(array, newList);
 
-                    while (current != null)
-                    {
-                        JObject json = (JObject)current.Value;
-
-                        TKey key = (TKey)json.Value<string>("__Key__").Deserialize(typeof(TKey));
-                        List<object> value = new List<object>();
-
-                        for (int i = 0; i < propertyKeys.Length; i++)
-                        {
-                            object val = json.Value<string>(propertyKeys[i]).Deserialize(typeList[i]);
-                            value.Add(val);
-                        }
-
-                        newList.Add(key, value.ToArray());
-
-                        current = (JProperty)current.Next;
-                    }
                 }
             }
 
             return newList;
+        }
+
+        private void DeserializeValues<TKey>(JObject array, Dictionary<TKey, object[]> newList)
+        {
+            JProperty current = (JProperty)array.First;
+
+            while (current != null)
+            {
+                JObject json = (JObject)current.Value;
+
+                TKey key = (TKey)json.Value<string>("__Key__").Deserialize(typeof(TKey));
+                List<object> value = new List<object>();
+
+                for (int i = 0; i < propertyKeys.Length; i++)
+                {
+                    object val = json.Value<string>(propertyKeys[i]).Deserialize(typeList[i]);
+                    value.Add(val);
+                }
+
+                newList.Add(key, value.ToArray());
+
+                current = (JProperty)current.Next;
+            }
         }
 
         public string Serialize<TKey>(Dictionary<TKey, object[]> list)

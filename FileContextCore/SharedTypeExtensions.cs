@@ -43,30 +43,30 @@ namespace System
                    || type == typeof(char);
         }
 
-        public static PropertyInfo GetAnyProperty(this Type type, string name)
-        {
-            var props = type.GetRuntimeProperties().Where(p => p.Name == name).ToList();
-            if (props.Count > 1)
-            {
-                throw new AmbiguousMatchException();
-            }
+        //public static PropertyInfo GetAnyProperty(this Type type, string name)
+        //{
+        //    var props = type.GetRuntimeProperties().Where(p => p.Name == name).ToList();
+        //    if (props.Count > 1)
+        //    {
+        //        throw new AmbiguousMatchException();
+        //    }
 
-            return props.SingleOrDefault();
-        }
+        //    return props.SingleOrDefault();
+        //}
 
-        public static bool IsInstantiable(this Type type) => IsInstantiable(type.GetTypeInfo());
+        //public static bool IsInstantiable(this Type type) => IsInstantiable(type.GetTypeInfo());
 
-        private static bool IsInstantiable(TypeInfo type)
-            => !type.IsAbstract
-               && !type.IsInterface
-               && (!type.IsGenericType || !type.IsGenericTypeDefinition);
+        //private static bool IsInstantiable(TypeInfo type)
+        //    => !type.IsAbstract
+        //       && !type.IsInterface
+        //       && (!type.IsGenericType || !type.IsGenericTypeDefinition);
 
-        public static bool IsGrouping(this Type type) => IsGrouping(type.GetTypeInfo());
+        //public static bool IsGrouping(this Type type) => IsGrouping(type.GetTypeInfo());
 
-        private static bool IsGrouping(TypeInfo type)
-            => type.IsGenericType
-               && (type.GetGenericTypeDefinition() == typeof(IGrouping<,>)
-                   || type.GetGenericTypeDefinition() == typeof(IAsyncGrouping<,>));
+        //private static bool IsGrouping(TypeInfo type)
+        //    => type.IsGenericType
+        //       && (type.GetGenericTypeDefinition() == typeof(IGrouping<,>)
+        //           || type.GetGenericTypeDefinition() == typeof(IAsyncGrouping<,>));
 
         public static Type UnwrapEnumType(this Type type)
         {
@@ -81,17 +81,17 @@ namespace System
             return isNullable ? MakeNullable(underlyingEnumType) : underlyingEnumType;
         }
 
-        public static Type GetSequenceType(this Type type)
-        {
-            var sequenceType = TryGetSequenceType(type);
-            if (sequenceType == null)
-            {
-                // TODO: Add exception message
-                throw new ArgumentException();
-            }
+        //public static Type GetSequenceType(this Type type)
+        //{
+        //    var sequenceType = TryGetSequenceType(type);
+        //    if (sequenceType == null)
+        //    {
+        //        // TODO: Add exception message
+        //        throw new ArgumentException();
+        //    }
 
-            return sequenceType;
-        }
+        //    return sequenceType;
+        //}
 
         public static Type TryGetSequenceType(this Type type)
             => type.TryGetElementType(typeof(IEnumerable<>))
@@ -136,25 +136,25 @@ namespace System
             }
         }
 
-        public static IEnumerable<Type> GetTypesInHierarchy(this Type type)
-        {
-            while (type != null)
-            {
-                yield return type;
+        //public static IEnumerable<Type> GetTypesInHierarchy(this Type type)
+        //{
+        //    while (type != null)
+        //    {
+        //        yield return type;
 
-                type = type.GetTypeInfo().BaseType;
-            }
-        }
+        //        type = type.GetTypeInfo().BaseType;
+        //    }
+        //}
 
-        public static ConstructorInfo GetDeclaredConstructor(this Type type, Type[] types)
-        {
-            types = types ?? new Type[0];
+        //public static ConstructorInfo GetDeclaredConstructor(this Type type, Type[] types)
+        //{
+        //    types = types ?? new Type[0];
 
-            return type.GetTypeInfo().DeclaredConstructors
-                .SingleOrDefault(
-                    c => !c.IsStatic
-                         && c.GetParameters().Select(p => p.ParameterType).SequenceEqual(types));
-        }
+        //    return type.GetTypeInfo().DeclaredConstructors
+        //        .SingleOrDefault(
+        //            c => !c.IsStatic
+        //                 && c.GetParameters().Select(p => p.ParameterType).SequenceEqual(types));
+        //}
 
         public static IEnumerable<PropertyInfo> GetPropertiesInHierarchy(this Type type, string name)
         {
@@ -172,19 +172,19 @@ namespace System
             while (type != null);
         }
 
-        public static IEnumerable<MemberInfo> GetMembersInHierarchy(this Type type, string name)
-        {
-            // Do the whole hierarchy for properties first since looking for fields is slower.
-            foreach (var propertyInfo in type.GetRuntimeProperties().Where(pi => pi.Name == name && !(pi.GetMethod ?? pi.SetMethod).IsStatic))
-            {
-                yield return propertyInfo;
-            }
+        //public static IEnumerable<MemberInfo> GetMembersInHierarchy(this Type type, string name)
+        //{
+        //    // Do the whole hierarchy for properties first since looking for fields is slower.
+        //    foreach (var propertyInfo in type.GetRuntimeProperties().Where(pi => pi.Name == name && !(pi.GetMethod ?? pi.SetMethod).IsStatic))
+        //    {
+        //        yield return propertyInfo;
+        //    }
 
-            foreach (var fieldInfo in type.GetRuntimeFields().Where(f => f.Name == name && !f.IsStatic))
-            {
-                yield return fieldInfo;
-            }
-        }
+        //    foreach (var fieldInfo in type.GetRuntimeFields().Where(f => f.Name == name && !f.IsStatic))
+        //    {
+        //        yield return fieldInfo;
+        //    }
+        //}
 
         private static readonly Dictionary<Type, object> _commonTypeDictionary = new Dictionary<Type, object>
         {
@@ -220,21 +220,21 @@ namespace System
                 : Activator.CreateInstance(type);
         }
 
-        public static IEnumerable<TypeInfo> GetConstructableTypes(this Assembly assembly)
-            => assembly.GetLoadableDefinedTypes().Where(
-                t => !t.IsAbstract
-                     && !t.IsGenericTypeDefinition);
+        //public static IEnumerable<TypeInfo> GetConstructableTypes(this Assembly assembly)
+        //    => assembly.GetLoadableDefinedTypes().Where(
+        //        t => !t.IsAbstract
+        //             && !t.IsGenericTypeDefinition);
 
-        public static IEnumerable<TypeInfo> GetLoadableDefinedTypes(this Assembly assembly)
-        {
-            try
-            {
-                return assembly.DefinedTypes;
-            }
-            catch (ReflectionTypeLoadException ex)
-            {
-                return ex.Types.Where(t => t != null).Select(IntrospectionExtensions.GetTypeInfo);
-            }
-        }
+        //public static IEnumerable<TypeInfo> GetLoadableDefinedTypes(this Assembly assembly)
+        //{
+        //    try
+        //    {
+        //        return assembly.DefinedTypes;
+        //    }
+        //    catch (ReflectionTypeLoadException ex)
+        //    {
+        //        return ex.Types.Where(t => t != null).Select(IntrospectionExtensions.GetTypeInfo);
+        //    }
+        //}
     }
 }

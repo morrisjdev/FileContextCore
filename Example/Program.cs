@@ -155,6 +155,19 @@ namespace Example
             db4.SaveChanges();
 
             users3 = db3.Users.ToList();
+
+            Console.WriteLine(db.Users.Count());
+
+            db.Users.Add(new User()
+            {
+                Name = "Test",
+                Username = "testname"
+            });
+            db.SaveChanges();
+
+            Console.WriteLine(db.Users.Count());
+
+            Console.ReadKey();
         }
     }
 }

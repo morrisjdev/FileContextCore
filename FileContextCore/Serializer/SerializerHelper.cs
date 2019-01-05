@@ -10,18 +10,12 @@ namespace FileContextCore.Serializer
         public static object Deserialize(this string input, Type type)
         {
             if (String.IsNullOrEmpty(input))
-            {
                 return type.GetDefaultValue();
-            }
 
             if (type == typeof(TimeSpan))
-            {
                 return TimeSpan.Parse(input, CultureInfo.InvariantCulture);
-            }
             else if (type == typeof(Guid))
-            {
                 return Guid.Parse(input);
-            }
             else if (type.IsArray)
             {
                 Type arrType = type.GetElementType();
@@ -35,9 +29,7 @@ namespace FileContextCore.Serializer
                 return arr.ToArray();
             }
             else
-            {
                 return Convert.ChangeType(input, type, CultureInfo.InvariantCulture);
-            }
         }
 
         public static string Serialize(this object input)

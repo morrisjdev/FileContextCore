@@ -21,13 +21,7 @@ namespace FileContextCore.FileManager
 
         public string GetFileName()
         {
-            string name = type.Name;
-
-            foreach(char c in Path.GetInvalidFileNameChars())
-            {
-                name = name.Replace(c, '_');
-            }
-
+            string name = type.Name.GetValidFileName();
 			string path = Path.Combine(AppContext.BaseDirectory, "appdata", databasename);
             
             Directory.CreateDirectory(path);

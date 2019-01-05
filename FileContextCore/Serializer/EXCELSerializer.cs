@@ -111,6 +111,27 @@ namespace FileContextCore.Serializer
 
         public void Serialize<TKey>(Dictionary<TKey, object[]> list)
         {
+            FillRows(list);
+
+            for (int x = 0; x < worksheet.Dimension.Columns; x++)
+            {
+                worksheet.Column(x + 1).AutoFit();
+            }
+
+            DeleteUnusedRows(list.Count + 1);
+
+            if (!String.IsNullOrEmpty(password))
+            {
+                package.Save(password);
+            }
+            else
+            {
+                package.Save();
+            }
+        }
+
+        private void FillRows<TKey>(Dictionary<TKey, object[]> list)
+        {
             int y = 2;
 
             foreach (KeyValuePair<TKey, object[]> val in list)
@@ -124,27 +145,14 @@ namespace FileContextCore.Serializer
 
                 y++;
             }
+        }
 
-            for (int x = 0; x < worksheet.Dimension.Columns; x++)
-            {
-                worksheet.Column(x + 1).AutoFit();
-            }
-
-            int lastRow = list.Count + 1;
-
+        private void DeleteUnusedRows(int lastRow)
+        {
             if (worksheet.Dimension.Rows > lastRow)
             {
                 int count = worksheet.Dimension.Rows - lastRow;
                 worksheet.DeleteRow(lastRow + 1, count);
-            }
-
-            if (!String.IsNullOrEmpty(password))
-            {
-                package.Save(password);
-            }
-            else
-            {
-                package.Save();
             }
         }
     }

@@ -117,39 +117,10 @@ namespace FileContextCore.Storage.Internal
             {
                 foreach (IUpdateEntry entry in entries)
                 {
-                    IEntityType entityType = entry.EntityType;
-
-                    Debug.Assert(!entityType.IsAbstract());
-
-                    if (!_tables.Value.TryGetValue(entityType, out IFileContextTable table))
+                    if (HandleEntry(entry))
                     {
-                        _tables.Value.Add(entityType, table = _tableFactory.Create(entityType, options));
+                        rowsAffected++;
                     }
-
-					if (entry.SharedIdentityEntry != null)
-					{
-						if (entry.EntityState == EntityState.Deleted)
-						{
-							continue;
-						}
-
-						table.Delete(entry);
-					}
-
-					switch (entry.EntityState)
-                    {
-                        case EntityState.Added:
-                            table.Create(entry);
-                            break;
-                        case EntityState.Deleted:
-                            table.Delete(entry);
-                            break;
-                        case EntityState.Modified:
-                            table.Update(entry);
-                            break;
-                    }
-
-                    rowsAffected++;
                 }
 
                 foreach (KeyValuePair<IEntityType, IFileContextTable> table in _tables.Value)
@@ -161,6 +132,43 @@ namespace FileContextCore.Storage.Internal
             updateLogger.ChangesSaved(entries, rowsAffected);
 
             return rowsAffected;
+        }
+
+        private bool HandleEntry(IUpdateEntry entry)
+        {
+            IEntityType entityType = entry.EntityType;
+
+            Debug.Assert(!entityType.IsAbstract());
+
+            if (!_tables.Value.TryGetValue(entityType, out IFileContextTable table))
+            {
+                _tables.Value.Add(entityType, table = _tableFactory.Create(entityType, options));
+            }
+
+            if (entry.SharedIdentityEntry != null)
+            {
+                if (entry.EntityState == EntityState.Deleted)
+                {
+                    return false;
+                }
+
+                table.Delete(entry);
+            }
+
+            switch (entry.EntityState)
+            {
+                case EntityState.Added:
+                    table.Create(entry);
+                    break;
+                case EntityState.Deleted:
+                    table.Delete(entry);
+                    break;
+                case EntityState.Modified:
+                    table.Update(entry);
+                    break;
+            }
+
+            return true;
         }
     }
 }

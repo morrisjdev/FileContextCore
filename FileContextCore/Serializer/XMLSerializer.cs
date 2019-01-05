@@ -14,7 +14,7 @@ namespace FileContextCore.Serializer
     {
         private IEntityType entityType;
         private string[] propertyKeys;
-        private Type[] typeList;
+        private readonly Type[] typeList;
 
         public XMLSerializer(IEntityType _entityType)
         {
@@ -67,6 +67,17 @@ namespace FileContextCore.Serializer
             string[] nameParts = entityType.Name.Split('.');
             string name = nameParts[nameParts.Length - 1].Replace("<", "").Replace(">", "");
 
+            WriteList(writer, name, list);
+
+            writer.WriteEndElement();
+            writer.WriteEndDocument();
+            writer.Close();
+
+            return sw.ToString();
+        }
+
+        private void WriteList<TKey>(XmlWriter writer, string name, Dictionary<TKey, object[]> list)
+        {
             foreach (KeyValuePair<TKey, object[]> val in list)
             {
                 writer.WriteStartElement(name);
@@ -81,12 +92,6 @@ namespace FileContextCore.Serializer
 
                 writer.WriteEndElement();
             }
-
-            writer.WriteEndElement();
-            writer.WriteEndDocument();
-            writer.Close();
-
-            return sw.ToString();
         }
     }
 }

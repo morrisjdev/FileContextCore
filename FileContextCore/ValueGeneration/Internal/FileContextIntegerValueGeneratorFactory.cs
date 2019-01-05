@@ -41,48 +41,24 @@ namespace FileContextCore.ValueGeneration.Internal
         public override ValueGenerator Create(IProperty property)
         {
             Check.NotNull(property, nameof(property));
-
             Type type = property.ClrType.UnwrapNullableType().UnwrapEnumType();
 
             if (type == typeof(long))
-            {
                 return new FileContextIntegerValueGenerator<long>(property, storeCache, idCache, options);
-            }
-
             if (type == typeof(int))
-            {
                 return new FileContextIntegerValueGenerator<int>(property, storeCache, idCache, options);
-            }
-
             if (type == typeof(short))
-            {
                 return new FileContextIntegerValueGenerator<short>(property, storeCache, idCache, options);
-            }
-
             if (type == typeof(byte))
-            {
                 return new FileContextIntegerValueGenerator<byte>(property, storeCache, idCache, options);
-            }
-
             if (type == typeof(ulong))
-            {
                 return new FileContextIntegerValueGenerator<ulong>(property, storeCache, idCache, options);
-            }
-
             if (type == typeof(uint))
-            {
                 return new FileContextIntegerValueGenerator<uint>(property, storeCache, idCache, options);
-            }
-
             if (type == typeof(ushort))
-            {
                 return new FileContextIntegerValueGenerator<ushort>(property, storeCache, idCache, options);
-            }
-
             if (type == typeof(sbyte))
-            {
                 return new FileContextIntegerValueGenerator<sbyte>(property, storeCache, idCache, options);
-            }
 
             throw new ArgumentException(CoreStrings.InvalidValueGeneratorFactoryProperty(
                 nameof(FileContextIntegerValueGeneratorFactory), property.Name, property.DeclaringEntityType.DisplayName()));
