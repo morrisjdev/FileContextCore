@@ -24,18 +24,18 @@ namespace FileContextCore.Extensions.Internal
         public static void TransactionIgnoredWarning(
             [NotNull] this IDiagnosticsLogger<DbLoggerCategory.Database.Transaction> diagnostics)
         {
-            EventDefinition definition = FileContextStrings.LogTransactionsNotSupported;
+            //EventDefinition definition = FileContextStrings.LogTransactionsNotSupported;
 
-            definition.Log(diagnostics, WarningBehavior.Log);
+            //definition.Log(diagnostics, WarningBehavior.Log);
 
-            if (diagnostics.DiagnosticSource.IsEnabled(definition.EventId.Name))
-            {
-                diagnostics.DiagnosticSource.Write(
-                    definition.EventId.Name, 
-                    new EventData(
-                        definition,
-                        (d, p) => ((EventDefinition)d).GenerateMessage()));
-            }
+            //if (diagnostics.DiagnosticSource.IsEnabled(definition.EventId.Name))
+            //{
+            //    diagnostics.DiagnosticSource.Write(
+            //        definition.EventId.Name, 
+            //        new EventData(
+            //            definition,
+            //            (d, p) => ((EventDefinition)d).GenerateMessage()));
+            //}
         }
 
         /// <summary>
