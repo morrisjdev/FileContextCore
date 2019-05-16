@@ -1,4 +1,4 @@
-# FileContextCore [![Build Status](https://travis-ci.org/morrisjdev/FileContextCore.svg?branch=master)](https://travis-ci.org/morrisjdev/FileContextCore)
+# FileContextCore [![Build Status](https://travis-ci.org/morrisjdev/FileContextCore.svg?branch=master)](https://travis-ci.org/morrisjdev/FileContextCore) [![Maintainability](https://api.codeclimate.com/v1/badges/72cbed89392efad4c743/maintainability)](https://codeclimate.com/github/morrisjdev/FileContextCore/maintainability)
 
 FileContextCore is a "Database"-Provider for Entity Framework Core and adds the ability to store information in files instead of being limited to databases. It enables fast developments because of the advantage of just copy, edit and delete files.
 
