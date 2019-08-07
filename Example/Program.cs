@@ -13,6 +13,8 @@ namespace Example
         static void Main(string[] args)
         {
             Context db = new Context();
+            Console.WriteLine(db.Database.CanConnect());
+
             NewContext db2 = new NewContext();
 
             Messurement current = new Messurement();

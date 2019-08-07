@@ -14,7 +14,7 @@ namespace FileContextCore.Storage.Internal
     ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
     ///     directly from your code. This API may change or be removed in future releases.
     /// </summary>
-    class FileContextDatabaseCreator : IDatabaseCreator
+    class FileContextDatabaseCreator : IDatabaseCreatorWithCanConnect
     {
         private readonly IModel _model;
         private readonly IFileContextDatabase _database;
@@ -58,5 +58,15 @@ namespace FileContextCore.Storage.Internal
         /// </summary>
         public virtual Task<bool> EnsureCreatedAsync(CancellationToken cancellationToken = default(CancellationToken))
             => Task.FromResult(_database.EnsureDatabaseCreated(_model));
+
+        public bool CanConnect()
+        {
+            return true;
+        }
+
+        public Task<bool> CanConnectAsync(CancellationToken cancellationToken = new CancellationToken())
+        {
+            return Task.FromResult(CanConnect());
+        }
     }
 }
