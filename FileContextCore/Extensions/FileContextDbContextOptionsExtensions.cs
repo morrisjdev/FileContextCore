@@ -32,10 +32,10 @@ namespace FileContextCore.Extensions
 		/// <returns> The options builder so that further configuration can be chained. </returns>
 		public static DbContextOptionsBuilder<TContext> UseFileContext<TContext>(
 			[NotNull] this DbContextOptionsBuilder<TContext> optionsBuilder,
-			string serializer = "json", string filemanager = "default")
+			string serializer = "json", string filemanager = "default", string databasename = "")
 			where TContext : DbContext
 			=> (DbContextOptionsBuilder<TContext>)UseFileContext(
-				(DbContextOptionsBuilder)optionsBuilder, serializer, filemanager);
+				(DbContextOptionsBuilder)optionsBuilder, serializer, filemanager, databasename);
 
 		/// <summary>
 		///     Configures the context to use FileContext.
