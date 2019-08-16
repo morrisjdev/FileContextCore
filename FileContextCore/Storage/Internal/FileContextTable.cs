@@ -15,6 +15,7 @@ using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.EntityFrameworkCore.Update;
 
 namespace FileContextCore.Storage.Internal
@@ -264,7 +265,7 @@ namespace FileContextCore.Storage.Internal
             return result;
         }
 
-        private Dictionary<TKey, object[]> ConvertToProvider(Dictionary<TKey, object[]> list)
+        private Dictionary<TKey, object[]> ApplyValueConverter(Dictionary<TKey, object[]> list, Func<ValueConverter, Func<object, object>> conversionFunc)
         {
             var result = new Dictionary<TKey, object[]>();
             var converters = entityType.GetProperties().Select(p => p.GetValueConverter()).ToArray();
@@ -273,24 +274,20 @@ namespace FileContextCore.Storage.Internal
                 result[keyValuePair.Key] = keyValuePair.Value.Select((value, index) =>
                 {
                     var converter = converters[index];
-                    return converter == null ? value : converter.ConvertToProvider(value);
+                    return converter == null ? value : conversionFunc(converter)(value);
                 }).ToArray();
             }
             return result;
         }
+
+        private Dictionary<TKey, object[]> ConvertToProvider(Dictionary<TKey, object[]> list)
+        {
+            return ApplyValueConverter(list, converter => converter.ConvertToProvider);
+        }
+
         private Dictionary<TKey, object[]> ConvertFromProvider(Dictionary<TKey, object[]> list)
         {
-            var result = new Dictionary<TKey, object[]>();
-            var converters = entityType.GetProperties().Select(p => p.GetValueConverter()).ToArray();
-            foreach (var keyValuePair in list)
-            {
-                result[keyValuePair.Key] = keyValuePair.Value.Select((value, index) =>
-                {
-                    var converter = converters[index];
-                    return converter == null ? value : converter.ConvertFromProvider(value);
-                }).ToArray();
-            }
-            return result;
+            return ApplyValueConverter(list, converter => converter.ConvertFromProvider);
         }
     }
 }
