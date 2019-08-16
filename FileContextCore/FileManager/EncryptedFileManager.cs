@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 
 namespace FileContextCore.FileManager
 {
@@ -25,7 +26,7 @@ namespace FileContextCore.FileManager
 
         public string GetFileName()
         {
-            string name = type.Name;
+            string name = type.Relational().TableName;
 
             foreach(char c in Path.GetInvalidFileNameChars())
             {
