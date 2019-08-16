@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 
 namespace FileContextCore.Serializer
 {
@@ -18,7 +19,7 @@ namespace FileContextCore.Serializer
         public BSONSerializer(IEntityType _entityType)
         {
             entityType = _entityType;
-            propertyKeys = entityType.GetProperties().Select(p => p.Name).ToArray();
+            propertyKeys = entityType.GetProperties().Select(p => p.Relational().ColumnName).ToArray();
             typeList = entityType.GetProperties().Select(p => p.ClrType).ToArray();
         }
 

@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace FileContextCore.Serializer
 {
@@ -15,7 +16,7 @@ namespace FileContextCore.Serializer
         public JSONSerializer(IEntityType _entityType)
         {
             entityType = _entityType;
-            propertyKeys = entityType.GetProperties().Select(p => p.Name).ToArray();
+            propertyKeys = entityType.GetProperties().Select(p => p.Relational().ColumnName).ToArray();
             typeList = entityType.GetProperties().Select(p => p.ClrType).ToArray();
         }
 
