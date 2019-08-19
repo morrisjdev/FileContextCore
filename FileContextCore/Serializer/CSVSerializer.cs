@@ -28,6 +28,7 @@ namespace FileContextCore.Serializer
             CsvReader reader = new CsvReader(tr);
 
             reader.Read();
+            reader.ReadHeader();
 
             while (reader.Read())
             {
@@ -36,7 +37,7 @@ namespace FileContextCore.Serializer
 
                 for (int i = 0; i < propertyKeys.Length; i++)
                 {
-                    object val = reader.GetField(i + 1).Deserialize(typeList[i]);
+                    object val = reader.GetField(propertyKeys[i]).Deserialize(typeList[i]);
                     value.Add(val);
                 }
 
