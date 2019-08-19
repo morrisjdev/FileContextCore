@@ -38,7 +38,7 @@ namespace FileContextCore.Serializer
         {
             entityType = _entityType;
             propertyKeys = entityType.GetProperties().Select(p => p.Relational().ColumnName).ToArray();
-            typeList = entityType.GetProperties().Select(p => p.ClrType).ToArray();
+            typeList = entityType.GetProperties().Select(p => p.GetValueConverter()?.ProviderClrType ?? p.ClrType).ToArray();
             password = _password;
             this.databaseName = databaseName;
 

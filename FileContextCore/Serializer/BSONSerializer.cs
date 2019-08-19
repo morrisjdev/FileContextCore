@@ -20,7 +20,7 @@ namespace FileContextCore.Serializer
         {
             entityType = _entityType;
             propertyKeys = entityType.GetProperties().Select(p => p.Relational().ColumnName).ToArray();
-            typeList = entityType.GetProperties().Select(p => p.ClrType).ToArray();
+            typeList = entityType.GetProperties().Select(p => p.GetValueConverter()?.ProviderClrType ?? p.ClrType).ToArray();
         }
 
         public Dictionary<TKey, object[]> Deserialize<TKey>(string list, Dictionary<TKey, object[]> newList)
