@@ -24,6 +24,11 @@ namespace FileContextCore.Serializer
 
         public Dictionary<TKey, object[]> Deserialize<TKey>(string list, Dictionary<TKey, object[]> newList)
         {
+            if (string.IsNullOrEmpty(list))
+            {
+                return new Dictionary<TKey, object[]>();
+            }
+
             TextReader tr = new StringReader(list);
             CsvReader reader = new CsvReader(tr);
 
