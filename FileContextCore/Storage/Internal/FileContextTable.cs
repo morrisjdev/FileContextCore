@@ -17,6 +17,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.EntityFrameworkCore.Update;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 
 namespace FileContextCore.Storage.Internal
 {
@@ -182,7 +183,7 @@ namespace FileContextCore.Storage.Internal
                 password = filetype.Substring(6);
             }
 
-            EXCELSerializer excel = new EXCELSerializer(entityType, password, options.DatabaseName);
+            EXCELSerializer<TKey> excel = new EXCELSerializer<TKey>(entityType, password, options.DatabaseName, options.Location, _keyValueFactory);
 
             UpdateMethod = new Action<Dictionary<TKey, object[]>>((list) =>
             {
@@ -199,19 +200,19 @@ namespace FileContextCore.Storage.Internal
         {
             if (options.Serializer == "xml")
             {
-                serializer = new XMLSerializer(entityType);
+                serializer = new XMLSerializer<TKey>(entityType, _keyValueFactory);
             }
             else if (options.Serializer == "bson")
             {
-                serializer = new BSONSerializer(entityType);
+                serializer = new BSONSerializer<TKey>(entityType, _keyValueFactory);
             }
             else if (options.Serializer == "csv")
             {
-                serializer = new CSVSerializer(entityType);
+                serializer = new CSVSerializer<TKey>(entityType, _keyValueFactory);
             }
             else
             {
-                serializer = new JSONSerializer(entityType);
+                serializer = new JSONSerializer<TKey>(entityType, _keyValueFactory);
             }
         }
 
@@ -228,15 +229,15 @@ namespace FileContextCore.Storage.Internal
                     password = fmgr.Substring(10);
                 }
 
-                fileManager = new EncryptedFileManager(entityType, filetype, password, options.DatabaseName);
+                fileManager = new EncryptedFileManager(entityType, filetype, password, options.DatabaseName, options.Location);
             }
             else if (fmgr == "private")
             {
-                fileManager = new PrivateFileManager(entityType, filetype, options.DatabaseName);
+                fileManager = new PrivateFileManager(entityType, filetype, options.DatabaseName, options.Location);
             }
             else
             {
-                fileManager = new DefaultFileManager(entityType, filetype, options.DatabaseName);
+                fileManager = new DefaultFileManager(entityType, filetype, options.DatabaseName, options.Location);
             }
         }
 

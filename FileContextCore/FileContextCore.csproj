@@ -5,7 +5,7 @@
     <SignAssembly Condition="'$(OS)' == 'Windows_NT'">true</SignAssembly>
     <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>2.2.6</Version>
+    <Version>3.0.0</Version>
     <Company>morrisjdev</Company>
     <Authors>morrisjdev</Authors>
     <Description>File provider for Entity Framework Core (to be used for development purposes)</Description>
@@ -19,7 +19,7 @@
     <PackageProjectUrl>https://github.com/morrisjdev/FileContextCore</PackageProjectUrl>
     <NeutralLanguage>en-US</NeutralLanguage>
     <DelaySign>false</DelaySign>
-    <AssemblyVersion>2.2.6.0</AssemblyVersion>
+    <AssemblyVersion>3.0.0.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>

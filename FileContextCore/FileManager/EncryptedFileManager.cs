@@ -15,27 +15,26 @@ namespace FileContextCore.FileManager
         private readonly string filetype;
         private readonly string key;
 		private readonly string databasename;
+        private readonly string _location;
 
-        public EncryptedFileManager(IEntityType _type, string _filetype, string _key, string _databasename)
+        public EncryptedFileManager(IEntityType _type, string _filetype, string _key, string _databasename, string _location)
         {
             type = _type;
             filetype = _filetype;
             key = _key;
 			databasename = _databasename;
+            this._location = _location;
         }
 
         public string GetFileName()
         {
-            string name = type.Relational().TableName;
+            string name = type.Relational().TableName.GetValidFileName();
 
-            foreach(char c in Path.GetInvalidFileNameChars())
-            {
-                name = name.Replace(c, '_');
-            }
+            string path = string.IsNullOrEmpty(_location)
+                ? Path.Combine(AppContext.BaseDirectory, "appdata", databasename)
+                : _location;
 
-			string path = Path.Combine(AppContext.BaseDirectory, "appdata", databasename);
-
-			Directory.CreateDirectory(path);
+            Directory.CreateDirectory(path);
 
             return Path.Combine(path, name + "." + filetype + ".crypted");
         }

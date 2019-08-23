@@ -18,6 +18,7 @@ namespace FileContextCore.Infrastructure.Internal
     {
         private string _serializer = "json";
         private string _filemanager = "default";
+        private string _location = "";
 		private string _databasename = "";
 
 		private string _logFragment;
@@ -38,6 +39,7 @@ namespace FileContextCore.Infrastructure.Internal
         {
             _serializer = copyFrom._serializer;
             _filemanager = copyFrom._filemanager;
+            _location = copyFrom._location;
         }
 
         /// <summary>
@@ -56,17 +58,20 @@ namespace FileContextCore.Infrastructure.Internal
 
 		public virtual string DatabaseName => _databasename;
 
+		public virtual string Location => _location;
+
 		/// <summary>
 		///     This API supports the Entity Framework Core infrastructure and is not intended to be used
 		///     directly from your code. This API may change or be removed in future releases.
 		/// </summary>
-		public virtual FileContextOptionsExtension WithSerializerAndFileManager(string serializer, string filemanager, string databasename)
+		public virtual FileContextOptionsExtension WithSerializerAndFileManager(string serializer, string filemanager, string databasename, string location)
         {
             FileContextOptionsExtension clone = Clone();
 
             clone._serializer = serializer;
             clone._filemanager = filemanager;
 			clone._databasename = databasename;
+            clone._location = location;
 
 			return clone;
         }
@@ -110,7 +115,11 @@ namespace FileContextCore.Infrastructure.Internal
                 {
                     StringBuilder builder = new StringBuilder();
 
-                    builder.Append("serializer=").Append(_serializer).Append(";filemanager=").Append(_filemanager).Append(";databasename=").Append(_databasename).Append(' ');
+                    builder
+                        .Append("serializer=").Append(_serializer)
+                        .Append(";filemanager=").Append(_filemanager)
+                        .Append(";databasename=").Append(_databasename)
+                        .Append(";location=").Append(_location).Append(' ');
 
                     _logFragment = builder.ToString();
                 }

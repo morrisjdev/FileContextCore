@@ -14,20 +14,25 @@ namespace FileContextCore.FileManager
         IEntityType type;
         private readonly string filetype;
 		private readonly string databasename;
+        private readonly string _location;
 
-        public PrivateFileManager(IEntityType _type, string _filetype, string _databasename)
+        public PrivateFileManager(IEntityType _type, string _filetype, string _databasename, string _location)
         {
             type = _type;
             filetype = _filetype;
 			databasename = _databasename;
+            this._location = _location;
         }
 
         public string GetFileName()
         {
             string name = type.Relational().TableName.GetValidFileName();
-			string path = Path.Combine(AppContext.BaseDirectory, "appdata", databasename);
 
-			Directory.CreateDirectory(path);
+            string path = string.IsNullOrEmpty(_location)
+                ? Path.Combine(AppContext.BaseDirectory, "appdata", databasename)
+                : _location;
+
+            Directory.CreateDirectory(path);
 
             return Path.Combine(path, name + ".private." + filetype);
         }

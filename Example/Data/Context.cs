@@ -21,9 +21,9 @@ namespace Example.Data
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             //Default: JSON-Serialize
-            //optionsBuilder.UseFileContext();
+            optionsBuilder.UseFileContext();
 
-            optionsBuilder.UseFileContext("bson");
+            //optionsBuilder.UseFileContext("bson");
 
             //JSON-Serialize + simple Encryption
             //optionsBuilder.UseFileContext("json", "encrypted");
@@ -33,10 +33,10 @@ namespace Example.Data
             //optionsBuilder.UseFileContext("xml", "private");
 
             //CSV
-            //optionsBuilder.UseFileContext("csv");
+            //optionsBuilder.UseFileContext("csv", location: @"C:\Users\mjanatzek\Documents\Projects\t");
 
             //Excel
-            //optionsBuilder.UseFileContext("excel");
+            //optionsBuilder.UseFileContext("excel", databasename: "test", location: @"C:\Users\mjanatzek\Documents\Projects\t");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

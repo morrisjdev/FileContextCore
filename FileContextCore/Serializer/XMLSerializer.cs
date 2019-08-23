@@ -8,18 +8,21 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 
 namespace FileContextCore.Serializer
 {
-    class XMLSerializer : ISerializer
+    class XMLSerializer<T> : ISerializer
     {
         private IEntityType entityType;
+        private readonly IPrincipalKeyValueFactory<T> _keyValueFactory;
         private string[] propertyKeys;
         private readonly Type[] typeList;
 
-        public XMLSerializer(IEntityType _entityType)
+        public XMLSerializer(IEntityType _entityType, IPrincipalKeyValueFactory<T> _keyValueFactory)
         {
             entityType = _entityType;
+            this._keyValueFactory = _keyValueFactory;
             propertyKeys = entityType.GetProperties().Select(p => p.Relational().ColumnName).ToArray();
             typeList = entityType.GetProperties().Select(p => p.GetValueConverter()?.ProviderClrType ?? p.ClrType).ToArray();
         }
@@ -35,7 +38,6 @@ namespace FileContextCore.Serializer
 
                 while (current != null)
                 {
-                    TKey key = (TKey)current.Attributes().FirstOrDefault(attr => attr.Name == "Key")?.Value.Deserialize(typeof(TKey));
                     Dictionary<string, string> values = current.Nodes().Select(x => (XElement)x).ToDictionary(x => x.Name.LocalName, x => x.Value);
 
                     List<object> value = new List<object>();
@@ -44,6 +46,8 @@ namespace FileContextCore.Serializer
                     {
                         value.Add(values[propertyKeys[i]].Deserialize(typeList[i]));
                     }
+
+                    TKey key = SerializerHelper.GetKey<TKey, T>(_keyValueFactory, entityType, propertyName => values[propertyName]);
 
                     newList.Add(key, value.ToArray());
 
@@ -82,7 +86,6 @@ namespace FileContextCore.Serializer
             foreach (KeyValuePair<TKey, object[]> val in list)
             {
                 writer.WriteStartElement(name);
-                writer.WriteAttributeString("Key", val.Key.Serialize());
 
                 for (int i = 0; i < propertyKeys.Length; i++)
                 {

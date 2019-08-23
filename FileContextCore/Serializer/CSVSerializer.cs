@@ -6,18 +6,21 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 
 namespace FileContextCore.Serializer
 {
-    class CSVSerializer : ISerializer
+    class CSVSerializer<T> : ISerializer
     {
         private IEntityType entityType;
+        private readonly IPrincipalKeyValueFactory<T> _keyValueFactory;
         private string[] propertyKeys;
         private readonly Type[] typeList;
 
-        public CSVSerializer(IEntityType _entityType)
+        public CSVSerializer(IEntityType _entityType, IPrincipalKeyValueFactory<T> _keyValueFactory)
         {
             entityType = _entityType;
+            this._keyValueFactory = _keyValueFactory;
             propertyKeys = entityType.GetProperties().Select(p => p.Relational().ColumnName).ToArray();
             typeList = entityType.GetProperties().Select(p => p.GetValueConverter()?.ProviderClrType ?? p.ClrType).ToArray();
         }
@@ -37,7 +40,6 @@ namespace FileContextCore.Serializer
 
             while (reader.Read())
             {
-                TKey key = (TKey)reader.GetField(0).Deserialize(typeof(TKey));
                 List<object> value = new List<object>();
 
                 for (int i = 0; i < propertyKeys.Length; i++)
@@ -45,6 +47,9 @@ namespace FileContextCore.Serializer
                     object val = reader.GetField(propertyKeys[i]).Deserialize(typeList[i]);
                     value.Add(val);
                 }
+
+                TKey key = SerializerHelper.GetKey<TKey, T>(_keyValueFactory, entityType,
+                    propertyName => reader.GetField(propertyName));
 
                 newList.Add(key, value.ToArray());
             }
@@ -57,8 +62,6 @@ namespace FileContextCore.Serializer
             StringWriter sw = new StringWriter();
             CsvWriter writer = new CsvWriter(sw);
 
-            writer.WriteField("Key");
-
             for (int i = 0; i < propertyKeys.Length; i++)
             {
                 writer.WriteField(propertyKeys[i]);
@@ -68,8 +71,6 @@ namespace FileContextCore.Serializer
 
             foreach (KeyValuePair<TKey, object[]> val in list)
             {
-                writer.WriteField(val.Key.Serialize());
-
                 for (int i = 0; i < propertyKeys.Length; i++)
                 {
                     writer.WriteField(val.Value[i].Serialize());

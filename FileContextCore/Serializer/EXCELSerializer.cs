@@ -6,16 +6,20 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace FileContextCore.Serializer
 {
-    class EXCELSerializer
+    class EXCELSerializer<T>
     {
         private IEntityType entityType;
         private string[] propertyKeys;
         private readonly Type[] typeList;
         private readonly string password;
         private readonly string databaseName;
+        private readonly string _location;
+        private readonly IPrincipalKeyValueFactory<T> _keyValueFactory;
 
         private static Dictionary<string, ExcelPackage> packages = new Dictionary<string, ExcelPackage>();
         private ExcelPackage package;
@@ -24,23 +28,27 @@ namespace FileContextCore.Serializer
 
         FileInfo GetFilePath()
         {
-            string folder = Path.Combine(AppContext.BaseDirectory, "appdata", databaseName);
+            string folder = string.IsNullOrEmpty(_location)
+                ? Path.Combine(AppContext.BaseDirectory, "appdata")
+                : _location;
 
             if (!Directory.Exists(folder))
             {
                 Directory.CreateDirectory(folder);
             }
 
-            return new FileInfo(Path.Combine(folder, "data.xlsx"));
+            return new FileInfo(Path.Combine(folder, $"{databaseName}.xlsx"));
         }
 
-        public EXCELSerializer(IEntityType _entityType, string _password, string databaseName)
+        public EXCELSerializer(IEntityType _entityType, string _password, string databaseName, string location, IPrincipalKeyValueFactory<T> _keyValueFactory)
         {
             entityType = _entityType;
             propertyKeys = entityType.GetProperties().Select(p => p.Relational().ColumnName).ToArray();
             typeList = entityType.GetProperties().Select(p => p.GetValueConverter()?.ProviderClrType ?? p.ClrType).ToArray();
             password = _password;
             this.databaseName = databaseName;
+            _location = location;
+            this._keyValueFactory = _keyValueFactory;
 
             if (!packages.ContainsKey(databaseName))
             {
@@ -68,14 +76,12 @@ namespace FileContextCore.Serializer
             if (worksheet == null)
             {
                 worksheet = package.Workbook.Worksheets.Add(name);
-
-                worksheet.Cells[1, 1].Value = "Key";
                 worksheet.Column(1).AutoFit();
 
                 for (int i = 0; i < propertyKeys.Length; i++)
                 {
-                    worksheet.Cells[1, i + 2].Value = propertyKeys[i];
-                    worksheet.Column(i + 2).AutoFit();
+                    worksheet.Cells[1, i + 1].Value = propertyKeys[i];
+                    worksheet.Column(i + 1).AutoFit();
                 }
 
                 worksheet.View.FreezePanes(2, 1);
@@ -95,14 +101,16 @@ namespace FileContextCore.Serializer
         {
             for (int y = 2; y < worksheet.Dimension.Rows; y++)
             {
-                TKey key = (TKey)worksheet.Cells[y, 1].GetValue<string>().Deserialize(typeof(TKey));
                 List<object> value = new List<object>();
 
                 for (int x = 0; x < propertyKeys.Length; x++)
                 {
-                    object val = worksheet.Cells[y, x + 2].GetValue<string>().Deserialize(typeList[x]);
+                    object val = worksheet.Cells[y, x + 1].GetValue<string>().Deserialize(typeList[x]);
                     value.Add(val);
                 }
+
+                TKey key = SerializerHelper.GetKey<TKey, T>(_keyValueFactory, entityType, propertyName => 
+                    worksheet.Cells[y, propertyKeys.IndexOf(propertyName) + 1].GetValue<string>());
 
                 newList.Add(key, value.ToArray());
             }
@@ -137,11 +145,9 @@ namespace FileContextCore.Serializer
 
             foreach (KeyValuePair<TKey, object[]> val in list)
             {
-                worksheet.SetValue(y, 1, val.Key.Serialize());
-
                 for (int x = 0; x < propertyKeys.Length; x++)
                 {
-                    worksheet.SetValue(y, x + 2, val.Value[x].Serialize());
+                    worksheet.SetValue(y, x + 1, val.Value[x].Serialize());
                 }
 
                 y++;

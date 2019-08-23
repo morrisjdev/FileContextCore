@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace FileContextCore.Serializer
 {
@@ -59,6 +63,15 @@ namespace FileContextCore.Serializer
 			}
 
             return "";
+        }
+
+        public static TKey GetKey<TKey, T>(IPrincipalKeyValueFactory<T> keyValueFactory, IEntityType entityType, Func<string, string> valueSelector)
+        {
+            return (TKey)keyValueFactory.CreateFromKeyValues(
+                entityType.FindPrimaryKey().Properties
+                    .Select(p =>
+                        valueSelector(p.Relational().ColumnName)
+                            .Deserialize(p.GetValueConverter()?.ProviderClrType ?? p.ClrType)).ToArray());
         }
     }
 }

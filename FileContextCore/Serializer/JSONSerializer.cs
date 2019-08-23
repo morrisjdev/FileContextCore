@@ -4,18 +4,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 
 namespace FileContextCore.Serializer
 {
-    class JSONSerializer : ISerializer
+    class JSONSerializer<T> : ISerializer
     {
         private IEntityType entityType;
+        private readonly IPrincipalKeyValueFactory<T> _keyValueFactory;
         private string[] propertyKeys;
         private readonly Type[] typeList;
 
-        public JSONSerializer(IEntityType _entityType)
+        public JSONSerializer(IEntityType _entityType, IPrincipalKeyValueFactory<T> _keyValueFactory)
         {
             entityType = _entityType;
+            this._keyValueFactory = _keyValueFactory;
             propertyKeys = entityType.GetProperties().Select(p => p.Relational().ColumnName).ToArray();
             typeList = entityType.GetProperties().Select(p => p.GetValueConverter()?.ProviderClrType ?? p.ClrType).ToArray();
         }
@@ -28,7 +31,6 @@ namespace FileContextCore.Serializer
 
                 foreach (JObject json in array)
                 {
-                    TKey key = (TKey)json.Value<string>("__Key__").Deserialize(typeof(TKey));
                     List<object> value = new List<object>();
 
                     for (int i = 0; i < propertyKeys.Length; i++)
@@ -36,6 +38,9 @@ namespace FileContextCore.Serializer
                         object val = json.Value<string>(propertyKeys[i]).Deserialize(typeList[i]);
                         value.Add(val);
                     }
+
+                    TKey key = SerializerHelper.GetKey<TKey, T>(_keyValueFactory, entityType,
+                        propertyName => json.Value<string>(propertyName));
 
                     newList.Add(key, value.ToArray());
                 }
@@ -50,10 +55,7 @@ namespace FileContextCore.Serializer
 
             foreach(KeyValuePair<TKey, object[]> val in list)
             {
-                JObject json = new JObject
-                {
-                    new JProperty("__Key__", val.Key.Serialize())
-                };
+                JObject json = new JObject();
 
                 for (int i = 0; i < propertyKeys.Length; i++)
                 {

@@ -7,18 +7,21 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 
 namespace FileContextCore.Serializer
 {
-    class BSONSerializer : ISerializer
+    class BSONSerializer<T> : ISerializer
     {
         private IEntityType entityType;
+        private readonly IPrincipalKeyValueFactory<T> _keyValueFactory;
         private string[] propertyKeys;
         private readonly Type[] typeList;
 
-        public BSONSerializer(IEntityType _entityType)
+        public BSONSerializer(IEntityType _entityType, IPrincipalKeyValueFactory<T> _keyValueFactory)
         {
             entityType = _entityType;
+            this._keyValueFactory = _keyValueFactory;
             propertyKeys = entityType.GetProperties().Select(p => p.Relational().ColumnName).ToArray();
             typeList = entityType.GetProperties().Select(p => p.GetValueConverter()?.ProviderClrType ?? p.ClrType).ToArray();
         }
@@ -52,7 +55,9 @@ namespace FileContextCore.Serializer
             {
                 JObject json = (JObject)current.Value;
 
-                TKey key = (TKey)json.Value<string>("__Key__").Deserialize(typeof(TKey));
+                TKey key = SerializerHelper.GetKey<TKey, T>(_keyValueFactory, entityType,
+                    propertyName => json.Value<string>(propertyName));
+
                 List<object> value = new List<object>();
 
                 for (int i = 0; i < propertyKeys.Length; i++)
@@ -78,9 +83,6 @@ namespace FileContextCore.Serializer
                 foreach (KeyValuePair<TKey, object[]> val in list)
                 {
                     writer.WriteStartObject();
-
-                    writer.WritePropertyName("__Key__");
-                    writer.WriteValue(val.Key.Serialize());
 
                     for (int i = 0; i < propertyKeys.Length; i++)
                     {

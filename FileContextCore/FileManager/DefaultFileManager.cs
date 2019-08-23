@@ -12,19 +12,24 @@ namespace FileContextCore.FileManager
         IEntityType type;
         private readonly string filetype;
 		private readonly string databasename;
+        private readonly string _location;
 
-        public DefaultFileManager(IEntityType _type, string _filetype, string _databasename)
+        public DefaultFileManager(IEntityType _type, string _filetype, string _databasename, string location)
         {
             type = _type;
             filetype = _filetype;
 			databasename = _databasename;
+            _location = location;
         }
 
         public string GetFileName()
         {
             string name = type.Relational().TableName.GetValidFileName();
-			string path = Path.Combine(AppContext.BaseDirectory, "appdata", databasename);
-            
+
+            string path = string.IsNullOrEmpty(_location)
+                ? Path.Combine(AppContext.BaseDirectory, "appdata", databasename)
+                : _location;
+
             Directory.CreateDirectory(path);
 
             return Path.Combine(path, name + "." + filetype);
