@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata;
 using System;
 using System.IO;
+using Microsoft.EntityFrameworkCore;
 
 namespace FileContextCore.FileManager
 {
@@ -21,7 +22,7 @@ namespace FileContextCore.FileManager
 
         public string GetFileName()
         {
-            string name = type.Name.GetValidFileName();
+            string name = type.Relational().TableName.GetValidFileName();
 			string path = Path.Combine(AppContext.BaseDirectory, "appdata", databasename);
             
             Directory.CreateDirectory(path);

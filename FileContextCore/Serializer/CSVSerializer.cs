@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 
 namespace FileContextCore.Serializer
 {
@@ -17,16 +18,22 @@ namespace FileContextCore.Serializer
         public CSVSerializer(IEntityType _entityType)
         {
             entityType = _entityType;
-            propertyKeys = entityType.GetProperties().Select(p => p.Name).ToArray();
-            typeList = entityType.GetProperties().Select(p => p.ClrType).ToArray();
+            propertyKeys = entityType.GetProperties().Select(p => p.Relational().ColumnName).ToArray();
+            typeList = entityType.GetProperties().Select(p => p.GetValueConverter()?.ProviderClrType ?? p.ClrType).ToArray();
         }
 
         public Dictionary<TKey, object[]> Deserialize<TKey>(string list, Dictionary<TKey, object[]> newList)
         {
+            if (string.IsNullOrEmpty(list))
+            {
+                return new Dictionary<TKey, object[]>();
+            }
+
             TextReader tr = new StringReader(list);
             CsvReader reader = new CsvReader(tr);
 
             reader.Read();
+            reader.ReadHeader();
 
             while (reader.Read())
             {
@@ -35,7 +42,7 @@ namespace FileContextCore.Serializer
 
                 for (int i = 0; i < propertyKeys.Length; i++)
                 {
-                    object val = reader.GetField(i + 1).Deserialize(typeList[i]);
+                    object val = reader.GetField(propertyKeys[i]).Deserialize(typeList[i]);
                     value.Add(val);
                 }
 

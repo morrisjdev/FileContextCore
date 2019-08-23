@@ -15,6 +15,7 @@ using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.EntityFrameworkCore.Update;
 
 namespace FileContextCore.Storage.Internal
@@ -185,7 +186,7 @@ namespace FileContextCore.Storage.Internal
 
             UpdateMethod = new Action<Dictionary<TKey, object[]>>((list) =>
             {
-                excel.Serialize(list);
+                excel.Serialize(ConvertToProvider(list));
             });
 
             Dictionary<TKey, object[]> newlist = new Dictionary<TKey, object[]>(_keyValueFactory.EqualityComparer);
@@ -253,15 +254,40 @@ namespace FileContextCore.Storage.Internal
 
             UpdateMethod = new Action<Dictionary<TKey, object[]>>((list) =>
             {
-                string cnt = serializer.Serialize(list);
+                string cnt = serializer.Serialize(ConvertToProvider(list));
                 fileManager.SaveContent(cnt);
             });
 
             string content = fileManager.LoadContent();
             Dictionary<TKey, object[]> newList = new Dictionary<TKey, object[]>(_keyValueFactory.EqualityComparer);
-            Dictionary<TKey, object[]> result = serializer.Deserialize(content, newList);
+            Dictionary<TKey, object[]> result = ConvertFromProvider(serializer.Deserialize(content, newList));
             GenerateLastAutoPropertyValues(result);
             return result;
+        }
+
+        private Dictionary<TKey, object[]> ApplyValueConverter(Dictionary<TKey, object[]> list, Func<ValueConverter, Func<object, object>> conversionFunc)
+        {
+            var result = new Dictionary<TKey, object[]>();
+            var converters = entityType.GetProperties().Select(p => p.GetValueConverter()).ToArray();
+            foreach (var keyValuePair in list)
+            {
+                result[keyValuePair.Key] = keyValuePair.Value.Select((value, index) =>
+                {
+                    var converter = converters[index];
+                    return converter == null ? value : conversionFunc(converter)(value);
+                }).ToArray();
+            }
+            return result;
+        }
+
+        private Dictionary<TKey, object[]> ConvertToProvider(Dictionary<TKey, object[]> list)
+        {
+            return ApplyValueConverter(list, converter => converter.ConvertToProvider);
+        }
+
+        private Dictionary<TKey, object[]> ConvertFromProvider(Dictionary<TKey, object[]> list)
+        {
+            return ApplyValueConverter(list, converter => converter.ConvertFromProvider);
         }
     }
 }
