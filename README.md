@@ -1,6 +1,7 @@
 # FileContextCore [![Build Status](https://travis-ci.org/morrisjdev/FileContextCore.svg?branch=master)](https://travis-ci.org/morrisjdev/FileContextCore) [![Maintainability](https://api.codeclimate.com/v1/badges/72cbed89392efad4c743/maintainability)](https://codeclimate.com/github/morrisjdev/FileContextCore/maintainability)
 
-FileContextCore is a "Database"-Provider for Entity Framework Core and adds the ability to store information in files instead of being limited to databases. It enables fast developments because of the advantage of just copy, edit and delete files.
+FileContextCore is a "Database"-Provider for Entity Framework Core and adds the ability to store information in files.
+It enables fast developments because of the advantage of just copy, edit and delete files.
 
 This framework bases on the idea of FileContext by DevMentor ([https://github.com/pmizel/DevMentor.Context.FileContext](https://github.com/pmizel/DevMentor.Context.FileContext))
 
@@ -11,8 +12,8 @@ This framework bases on the idea of FileContext by DevMentor ([https://github.co
 - rapid data-modelling, -modification
 - share data through version-control
 - supports all serializable .NET types
-- integrated seamlessly into EF Core
-- diferrent serializer supported (XML, JSON, CSV, Excel)
+- integrates seamlessly into EF Core
+- different serializer supported (XML, JSON, CSV, Excel)
 - supports encryption
 - supports relations
 - supports multiple databases
@@ -27,25 +28,45 @@ This framework bases on the idea of FileContext by DevMentor ([https://github.co
 PM > Install-Package FileContextCore
 ```
 
-Configure EF Core
+### Configure EF Core
+
+#### Configure in DI-Service configuration
+
+In your `Startup.cs` use this:
 
 ```cs
-optionsBuilder.UseFileContext();
+public void ConfigureServices(IServiceCollection services)
+{
+    ...
+    services.AddDbContext<Context>(options => options.UseFileContext());
+    ...
+}
 ```
 
-or
+#### or
+
+#### Override `OnConfiguring` method 
+
+You can also override the `OnConfiguring` method of your DbContext to apply the settings:
 
 ```cs
-services.AddEntityFramework().AddDbContext<Context>(options => options.UseFileContext());
+protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+{
+    optionsBuilder.UseFileContext();
+}
 ```
 
 ## Example
 
-For an Example check out: [Example](https://github.com/morrisjdev/FileContextCore/tree/master/src/Example)
+For a simple example check out: [Example](https://github.com/morrisjdev/FileContextCore/tree/master/Example)
+
+You can also play around with this example on dotnetfiddle.net: [Demo](https://dotnetfiddle.net/jvFdaY)
 
 ## Configuration
 
 By default the extension uses `JSON`-serialization and the `DefaultFileManager`
+
+You can use a different serializer to support other serialization methods.
 
 ## Available Serializer
 
@@ -72,6 +93,10 @@ Serializes data using Newtonsoft Json.NET ([http://www.newtonsoft.com/json](http
 ```cs
 optionsBuilder.UseFileContext("json");
 ```
+or just
+```
+optionsBuilder.UseFileContext();
+```
 
 ### BSONSerializer
 
@@ -89,13 +114,14 @@ Uses [EEPlus](http://epplus.codeplex.com/documentation) implementation for .Net 
 
 ```cs
 optionsBuilder.UseFileContext("excel");
+```
 
-//use password
-optionsBuilder.UseFileContext("excel:password");
+If you want to secure the excel file with a password use:
+```cs
+optionsBuilder.UseFileContext("excel:<password>");
 ```
 
 To run on Linux-Systems
-
 ```
 sudo apt-get update
 sudo apt-get install libgdiplus
@@ -103,9 +129,11 @@ sudo apt-get install libgdiplus
 
 ## File Manager
 
+The file manager controls how the files are stored.
+
 ### DefaultFileManager
 
-Saves the data into files
+The default file manager just creates normal files.
 
 ```cs
 optionsBuilder.UseFileContext("json", "default");
@@ -113,15 +141,26 @@ optionsBuilder.UseFileContext("json", "default");
 
 ### EncryptedFileManager
 
-Encrypts the data and saves them into files
+The encrypted file manager encrypts the files with a password.
 
 ```cs
-optionsBuilder.UseFileContext("json", "encrypted:password");
+optionsBuilder.UseFileContext("json", "encrypted:<password>");
+```
+
+## Custom file-location
+
+By default the files are stored in a subfolder of your running application called `appdata`.
+If you want to control this behavior you can also use define a custom location.
+
+```cs
+optionsBuilder.UseFileContext(location: @"C:\Users\mjanatzek\Documents\Projects\test");
 ```
 
 ## Multiple Databases
 
-You can define a name for your database and all the corresponding data will saved in a subfolder. So you are able to use FileContext with multiple DbContext-configurations.
+If noting is configured all files of your application will be stored in a flat folder.
+You can optionally define a name for your database and all the corresponding data will saved in a subfolder.
+So you are able to use FileContext with multiple DbContext-configurations.
 
 ```cs
 optionsBuilder.UseFileContext(databasename: "database");
