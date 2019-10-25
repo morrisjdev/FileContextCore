@@ -18,7 +18,8 @@ namespace FileContextCore.Serializer
 
             if (type == typeof(TimeSpan))
                 return TimeSpan.Parse(input, CultureInfo.InvariantCulture);
-            else if (type == typeof(Guid))
+            else if (type == typeof(Guid)
+		    || Nullable.GetUnderlyingType(type) == typeof(Guid))
                 return Guid.Parse(input);
             else if (type.IsArray)
             {
