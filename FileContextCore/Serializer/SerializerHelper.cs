@@ -13,13 +13,14 @@ namespace FileContextCore.Serializer
     {
         public static object Deserialize(this string input, Type type)
         {
+	    type = Nullable.GetUnderlyingType(type) ?? type;
+		
             if (String.IsNullOrEmpty(input))
                 return type.GetDefaultValue();
 
             if (type == typeof(TimeSpan))
                 return TimeSpan.Parse(input, CultureInfo.InvariantCulture);
-            else if (type == typeof(Guid)
-		    || Nullable.GetUnderlyingType(type) == typeof(Guid))
+            else if (type == typeof(Guid))
                 return Guid.Parse(input);
             else if (type.IsArray)
             {
