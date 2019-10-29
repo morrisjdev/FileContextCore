@@ -3,15 +3,15 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <SignAssembly Condition="'$(OS)' == 'Windows_NT'">true</SignAssembly>
-    <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>FileContextCoreCert.pfx</AssemblyOriginatorKeyFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>3.0.0</Version>
+    <Version>3.0.1</Version>
     <Company>morrisjdev</Company>
     <Authors>morrisjdev</Authors>
     <Description>File provider for Entity Framework Core (to be used for development purposes)</Description>
     <Copyright>Copyright © Morris Janatzek</Copyright>
     <Title>FileContextCore</Title>
-    <PackageLicenseUrl>https://raw.githubusercontent.com/morrisjdev/FileContextCore/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseUrl></PackageLicenseUrl>
     <PackageIconUrl>https://morrisj.net/img/morrisjdev_logo.png</PackageIconUrl>
     <RepositoryUrl>https://github.com/morrisjdev/FileContextCore</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -19,7 +19,7 @@
     <PackageProjectUrl>https://github.com/morrisjdev/FileContextCore</PackageProjectUrl>
     <NeutralLanguage>en-US</NeutralLanguage>
     <DelaySign>false</DelaySign>
-    <AssemblyVersion>3.0.0.0</AssemblyVersion>
+    <AssemblyVersion>3.0.1.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>

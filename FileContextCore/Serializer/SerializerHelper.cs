@@ -13,16 +13,25 @@ namespace FileContextCore.Serializer
     {
         public static object Deserialize(this string input, Type type)
         {
-	    type = Nullable.GetUnderlyingType(type) ?? type;
-		
-            if (String.IsNullOrEmpty(input))
+	        type = Nullable.GetUnderlyingType(type) ?? type;
+
+            if (string.IsNullOrEmpty(input))
+            {
                 return type.GetDefaultValue();
+            }
 
             if (type == typeof(TimeSpan))
+            {
                 return TimeSpan.Parse(input, CultureInfo.InvariantCulture);
-            else if (type == typeof(Guid))
+
+            }
+            
+            if (type == typeof(Guid))
+            {
                 return Guid.Parse(input);
-            else if (type.IsArray)
+            }
+            
+            if (type.IsArray)
             {
                 Type arrType = type.GetElementType();
                 List<object> arr = new List<object>();
@@ -34,8 +43,9 @@ namespace FileContextCore.Serializer
 
                 return arr.ToArray();
             }
-            else
-                return Convert.ChangeType(input, type, CultureInfo.InvariantCulture);
+            
+
+            return Convert.ChangeType(input, type, CultureInfo.InvariantCulture);
         }
 
         public static string Serialize(this object input)
