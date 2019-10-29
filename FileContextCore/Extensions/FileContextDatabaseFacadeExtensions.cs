@@ -27,8 +27,8 @@ namespace FileContextCore.Extensions
         ///     </para>
         /// </summary>
         /// <param name="database"> The facade from <see cref="DbContext.Database" />. </param>
-        /// <returns> True if the in-memory database is being used; false otherwise. </returns>
-        public static bool IsInMemory([NotNull] this DatabaseFacade database)
+        /// <returns> True if the filecontext database is being used; false otherwise. </returns>
+        public static bool IsFileContext([NotNull] this DatabaseFacade database)
             => database.ProviderName.Equals(
                 typeof(FileContextOptionsExtension).GetTypeInfo().Assembly.GetName().Name,
                 StringComparison.Ordinal);
