@@ -13,6 +13,8 @@ namespace FileContextCore.Serializer
     {
         public static object Deserialize(this string input, Type type)
         {
+	    type = Nullable.GetUnderlyingType(type) ?? type;
+		
             if (String.IsNullOrEmpty(input))
                 return type.GetDefaultValue();
 
