@@ -1,83 +1,140 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) morrisjdev & .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using FileContextCore.FileManager;
-using FileContextCore.Infrastructure.Internal;
 using FileContextCore.Internal;
-using FileContextCore.Query.Internal;
-using FileContextCore.Serializer;
+using FileContextCore.Utilities;
 using FileContextCore.ValueGeneration.Internal;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.EntityFrameworkCore.Update;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
+using Microsoft.EntityFrameworkCore.Utilities;
 
 namespace FileContextCore.Storage.Internal
 {
     /// <summary>
-    ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-    ///     directly from your code. This API may change or be removed in future releases.
+    ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+    ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+    ///     any release. You should only use it directly in your code with extreme caution and knowing that
+    ///     doing so can result in application failures when updating to a new Entity Framework Core release.
     /// </summary>
-    class FileContextTable<TKey> : IFileContextTable
+    public class FileContextTable<TKey> : IFileContextTable
     {
-		private readonly IPrincipalKeyValueFactory<TKey> _keyValueFactory;
+        // WARNING: The in-memory provider is using EF internal code here. This should not be copied by other providers. See #15096
+        private readonly Microsoft.EntityFrameworkCore.ChangeTracking.Internal.IPrincipalKeyValueFactory<TKey> _keyValueFactory;
+        private readonly bool _sensitiveLoggingEnabled;
         private readonly Dictionary<TKey, object[]> _rows;
-		private readonly FileContextIntegerValueGeneratorCache idCache;
-		private readonly FileContextOptionsExtension options;
 
-		private IEntityType entityType;
-		
-		private IFileManager fileManager;
-        private ISerializer serializer;
-        private string filetype;
+        private Dictionary<int, IFileContextIntegerValueGenerator> _integerGenerators;
 
         /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
+        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
         /// </summary>
-        public FileContextTable([NotNull] IPrincipalKeyValueFactory<TKey> keyValueFactory, IEntityType _entityType, FileContextIntegerValueGeneratorCache _idCache, FileContextOptionsExtension _options)
+        public FileContextTable(
+            // WARNING: The in-memory provider is using EF internal code here. This should not be copied by other providers. See #15096
+            [NotNull] Microsoft.EntityFrameworkCore.ChangeTracking.Internal.IPrincipalKeyValueFactory<TKey> keyValueFactory,
+            bool sensitiveLoggingEnabled)
         {
-			idCache = _idCache;
-            entityType = _entityType;
-			options = _options;
             _keyValueFactory = keyValueFactory;
-
-            _rows = Init();
+            _sensitiveLoggingEnabled = sensitiveLoggingEnabled;
+            _rows = new Dictionary<TKey, object[]>(keyValueFactory.EqualityComparer);
         }
 
         /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
+        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
+        /// </summary>
+        public virtual FileContextIntegerValueGenerator<TProperty> GetIntegerValueGenerator<TProperty>(IProperty property)
+        {
+            if (_integerGenerators == null)
+            {
+                _integerGenerators = new Dictionary<int, IFileContextIntegerValueGenerator>();
+            }
+
+            // WARNING: The in-memory provider is using EF internal code here. This should not be copied by other providers. See #15096
+            var propertyIndex = Microsoft.EntityFrameworkCore.Metadata.Internal.PropertyBaseExtensions.GetIndex(property);
+            if (!_integerGenerators.TryGetValue(propertyIndex, out var generator))
+            {
+                generator = new FileContextIntegerValueGenerator<TProperty>(propertyIndex);
+                _integerGenerators[propertyIndex] = generator;
+
+                foreach (var row in _rows.Values)
+                {
+                    generator.Bump(row);
+                }
+            }
+
+            return (FileContextIntegerValueGenerator<TProperty>)generator;
+        }
+
+        /// <summary>
+        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
         /// </summary>
         public virtual IReadOnlyList<object[]> SnapshotRows()
             => _rows.Values.ToList();
 
+        private static List<ValueComparer> GetStructuralComparers(IEnumerable<IProperty> properties)
+            => properties.Select(GetStructuralComparer).ToList();
+
+        private static ValueComparer GetStructuralComparer(IProperty p)
+            => p.GetStructuralValueComparer() ?? p.FindTypeMapping()?.StructuralComparer;
+
         /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
+        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
         /// </summary>
         public virtual void Create(IUpdateEntry entry)
         {
-            _rows.Add(CreateKey(entry), CreateValueBuffer(entry));
+            var row = entry.EntityType.GetProperties()
+                .Select(p => SnapshotValue(p, GetStructuralComparer(p), entry))
+                .ToArray();
+
+            _rows.Add(CreateKey(entry), row);
+
+            BumpValueGenerators(row);
         }
 
         /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
+        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
         /// </summary>
         public virtual void Delete(IUpdateEntry entry)
         {
-            TKey key = CreateKey(entry);
+            var key = CreateKey(entry);
 
             if (_rows.ContainsKey(key))
             {
+                var properties = entry.EntityType.GetProperties().ToList();
+                var concurrencyConflicts = new Dictionary<IProperty, object>();
+
+                for (var index = 0; index < properties.Count; index++)
+                {
+                    IsConcurrencyConflict(entry, properties[index], _rows[key][index], concurrencyConflicts);
+                }
+
+                if (concurrencyConflicts.Count > 0)
+                {
+                    ThrowUpdateConcurrencyException(entry, concurrencyConflicts);
+                }
+
                 _rows.Remove(key);
             }
             else
@@ -86,209 +143,116 @@ namespace FileContextCore.Storage.Internal
             }
         }
 
-        public void Save()
+        private static bool IsConcurrencyConflict(
+            IUpdateEntry entry,
+            IProperty property,
+            object rowValue,
+            Dictionary<IProperty, object> concurrencyConflicts)
         {
-            UpdateMethod(_rows);
+            if (property.IsConcurrencyToken
+                && !StructuralComparisons.StructuralEqualityComparer.Equals(
+                    rowValue,
+                    entry.GetOriginalValue(property)))
+            {
+                concurrencyConflicts.Add(property, rowValue);
+
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
+        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
         /// </summary>
         public virtual void Update(IUpdateEntry entry)
         {
-            TKey key = CreateKey(entry);
+            var key = CreateKey(entry);
 
             if (_rows.ContainsKey(key))
             {
-                List<IProperty> properties = entry.EntityType.GetProperties().ToList();
-                object[] valueBuffer = new object[properties.Count];
+                var properties = entry.EntityType.GetProperties().ToList();
+                var comparers = GetStructuralComparers(properties);
+                var valueBuffer = new object[properties.Count];
+                var concurrencyConflicts = new Dictionary<IProperty, object>();
 
-                for (int index = 0; index < valueBuffer.Length; index++)
+                for (var index = 0; index < valueBuffer.Length; index++)
                 {
+                    if (IsConcurrencyConflict(entry, properties[index], _rows[key][index], concurrencyConflicts))
+                    {
+                        continue;
+                    }
+
                     valueBuffer[index] = entry.IsModified(properties[index])
-                        ? entry.GetCurrentValue(properties[index])
+                        ? SnapshotValue(properties[index], comparers[index], entry)
                         : _rows[key][index];
                 }
 
+                if (concurrencyConflicts.Count > 0)
+                {
+                    ThrowUpdateConcurrencyException(entry, concurrencyConflicts);
+                }
+
                 _rows[key] = valueBuffer;
+
+                BumpValueGenerators(valueBuffer);
             }
             else
             {
-				throw new DbUpdateConcurrencyException(FileContextStrings.UpdateConcurrencyException, new[] { entry });
+                throw new DbUpdateConcurrencyException(FileContextStrings.UpdateConcurrencyException, new[] { entry });
             }
         }
 
+        private void BumpValueGenerators(object[] row)
+        {
+            if (_integerGenerators != null)
+            {
+                foreach (var generator in _integerGenerators.Values)
+                {
+                    generator.Bump(row);
+                }
+            }
+        }
+
+        // WARNING: The in-memory provider is using EF internal code here. This should not be copied by other providers. See #15096
         private TKey CreateKey(IUpdateEntry entry)
-            => _keyValueFactory.CreateFromCurrentValues((InternalEntityEntry)entry);
+            => _keyValueFactory.CreateFromCurrentValues((Microsoft.EntityFrameworkCore.ChangeTracking.Internal.InternalEntityEntry)entry);
 
-        private static object[] CreateValueBuffer(IUpdateEntry entry)
-            => entry.EntityType.GetProperties().Select(entry.GetCurrentValue).ToArray();
+        private static object SnapshotValue(IProperty property, ValueComparer comparer, IUpdateEntry entry)
+            => SnapshotValue(comparer, entry.GetCurrentValue(property));
 
-        private Action<Dictionary<TKey, object[]>> UpdateMethod;
+        private static object SnapshotValue(ValueComparer comparer, object value)
+            => comparer == null ? value : comparer.Snapshot(value);
 
-        private Dictionary<int, string> GetAutoGeneratedFields()
+        /// <summary>
+        ///     Throws an exception indicating that concurrency conflicts were detected.
+        /// </summary>
+        /// <param name="entry"> The update entry which resulted in the conflict(s). </param>
+        /// <param name="concurrencyConflicts"> The conflicting properties with their associated database values. </param>
+        protected virtual void ThrowUpdateConcurrencyException([NotNull] IUpdateEntry entry, [NotNull] Dictionary<IProperty, object> concurrencyConflicts)
         {
-            IProperty[] props = entityType.GetProperties().ToArray();
-            Dictionary<int, string> AutoGeneratedFields = new Dictionary<int, string>();
+            Check.NotNull(entry, nameof(entry));
+            Check.NotNull(concurrencyConflicts, nameof(concurrencyConflicts));
 
-            for (int i = 0; i < props.Length; i++)
+            if (_sensitiveLoggingEnabled)
             {
-                if (props[i].ValueGenerated == ValueGenerated.OnAdd || props[i].ValueGenerated == ValueGenerated.OnAddOrUpdate || props[i].ValueGenerated == ValueGenerated.OnUpdate)
-                {
-					if (props[i].ClrType.IsInteger())
-					{
-						AutoGeneratedFields.Add(i, props[i].Name);
-					}
-                }
+                throw new DbUpdateConcurrencyException(
+                    FileContextStrings.UpdateConcurrencyTokenExceptionSensitive(
+                        entry.EntityType.DisplayName(),
+                        entry.BuildCurrentValuesString(entry.EntityType.FindPrimaryKey().Properties),
+                        entry.BuildOriginalValuesString(concurrencyConflicts.Keys),
+                        "{" + string.Join(", ", concurrencyConflicts.Select(c => c.Key.Name + ": " + Convert.ToString(c.Value, CultureInfo.InvariantCulture))) + "}"),
+                    new[] { entry });
             }
 
-            return AutoGeneratedFields;
-        }
-
-        private void GenerateLastAutoPropertyValues(Dictionary<TKey, object[]> list)
-        {
-            Dictionary<int, string> fields = GetAutoGeneratedFields();
-
-            if (fields.Any())
-            {
-                Dictionary<string, long> values = new Dictionary<string, long>();
-
-                foreach (KeyValuePair<int, string> val in fields)
-                {
-                    object last = list.Select(p => p.Value[val.Key]).OrderByDescending(p => p).FirstOrDefault();
-
-                    if (last != null)
-                        values.Add(val.Value, (long)Convert.ChangeType(last, typeof(long), CultureInfo.InvariantCulture));
-                    else
-                        values.Add(val.Value, 0);
-                }
-
-                if (idCache.LastIds.ContainsKey(entityType.Name))
-                {
-					idCache.LastIds[entityType.Name] = values;
-                }
-                else {
-                    idCache.LastIds.Add(entityType.Name, values);
-                }
-            }
-        }
-
-        private Dictionary<TKey, object[]> InitExcel(string filetype)
-        {
-            string password = "";
-
-            if (filetype.Length > 5)
-            {
-                password = filetype.Substring(6);
-            }
-
-            EXCELSerializer<TKey> excel = new EXCELSerializer<TKey>(entityType, password, options.DatabaseName, options.Location, _keyValueFactory);
-
-            UpdateMethod = new Action<Dictionary<TKey, object[]>>((list) =>
-            {
-                excel.Serialize(ConvertToProvider(list));
-            });
-
-            Dictionary<TKey, object[]> newlist = new Dictionary<TKey, object[]>(_keyValueFactory.EqualityComparer);
-            Dictionary<TKey, object[]> excelresult = excel.Deserialize(newlist);
-            GenerateLastAutoPropertyValues(excelresult);
-            return excelresult;
-        }
-
-        private void InitSerializer()
-        {
-            if (options.Serializer == "xml")
-            {
-                serializer = new XMLSerializer<TKey>(entityType, _keyValueFactory);
-            }
-            else if (options.Serializer == "bson")
-            {
-                serializer = new BSONSerializer<TKey>(entityType, _keyValueFactory);
-            }
-            else if (options.Serializer == "csv")
-            {
-                serializer = new CSVSerializer<TKey>(entityType, _keyValueFactory);
-            }
-            else
-            {
-                serializer = new JSONSerializer<TKey>(entityType, _keyValueFactory);
-            }
-        }
-
-        private void InitFileManager()
-        {
-            string fmgr = options.FileManager;
-
-            if (fmgr.Length >= 9 && fmgr.Substring(0, 9) == "encrypted")
-            {
-                string password = "";
-
-                if (fmgr.Length > 9)
-                {
-                    password = fmgr.Substring(10);
-                }
-
-                fileManager = new EncryptedFileManager(entityType, filetype, password, options.DatabaseName, options.Location);
-            }
-            else if (fmgr == "private")
-            {
-                fileManager = new PrivateFileManager(entityType, filetype, options.DatabaseName, options.Location);
-            }
-            else
-            {
-                fileManager = new DefaultFileManager(entityType, filetype, options.DatabaseName, options.Location);
-            }
-        }
-
-        private Dictionary<TKey, object[]> Init()
-        {
-            filetype = options.Serializer;
-
-            if (filetype.Length >= 5 && filetype.Substring(0, 5) == "excel")
-            {
-                return InitExcel(filetype);
-            }
-
-            InitSerializer();
-            InitFileManager();
-
-            UpdateMethod = new Action<Dictionary<TKey, object[]>>((list) =>
-            {
-                string cnt = serializer.Serialize(ConvertToProvider(list));
-                fileManager.SaveContent(cnt);
-            });
-
-            string content = fileManager.LoadContent();
-            Dictionary<TKey, object[]> newList = new Dictionary<TKey, object[]>(_keyValueFactory.EqualityComparer);
-            Dictionary<TKey, object[]> result = ConvertFromProvider(serializer.Deserialize(content, newList));
-            GenerateLastAutoPropertyValues(result);
-            return result;
-        }
-
-        private Dictionary<TKey, object[]> ApplyValueConverter(Dictionary<TKey, object[]> list, Func<ValueConverter, Func<object, object>> conversionFunc)
-        {
-            var result = new Dictionary<TKey, object[]>();
-            var converters = entityType.GetProperties().Select(p => p.GetValueConverter()).ToArray();
-            foreach (var keyValuePair in list)
-            {
-                result[keyValuePair.Key] = keyValuePair.Value.Select((value, index) =>
-                {
-                    var converter = converters[index];
-                    return converter == null ? value : conversionFunc(converter)(value);
-                }).ToArray();
-            }
-            return result;
-        }
-
-        private Dictionary<TKey, object[]> ConvertToProvider(Dictionary<TKey, object[]> list)
-        {
-            return ApplyValueConverter(list, converter => converter.ConvertToProvider);
-        }
-
-        private Dictionary<TKey, object[]> ConvertFromProvider(Dictionary<TKey, object[]> list)
-        {
-            return ApplyValueConverter(list, converter => converter.ConvertFromProvider);
+            throw new DbUpdateConcurrencyException(
+                FileContextStrings.UpdateConcurrencyTokenException(
+                    entry.EntityType.DisplayName(),
+                    concurrencyConflicts.Keys.Format()),
+                new[] { entry });
         }
     }
 }

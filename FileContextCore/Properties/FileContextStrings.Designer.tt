@@ -1,4 +1,5 @@
 <#
     Session["ResourceFile"] = "FileContextStrings.resx";
+    Session["LoggingDefinitionsClass"] = "Diagnostics.Internal.FileContextLoggingDefinitions";
 #>
 <#@ include file="..\..\..\tools\Resources.tt" #>

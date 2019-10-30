@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Example.Data.Entities;
-using FileContextCore.Extensions;
+using FileContextCore;
 
 namespace Example.Data
 {
@@ -21,7 +21,7 @@ namespace Example.Data
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 			//Default: JSON-Serialize
-			optionsBuilder.UseFileContext(databasename: "new");
+			optionsBuilder.UseFileContextDatabase("new");
 
 			//JSON-Serialize + simple Encryption
 			//optionsBuilder.UseFileContext("json", "encrypted");

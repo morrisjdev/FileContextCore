@@ -1,102 +1,159 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) morrisjdev & .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using FileContextCore.Extensions.Internal;
-using FileContextCore.Infrastructure.Internal;
+using System.Linq;
+using FileContextCore.Internal;
+using FileContextCore.ValueGeneration.Internal;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Update;
 
 namespace FileContextCore.Storage.Internal
 {
     /// <summary>
-    ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-    ///     directly from your code. This API may change or be removed in future releases.
+    ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+    ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+    ///     any release. You should only use it directly in your code with extreme caution and knowing that
+    ///     doing so can result in application failures when updating to a new Entity Framework Core release.
     /// </summary>
-    class FileContextStore : IFileContextStore
+    public class FileContextStore : IFileContextStore
     {
         private readonly IFileContextTableFactory _tableFactory;
-		private readonly FileContextOptionsExtension options;
-		private readonly object _lock = new object();
+        private readonly bool _useNameMatching;
 
-        private LazyRef<Dictionary<IEntityType, IFileContextTable>> _tables = CreateTables();
+        private readonly object _lock = new object();
+
+        private Dictionary<object, IFileContextTable> _tables;
 
         /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
+        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
         /// </summary>
-        public FileContextStore([NotNull] IFileContextTableFactory tableFactory, FileContextOptionsExtension _options)
+        public FileContextStore([NotNull] IFileContextTableFactory tableFactory)
+            : this(tableFactory, useNameMatching: false)
         {
-            _tableFactory = tableFactory;
-			options = _options;
         }
 
         /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
+        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
         /// </summary>
-        public virtual bool EnsureCreated(IModel model)
+        public FileContextStore(
+            [NotNull] IFileContextTableFactory tableFactory,
+            bool useNameMatching)
+        {
+            _tableFactory = tableFactory;
+            _useNameMatching = useNameMatching;
+        }
+
+        /// <summary>
+        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
+        /// </summary>
+        public virtual FileContextIntegerValueGenerator<TProperty> GetIntegerValueGenerator<TProperty>(
+            IProperty property)
         {
             lock (_lock)
             {
-                bool returnValue = !_tables.HasValue;
-                
-                // ReSharper disable once AssignmentIsFullyDiscarded
-                _ = _tables.Value;
+                var entityType = property.DeclaringEntityType;
+                var key = _useNameMatching ? (object)entityType.Name : entityType;
 
-                return returnValue;
+                return EnsureTable(key, entityType).GetIntegerValueGenerator<TProperty>(property);
             }
         }
 
         /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
+        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
+        /// </summary>
+        public virtual bool EnsureCreated(
+            IUpdateAdapterFactory updateAdapterFactory,
+            IDiagnosticsLogger<DbLoggerCategory.Update> updateLogger)
+        {
+            lock (_lock)
+            {
+                var valuesSeeded = _tables == null;
+                if (valuesSeeded)
+                {
+                    // ReSharper disable once AssignmentIsFullyDiscarded
+                    _tables = CreateTables();
+
+                    var updateAdapter = updateAdapterFactory.CreateStandalone();
+                    var entries = new List<IUpdateEntry>();
+                    foreach (var entityType in updateAdapter.Model.GetEntityTypes())
+                    {
+                        foreach (var targetSeed in entityType.GetSeedData())
+                        {
+                            var entry = updateAdapter.CreateEntry(targetSeed, entityType);
+                            entry.EntityState = EntityState.Added;
+                            entries.Add(entry);
+                        }
+                    }
+
+                    ExecuteTransaction(entries, updateLogger);
+                }
+
+                return valuesSeeded;
+            }
+        }
+
+        /// <summary>
+        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
         /// </summary>
         public virtual bool Clear()
         {
             lock (_lock)
             {
-                if (!_tables.HasValue)
+                if (_tables == null)
                 {
                     return false;
                 }
 
-                _tables = CreateTables();
+                _tables = null;
+
                 return true;
             }
         }
 
-        private static LazyRef<Dictionary<IEntityType, IFileContextTable>> CreateTables()
-        {
-            return new LazyRef<Dictionary<IEntityType, IFileContextTable>>(
-                () => new Dictionary<IEntityType, IFileContextTable>());
-        }
+        private static Dictionary<object, IFileContextTable> CreateTables()
+            => new Dictionary<object, IFileContextTable>();
 
         /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
+        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
         /// </summary>
         public virtual IReadOnlyList<FileContextTableSnapshot> GetTables(IEntityType entityType)
         {
-            List<FileContextTableSnapshot> data = new List<FileContextTableSnapshot>();
+            var data = new List<FileContextTableSnapshot>();
             lock (_lock)
             {
-                foreach (IEntityType et in entityType.GetConcreteTypesInHierarchy())
+                if (_tables != null)
                 {
-
-                    if (!_tables.Value.TryGetValue(et, out IFileContextTable table))
+                    foreach (var et in entityType.GetDerivedTypesInclusive().Where(et => !et.IsAbstract()))
                     {
-                        _tables.Value.Add(entityType, table = _tableFactory.Create(entityType, options));
+                        var key = _useNameMatching ? (object)et.Name : et;
+                        if (_tables.TryGetValue(key, out var table))
+                        {
+                            data.Add(new FileContextTableSnapshot(et, table.SnapshotRows()));
+                        }
                     }
-
-                    data.Add(new FileContextTableSnapshot(et, table.SnapshotRows()));
                 }
             }
 
@@ -104,28 +161,54 @@ namespace FileContextCore.Storage.Internal
         }
 
         /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
+        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
         /// </summary>
         public virtual int ExecuteTransaction(
-            IEnumerable<IUpdateEntry> entries,
+            IList<IUpdateEntry> entries,
             IDiagnosticsLogger<DbLoggerCategory.Update> updateLogger)
         {
-            int rowsAffected = 0;
+            var rowsAffected = 0;
 
             lock (_lock)
             {
-                foreach (IUpdateEntry entry in entries)
+                // ReSharper disable once ForCanBeConvertedToForeach
+                for (var i = 0; i < entries.Count; i++)
                 {
-                    if (HandleEntry(entry))
-                    {
-                        rowsAffected++;
-                    }
-                }
+                    var entry = entries[i];
+                    var entityType = entry.EntityType;
 
-                foreach (KeyValuePair<IEntityType, IFileContextTable> table in _tables.Value)
-                {
-                    table.Value.Save();
+                    Debug.Assert(!entityType.IsAbstract());
+
+                    var key = _useNameMatching ? (object)entityType.Name : entityType;
+                    var table = EnsureTable(key, entityType);
+
+                    if (entry.SharedIdentityEntry != null)
+                    {
+                        if (entry.EntityState == EntityState.Deleted)
+                        {
+                            continue;
+                        }
+
+                        table.Delete(entry);
+                    }
+
+                    switch (entry.EntityState)
+                    {
+                        case EntityState.Added:
+                            table.Create(entry);
+                            break;
+                        case EntityState.Deleted:
+                            table.Delete(entry);
+                            break;
+                        case EntityState.Modified:
+                            table.Update(entry);
+                            break;
+                    }
+
+                    rowsAffected++;
                 }
             }
 
@@ -134,41 +217,20 @@ namespace FileContextCore.Storage.Internal
             return rowsAffected;
         }
 
-        private bool HandleEntry(IUpdateEntry entry)
+        // Must be called from inside the lock
+        private IFileContextTable EnsureTable(object key, IEntityType entityType)
         {
-            IEntityType entityType = entry.EntityType;
-
-            Debug.Assert(!entityType.IsAbstract());
-
-            if (!_tables.Value.TryGetValue(entityType, out IFileContextTable table))
+            if (_tables == null)
             {
-                _tables.Value.Add(entityType, table = _tableFactory.Create(entityType, options));
+                _tables = CreateTables();
             }
 
-            if (entry.SharedIdentityEntry != null)
+            if (!_tables.TryGetValue(key, out var table))
             {
-                if (entry.EntityState == EntityState.Deleted)
-                {
-                    return false;
-                }
-
-                table.Delete(entry);
+                _tables.Add(key, table = _tableFactory.Create(entityType));
             }
 
-            switch (entry.EntityState)
-            {
-                case EntityState.Added:
-                    table.Create(entry);
-                    break;
-                case EntityState.Deleted:
-                    table.Delete(entry);
-                    break;
-                case EntityState.Modified:
-                    table.Update(entry);
-                    break;
-            }
-
-            return true;
+            return table;
         }
     }
 }

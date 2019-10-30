@@ -3,6 +3,7 @@
 using System;
 using System.Reflection;
 using System.Resources;
+using System.Threading;
 using FileContextCore.Diagnostics;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -11,43 +12,38 @@ using Microsoft.Extensions.Logging;
 namespace FileContextCore.Internal
 {
     /// <summary>
-    ///		This API supports the Entity Framework Core infrastructure and is not intended to be used
-    ///     directly from your code. This API may change or be removed in future releases.
+    ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+    ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+    ///     any release. You should only use it directly in your code with extreme caution and knowing that
+    ///     doing so can result in application failures when updating to a new Entity Framework Core release.
     /// </summary>
-    static class FileContextStrings
+    public static class FileContextStrings
     {
         private static readonly ResourceManager _resourceManager
-            = new ResourceManager("Microsoft.EntityFrameworkCore.Properties.FileContextStrings", typeof(FileContextStrings).GetTypeInfo().Assembly);
-
-        /// <summary>
-        ///     Saved {count} entities to in-memory store.
-        /// </summary>
-        public static readonly EventDefinition<int> LogSavedChanges
-            = new EventDefinition<int>(
-                FileContextEventId.ChangesSaved,
-                LogLevel.Information,
-                LoggerMessage.Define<int>(
-                    LogLevel.Information,
-                    FileContextEventId.ChangesSaved,
-                    _resourceManager.GetString("LogSavedChanges")));
-
-        /// <summary>
-        ///     Transactions are not supported by the in-memory store. See http://go.microsoft.com/fwlink/?LinkId=800142
-        /// </summary>
-        public static readonly EventDefinition LogTransactionsNotSupported
-            = new EventDefinition(
-                FileContextEventId.TransactionIgnoredWarning,
-                LogLevel.Warning,
-                LoggerMessage.Define(
-                    LogLevel.Warning,
-                    FileContextEventId.TransactionIgnoredWarning,
-                    _resourceManager.GetString("LogTransactionsNotSupported")));
+            = new ResourceManager("FileContextCore.Properties.FileContextStrings" +
+                                  "", typeof(FileContextStrings).GetTypeInfo().Assembly);
 
         /// <summary>
         ///     Attempted to update or delete an entity that does not exist in the store.
         /// </summary>
         public static string UpdateConcurrencyException
             => GetString("UpdateConcurrencyException");
+
+        /// <summary>
+        ///     Conflicts were detected for instance of entity type '{entityType}' on the concurrency token properties {properties}. Consider using 'DbContextOptionsBuilder.EnableSensitiveDataLogging' to see the conflicting values.
+        /// </summary>
+        public static string UpdateConcurrencyTokenException([CanBeNull] object entityType, [CanBeNull] object properties)
+            => string.Format(
+                GetString("UpdateConcurrencyTokenException", nameof(entityType), nameof(properties)),
+                entityType, properties);
+
+        /// <summary>
+        ///     Conflicts were detected for instance of entity type '{entityType}' with the key value '{keyValue}' on the concurrency token property values {conflictingValues}, with corresponding database values {databaseValues}.
+        /// </summary>
+        public static string UpdateConcurrencyTokenExceptionSensitive([CanBeNull] object entityType, [CanBeNull] object keyValue, [CanBeNull] object conflictingValues, [CanBeNull] object databaseValues)
+            => string.Format(
+                GetString("UpdateConcurrencyTokenExceptionSensitive", nameof(entityType), nameof(keyValue), nameof(conflictingValues), nameof(databaseValues)),
+                entityType, keyValue, conflictingValues, databaseValues);
 
         private static string GetString(string name, params string[] formatterNames)
         {
@@ -58,6 +54,69 @@ namespace FileContextCore.Internal
             }
 
             return value;
+        }
+    }
+}
+
+namespace FileContextCore.Internal
+{
+    /// <summary>
+    ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+    ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+    ///     any release. You should only use it directly in your code with extreme caution and knowing that
+    ///     doing so can result in application failures when updating to a new Entity Framework Core release.
+    /// </summary>
+    public static class FileContextResources
+    {
+        private static readonly ResourceManager _resourceManager
+            = new ResourceManager("FileContextCore.Properties.FileContextStrings", typeof(FileContextResources).GetTypeInfo().Assembly);
+
+        /// <summary>
+        ///     Saved {count} entities to in-memory store.
+        /// </summary>
+        public static EventDefinition<int> LogSavedChanges([NotNull] IDiagnosticsLogger logger)
+        {
+            var definition = ((Diagnostics.Internal.FileContextLoggingDefinitions)logger.Definitions).LogSavedChanges;
+            if (definition == null)
+            {
+                definition = LazyInitializer.EnsureInitialized<EventDefinitionBase>(
+                    ref ((Diagnostics.Internal.FileContextLoggingDefinitions)logger.Definitions).LogSavedChanges,
+                    () => new EventDefinition<int>(
+                        logger.Options,
+                        FileContextEventId.ChangesSaved,
+                        LogLevel.Information,
+                        "FileContextEventId.ChangesSaved",
+                        level => LoggerMessage.Define<int>(
+                            level,
+                            FileContextEventId.ChangesSaved,
+                            _resourceManager.GetString("LogSavedChanges"))));
+            }
+
+            return (EventDefinition<int>)definition;
+        }
+
+        /// <summary>
+        ///     Transactions are not supported by the in-memory store. See http://go.microsoft.com/fwlink/?LinkId=800142
+        /// </summary>
+        public static EventDefinition LogTransactionsNotSupported([NotNull] IDiagnosticsLogger logger)
+        {
+            var definition = ((Diagnostics.Internal.FileContextLoggingDefinitions)logger.Definitions).LogTransactionsNotSupported;
+            if (definition == null)
+            {
+                definition = LazyInitializer.EnsureInitialized<EventDefinitionBase>(
+                    ref ((Diagnostics.Internal.FileContextLoggingDefinitions)logger.Definitions).LogTransactionsNotSupported,
+                    () => new EventDefinition(
+                        logger.Options,
+                        FileContextEventId.TransactionIgnoredWarning,
+                        LogLevel.Warning,
+                        "FileContextEventId.TransactionIgnoredWarning",
+                        level => LoggerMessage.Define(
+                            level,
+                            FileContextEventId.TransactionIgnoredWarning,
+                            _resourceManager.GetString("LogTransactionsNotSupported"))));
+            }
+
+            return (EventDefinition)definition;
         }
     }
 }

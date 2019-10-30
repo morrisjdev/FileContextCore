@@ -1,131 +1,169 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) morrisjdev & .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
-using FileContextCore.Extensions;
-using FileContextCore.Utilities;
+using FileContextCore.Storage;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FileContextCore.Infrastructure.Internal
 {
     /// <summary>
-    ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-    ///     directly from your code. This API may change or be removed in future releases.
+    ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+    ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+    ///     any release. You should only use it directly in your code with extreme caution and knowing that
+    ///     doing so can result in application failures when updating to a new Entity Framework Core release.
     /// </summary>
-    class FileContextOptionsExtension : IDbContextOptionsExtension
+    public class FileContextOptionsExtension : IDbContextOptionsExtension
     {
-        private string _serializer = "json";
-        private string _filemanager = "default";
-        private string _location = "";
-		private string _databasename = "";
-
-		private string _logFragment;
+        private string _storeName;
+        private FileContextDatabaseRoot _databaseRoot;
+        private DbContextOptionsExtensionInfo _info;
 
         /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
+        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
         /// </summary>
         public FileContextOptionsExtension()
         {
         }
 
         /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
+        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
         /// </summary>
         protected FileContextOptionsExtension([NotNull] FileContextOptionsExtension copyFrom)
         {
-            _serializer = copyFrom._serializer;
-            _filemanager = copyFrom._filemanager;
-            _location = copyFrom._location;
+            _storeName = copyFrom._storeName;
+            _databaseRoot = copyFrom._databaseRoot;
         }
 
         /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
+        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
+        /// </summary>
+        public virtual DbContextOptionsExtensionInfo Info
+            => _info ??= new ExtensionInfo(this);
+
+        /// <summary>
+        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
         /// </summary>
         protected virtual FileContextOptionsExtension Clone() => new FileContextOptionsExtension(this);
 
         /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
+        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
         /// </summary>
-        public virtual string Serializer => _serializer;
+        public virtual string StoreName => _storeName;
 
-        public virtual string FileManager => _filemanager;
-
-		public virtual string DatabaseName => _databasename;
-
-		public virtual string Location => _location;
-
-		/// <summary>
-		///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-		///     directly from your code. This API may change or be removed in future releases.
-		/// </summary>
-		public virtual FileContextOptionsExtension WithSerializerAndFileManager(string serializer, string filemanager, string databasename, string location)
+        /// <summary>
+        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
+        /// </summary>
+        public virtual FileContextOptionsExtension WithStoreName([NotNull] string storeName)
         {
-            FileContextOptionsExtension clone = Clone();
+            var clone = Clone();
 
-            clone._serializer = serializer;
-            clone._filemanager = filemanager;
-			clone._databasename = databasename;
-            clone._location = location;
+            clone._storeName = storeName;
 
-			return clone;
+            return clone;
         }
 
         /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
+        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
         /// </summary>
-        public virtual bool ApplyServices(IServiceCollection services)
+        public virtual FileContextDatabaseRoot DatabaseRoot => _databaseRoot;
+
+        /// <summary>
+        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
+        /// </summary>
+        public virtual FileContextOptionsExtension WithDatabaseRoot([NotNull] FileContextDatabaseRoot databaseRoot)
         {
-            Check.NotNull(services, nameof(services));
+            var clone = Clone();
 
-            services.AddEntityFrameworkFileContext();
+            clone._databaseRoot = databaseRoot;
 
-            return true;
+            return clone;
         }
 
         /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
+        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
         /// </summary>
-        public virtual long GetServiceProviderHashCode() => DatabaseName.GetHashCode();
+        public virtual void ApplyServices(IServiceCollection services)
+            => services.AddEntityFrameworkFileContextDatabase();
 
         /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
+        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
         /// </summary>
         public virtual void Validate(IDbContextOptions options)
         {
         }
 
-        /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
-        public virtual string LogFragment
+        private sealed class ExtensionInfo : DbContextOptionsExtensionInfo
         {
-            get
+            private string _logFragment;
+
+            public ExtensionInfo(IDbContextOptionsExtension extension)
+                : base(extension)
             {
-                if (_logFragment == null)
-                {
-                    StringBuilder builder = new StringBuilder();
-
-                    builder
-                        .Append("serializer=").Append(_serializer)
-                        .Append(";filemanager=").Append(_filemanager)
-                        .Append(";databasename=").Append(_databasename)
-                        .Append(";location=").Append(_location).Append(' ');
-
-                    _logFragment = builder.ToString();
-                }
-
-                return _logFragment;
             }
+
+            private new FileContextOptionsExtension Extension
+                => (FileContextOptionsExtension)base.Extension;
+
+            public override bool IsDatabaseProvider => true;
+
+            public override string LogFragment
+            {
+                get
+                {
+                    if (_logFragment == null)
+                    {
+                        var builder = new StringBuilder();
+
+                        builder.Append("StoreName=").Append(Extension._storeName).Append(' ');
+
+                        _logFragment = builder.ToString();
+                    }
+
+                    return _logFragment;
+                }
+            }
+
+            public override long GetServiceProviderHashCode() => Extension._databaseRoot?.GetHashCode() ?? 0L;
+
+            public override void PopulateDebugInfo(IDictionary<string, string> debugInfo)
+                => debugInfo["FileContextDatabase:DatabaseRoot"]
+                    = (Extension._databaseRoot?.GetHashCode() ?? 0L).ToString(CultureInfo.InvariantCulture);
         }
     }
 }

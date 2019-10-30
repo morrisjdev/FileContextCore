@@ -1,41 +1,56 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) morrisjdev & .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using FileContextCore.Infrastructure.Internal;
 using FileContextCore.Storage.Internal;
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Query;
-using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace FileContextCore.Query.Internal
 {
     /// <summary>
-    ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-    ///     directly from your code. This API may change or be removed in future releases.
+    ///     <para>
+    ///         This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+    ///         the same compatibility standards as public APIs. It may be changed or removed without notice in
+    ///         any release. You should only use it directly in your code with extreme caution and knowing that
+    ///         doing so can result in application failures when updating to a new Entity Framework Core release.
+    ///     </para>
+    ///     <para>
+    ///         The service lifetime is <see cref="ServiceLifetime.Scoped"/>. This means that each
+    ///         <see cref="DbContext"/> instance will use its own instance of this service.
+    ///         The implementation may depend on other services registered with any lifetime.
+    ///         The implementation does not need to be thread-safe.
+    ///     </para>
     /// </summary>
-    class FileContextQueryContextFactory : QueryContextFactory
+    public class FileContextQueryContextFactory : IQueryContextFactory
     {
         private readonly IFileContextStore _store;
+        private readonly QueryContextDependencies _dependencies;
 
         /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
+        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
         /// </summary>
         public FileContextQueryContextFactory(
             [NotNull] QueryContextDependencies dependencies,
             [NotNull] IFileContextStoreCache storeCache,
             [NotNull] IDbContextOptions contextOptions)
-            : base(dependencies)
         {
-            _store = storeCache.GetStore(contextOptions.Extensions.OfType<FileContextOptionsExtension>().First());
+            _store = storeCache.GetStore(contextOptions);
+            _dependencies = dependencies;
         }
 
         /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
+        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
         /// </summary>
-        public override QueryContext Create()
-            => new FileContextQueryContext(Dependencies, CreateQueryBuffer, _store);
+        public virtual QueryContext Create()
+            => new FileContextQueryContext(_dependencies, _store);
     }
 }
