@@ -21,7 +21,7 @@ namespace Example.Data
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 			//Default: JSON-Serialize
-			optionsBuilder.UseFileContextDatabase("new");
+			optionsBuilder.UseFileContextDatabase(databaseName: "new");
 
 			//JSON-Serialize + simple Encryption
 			//optionsBuilder.UseFileContext("json", "encrypted");

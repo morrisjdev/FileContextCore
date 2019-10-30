@@ -25,7 +25,7 @@ namespace FileContextCore.Storage.Internal
         // WARNING: The in-memory provider is using EF internal code here. This should not be copied by other providers. See #15096
         : Microsoft.EntityFrameworkCore.ChangeTracking.Internal.IdentityMapFactoryFactoryBase, IFileContextTableFactory
     {
-        private readonly IFileContextSingletonOptions _options;
+        private readonly IFileContextScopedOptions _options;
         private readonly bool _sensitiveLoggingEnabled;
 
         private readonly ConcurrentDictionary<IKey, Func<IFileContextTable>> _factories
@@ -37,7 +37,7 @@ namespace FileContextCore.Storage.Internal
         ///     any release. You should only use it directly in your code with extreme caution and knowing that
         ///     doing so can result in application failures when updating to a new Entity Framework Core release.
         /// </summary>
-        public FileContextTableFactory([NotNull] ILoggingOptions loggingOptions, IFileContextSingletonOptions options)
+        public FileContextTableFactory([NotNull] ILoggingOptions loggingOptions, IFileContextScopedOptions options)
         {
             _options = options;
             Check.NotNull(loggingOptions, nameof(loggingOptions));
@@ -61,7 +61,7 @@ namespace FileContextCore.Storage.Internal
                 .Invoke(null, new object[] { key, key.DeclaringEntityType, _sensitiveLoggingEnabled, _options });
 
         [UsedImplicitly]
-        private static Func<IFileContextTable> CreateFactory<TKey>(IKey key, IEntityType entityType, bool sensitiveLoggingEnabled, IFileContextSingletonOptions options)
+        private static Func<IFileContextTable> CreateFactory<TKey>(IKey key, IEntityType entityType, bool sensitiveLoggingEnabled, IFileContextScopedOptions options)
             => () => new FileContextTable<TKey>(
                 // WARNING: The in-memory provider is using EF internal code here. This should not be copied by other providers. See #15096
                 Microsoft.EntityFrameworkCore.Metadata.Internal.KeyExtensions.GetPrincipalKeyValueFactory<TKey>(key),

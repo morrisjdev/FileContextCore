@@ -45,7 +45,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns>
         ///     The same service collection so that multiple calls can be chained.
         /// </returns>
-        public static IServiceCollection AddEntityFrameworkFileContextDatabase([NotNull] this IServiceCollection serviceCollection)
+        public static IServiceCollection AddEntityFrameworkFileContextDatabase([NotNull] this IServiceCollection serviceCollection, FileContextOptionsExtension optionsExtension = null)
         {
             Check.NotNull(serviceCollection, nameof(serviceCollection));
 
@@ -69,6 +69,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 .TryAddProviderSpecificServices(
                     b => b
                         .TryAddSingleton<IFileContextSingletonOptions, FileContextSingletonOptions>()
+                        .TryAddScoped<IFileContextScopedOptions, FileContextScopedOptions>((serviceProvider) => new FileContextScopedOptions(optionsExtension))
                         .TryAddSingleton<IFileContextStoreCache, FileContextStoreCache>()
                         .TryAddSingleton<IFileContextTableFactory, FileContextTableFactory>()
                         .TryAddScoped<IFileContextDatabase, FileContextDatabase>());
