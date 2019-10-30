@@ -1,6 +1,6 @@
 language: csharp
 mono: none
-dotnet: 3.0.0
+dotnet: 3
 
 script:
  - cd FileContextCore
