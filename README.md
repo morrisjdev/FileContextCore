@@ -38,7 +38,7 @@ In your `Startup.cs` use this:
 public void ConfigureServices(IServiceCollection services)
 {
     ...
-    services.AddDbContext<Context>(options => options.UseFileContext());
+    services.AddDbContext<Context>(options => options.UseFileContextDatabase());
     ...
 }
 ```
@@ -52,7 +52,7 @@ You can also override the `OnConfiguring` method of your DbContext to apply the 
 ```cs
 protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 {
-    optionsBuilder.UseFileContext();
+    optionsBuilder.UseFileContextDatabase();
 }
 ```
 
@@ -75,7 +75,7 @@ You can use a different serializer to support other serialization methods.
 Serializes data using System.XML
 
 ```cs
-optionsBuilder.UseFileContext("xml");
+optionsBuilder.UseFileContextDatabase("xml");
 ```
 
 ### CSVSerializer
@@ -83,7 +83,7 @@ optionsBuilder.UseFileContext("xml");
 Serializes data using CsvHelper ([https://joshclose.github.io/CsvHelper/](https://joshclose.github.io/CsvHelper/))
 
 ```cs
-optionsBuilder.UseFileContext("csv");
+optionsBuilder.UseFileContextDatabase("csv");
 ```
 
 ### JSONSerializer
@@ -91,11 +91,11 @@ optionsBuilder.UseFileContext("csv");
 Serializes data using Newtonsoft Json.NET ([http://www.newtonsoft.com/json](http://www.newtonsoft.com/json))
 
 ```cs
-optionsBuilder.UseFileContext("json");
+optionsBuilder.UseFileContextDatabase("json");
 ```
 or just
 ```
-optionsBuilder.UseFileContext();
+optionsBuilder.UseFileContextDatabase();
 ```
 
 ### BSONSerializer
@@ -103,7 +103,7 @@ optionsBuilder.UseFileContext();
 Serializes data to bson using Newtonsoft Json.NET ([http://www.newtonsoft.com/json](http://www.newtonsoft.com/json))
 
 ```cs
-optionsBuilder.UseFileContext("bson");
+optionsBuilder.UseFileContextDatabase("bson");
 ```
 
 ### EXCELSerializer
@@ -113,12 +113,12 @@ Saves files into an .xlsx-file and enables the quick editing of the data using E
 Uses [EEPlus](http://epplus.codeplex.com/documentation) implementation for .Net Core ([https://github.com/VahidN/EPPlus.Core](https://github.com/VahidN/EPPlus.Core))
 
 ```cs
-optionsBuilder.UseFileContext("excel");
+optionsBuilder.UseFileContextDatabase("excel");
 ```
 
 If you want to secure the excel file with a password use:
 ```cs
-optionsBuilder.UseFileContext("excel:<password>");
+optionsBuilder.UseFileContextDatabase("excel:<password>");
 ```
 
 To run on Linux-Systems
@@ -136,7 +136,7 @@ The file manager controls how the files are stored.
 The default file manager just creates normal files.
 
 ```cs
-optionsBuilder.UseFileContext("json", "default");
+optionsBuilder.UseFileContextDatabase("json", "default");
 ```
 
 ### EncryptedFileManager
@@ -144,7 +144,7 @@ optionsBuilder.UseFileContext("json", "default");
 The encrypted file manager encrypts the files with a password.
 
 ```cs
-optionsBuilder.UseFileContext("json", "encrypted:<password>");
+optionsBuilder.UseFileContextDatabase("json", "encrypted:<password>");
 ```
 
 ## Custom file-location
@@ -153,7 +153,7 @@ By default the files are stored in a subfolder of your running application calle
 If you want to control this behavior you can also use define a custom location.
 
 ```cs
-optionsBuilder.UseFileContext(location: @"C:\Users\mjanatzek\Documents\Projects\test");
+optionsBuilder.UseFileContextDatabase(location: @"C:\Users\mjanatzek\Documents\Projects\test");
 ```
 
 ## Multiple Databases
@@ -163,7 +163,7 @@ You can optionally define a name for your database and all the corresponding dat
 So you are able to use FileContext with multiple DbContext-configurations.
 
 ```cs
-optionsBuilder.UseFileContext(databasename: "database");
+optionsBuilder.UseFileContextDatabase(databasename: "database");
 ```
 
 ## Author

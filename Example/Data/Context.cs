@@ -21,22 +21,22 @@ namespace Example.Data
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             //Default: JSON-Serialize
-            optionsBuilder.UseFileContextDatabase("test");
+            //optionsBuilder.UseFileContextDatabase();
 
-            //optionsBuilder.UseFileContext("bson");
+            //optionsBuilder.UseFileContextDatabase("bson");
 
             //JSON-Serialize + simple Encryption
-            //optionsBuilder.UseFileContext("json", "encrypted");
+            //optionsBuilder.UseFileContextDatabase("json", "encrypted");
 
             //XML
-            //optionsBuilder.UseFileContext("xml");
-            //optionsBuilder.UseFileContext("xml", "private");
+            //optionsBuilder.UseFileContextDatabase("xml");
+            //optionsBuilder.UseFileContextDatabase("xml", "private");
 
             //CSV
-            //optionsBuilder.UseFileContext("csv", location: @"C:\Users\mjanatzek\Documents\Projects\t");
+            //optionsBuilder.UseFileContextDatabase("csv", location: @"D:\t");
 
             //Excel
-            //optionsBuilder.UseFileContext("excel", databasename: "test", location: @"C:\Users\mjanatzek\Documents\Projects\t");
+            optionsBuilder.UseFileContextDatabase("excel", databaseName: "test");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

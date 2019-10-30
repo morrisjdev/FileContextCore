@@ -23,6 +23,9 @@ namespace FileContextCore.Infrastructure.Internal
     public class FileContextOptionsExtension : IDbContextOptionsExtension
     {
         private string _storeName;
+        public string serializer;
+        public string filemanager;
+        public string location;
         private FileContextDatabaseRoot _databaseRoot;
         private DbContextOptionsExtensionInfo _info;
 
@@ -44,6 +47,10 @@ namespace FileContextCore.Infrastructure.Internal
         /// </summary>
         protected FileContextOptionsExtension([NotNull] FileContextOptionsExtension copyFrom)
         {
+            serializer = copyFrom.serializer;
+            filemanager = copyFrom.filemanager;
+            location = copyFrom.location;
+            
             _storeName = copyFrom._storeName;
             _databaseRoot = copyFrom._databaseRoot;
         }
@@ -84,6 +91,23 @@ namespace FileContextCore.Infrastructure.Internal
             var clone = Clone();
 
             clone._storeName = storeName;
+
+            return clone;
+        }
+
+        /// <summary>
+        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
+        /// </summary>
+        public virtual FileContextOptionsExtension WithCustomOptions(string serializer, string filemanager, string location)
+        {
+            var clone = Clone();
+
+            clone.serializer = serializer;
+            clone.filemanager = filemanager;
+            clone.location = location;
 
             return clone;
         }

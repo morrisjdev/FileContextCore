@@ -146,15 +146,18 @@ namespace FileContextCore.Storage.Internal
             var data = new List<FileContextTableSnapshot>();
             lock (_lock)
             {
-                if (_tables != null)
+                if (_tables == null)
                 {
-                    foreach (var et in entityType.GetDerivedTypesInclusive().Where(et => !et.IsAbstract()))
+                    var key = _useNameMatching ? (object)entityType.Name : entityType;
+                    EnsureTable(key, entityType);
+                }
+
+                foreach (var et in entityType.GetDerivedTypesInclusive().Where(et => !et.IsAbstract()))
+                {
+                    var key = _useNameMatching ? (object)et.Name : et;
+                    if (_tables.TryGetValue(key, out var table))
                     {
-                        var key = _useNameMatching ? (object)et.Name : et;
-                        if (_tables.TryGetValue(key, out var table))
-                        {
-                            data.Add(new FileContextTableSnapshot(et, table.SnapshotRows()));
-                        }
+                        data.Add(new FileContextTableSnapshot(et, table.SnapshotRows()));
                     }
                 }
             }
@@ -211,6 +214,11 @@ namespace FileContextCore.Storage.Internal
                     }
 
                     rowsAffected++;
+                }
+
+                foreach (KeyValuePair<object, IFileContextTable> table in _tables)
+                {
+                    table.Value.Save();
                 }
             }
 
