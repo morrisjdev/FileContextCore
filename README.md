@@ -166,6 +166,14 @@ So you are able to use FileContext with multiple DbContext-configurations.
 optionsBuilder.UseFileContextDatabase(databasename: "database");
 ```
 
+## Version compability
+
+| FileContext Version | EF Core Version |
+|---------------------|-----------------|
+| 3.2.0               | 3.0.0           |
+| 3.0.1/3.0.0/2.2.6   | 2.2.6           |
+| 2.2.0               | 2.2.0           |
+
 ## Author
 
 [Morris Janatzek](http://morrisj.net) ([morrisjdev](https://github.com/morrisjdev))
