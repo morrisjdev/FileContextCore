@@ -12,7 +12,7 @@
     <Copyright>Copyright © Morris Janatzek</Copyright>
     <Title>FileContextCore</Title>
     <PackageLicenseUrl></PackageLicenseUrl>
-    <PackageIconUrl>https://morrisj.net/img/morrisjdev_logo.png</PackageIconUrl>
+    <PackageIconUrl>https://morrisj.net/storage/morrisjdev_logo.png</PackageIconUrl>
     <RepositoryUrl>https://github.com/morrisjdev/FileContextCore</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>Entity Framework Core;entity-framework-core;EF;Data;O/RM;FileContext;FileDB;JSON;XML;CSV;ELSX;Excel</PackageTags>
@@ -21,6 +21,7 @@
     <DelaySign>false</DelaySign>
     <AssemblyVersion>3.2.1.0</AssemblyVersion>
     <FileVersion>3.2.1.0</FileVersion>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,6 +32,13 @@
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
     <PackageReference Include="Newtonsoft.Json.Bson" Version="1.0.2" />
     <PackageReference Include="System.Xml.XmlSerializer" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\FileContextCoreold\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
