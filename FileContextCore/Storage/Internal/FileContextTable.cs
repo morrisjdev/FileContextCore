@@ -327,7 +327,7 @@ namespace FileContextCore.Storage.Internal
 
         private Dictionary<TKey, object[]> Init()
         {
-            filetype = _options.Serializer;
+            filetype = _options.Serializer ?? "json";
 
             if (filetype.Length >= 5 && filetype.Substring(0, 5) == "excel")
             {
@@ -346,7 +346,6 @@ namespace FileContextCore.Storage.Internal
             string content = fileManager.LoadContent();
             Dictionary<TKey, object[]> newList = new Dictionary<TKey, object[]>(_keyValueFactory.EqualityComparer);
             Dictionary<TKey, object[]> result = ConvertFromProvider(serializer.Deserialize(content, newList));
-            //GenerateLastAutoPropertyValues(result);
             return result;
         }
 
@@ -368,13 +367,12 @@ namespace FileContextCore.Storage.Internal
 
             Dictionary<TKey, object[]> newlist = new Dictionary<TKey, object[]>(_keyValueFactory.EqualityComparer);
             Dictionary<TKey, object[]> excelresult = excel.Deserialize(newlist);
-            //GenerateLastAutoPropertyValues(excelresult);
             return excelresult;
         }
 
         private Dictionary<TKey, object[]> ApplyValueConverter(Dictionary<TKey, object[]> list, Func<ValueConverter, Func<object, object>> conversionFunc)
         {
-            var result = new Dictionary<TKey, object[]>();
+            var result = new Dictionary<TKey, object[]>(_keyValueFactory.EqualityComparer);
             var converters = _entityType.GetProperties().Select(p => p.GetValueConverter()).ToArray();
             foreach (var keyValuePair in list)
             {

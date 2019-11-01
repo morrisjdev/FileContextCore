@@ -118,11 +118,11 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="LogSavedChanges" xml:space="preserve">
-    <value>Saved {count} entities to in-memory store.</value>
+    <value>Saved {count} entities to file context.</value>
     <comment>Information FileContextEventId.ChangesSaved int</comment>
   </data>
   <data name="LogTransactionsNotSupported" xml:space="preserve">
-    <value>Transactions are not supported by the in-memory store. See http://go.microsoft.com/fwlink/?LinkId=800142</value>
+    <value>Transactions are not supported by FileContext</value>
     <comment>Warning FileContextEventId.TransactionIgnoredWarning</comment>
   </data>
   <data name="UpdateConcurrencyException" xml:space="preserve">
