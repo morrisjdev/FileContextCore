@@ -21,7 +21,7 @@ namespace Example.Data
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             //Default: JSON-Serialize
-            optionsBuilder.UseFileContextDatabase();
+            //optionsBuilder.UseFileContextDatabase();
 
             //optionsBuilder.UseFileContextDatabase("bson");
 
@@ -37,6 +37,9 @@ namespace Example.Data
 
             //Excel
             //optionsBuilder.UseFileContextDatabase("excel", databaseName: "test");
+
+            //ConnectionString
+            optionsBuilder.UseFileContextDatabaseConnectionString("SeriAlizer=xml;databasenaMe=Test");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

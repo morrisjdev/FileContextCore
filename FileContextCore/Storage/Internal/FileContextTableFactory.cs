@@ -5,11 +5,14 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Reflection;
 using FileContextCore.Infrastructure.Internal;
 using FileContextCore.Utilities;
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Utilities;
 
@@ -37,7 +40,7 @@ namespace FileContextCore.Storage.Internal
         ///     any release. You should only use it directly in your code with extreme caution and knowing that
         ///     doing so can result in application failures when updating to a new Entity Framework Core release.
         /// </summary>
-        public FileContextTableFactory([NotNull] ILoggingOptions loggingOptions, IFileContextScopedOptions options)
+        public FileContextTableFactory([NotNull] ILoggingOptions loggingOptions, [NotNull] IFileContextScopedOptions options)
         {
             _options = options;
             Check.NotNull(loggingOptions, nameof(loggingOptions));

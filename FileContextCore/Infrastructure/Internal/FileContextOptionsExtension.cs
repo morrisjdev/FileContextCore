@@ -22,12 +22,9 @@ namespace FileContextCore.Infrastructure.Internal
     /// </summary>
     public class FileContextOptionsExtension : IDbContextOptionsExtension
     {
-        private string _storeName;
-        public string serializer;
-        public string filemanager;
-        public string location;
         private FileContextDatabaseRoot _databaseRoot;
         private DbContextOptionsExtensionInfo _info;
+        private FileContextScopedOptions _options;
 
         /// <summary>
         ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
@@ -37,6 +34,7 @@ namespace FileContextCore.Infrastructure.Internal
         /// </summary>
         public FileContextOptionsExtension()
         {
+            _options = new FileContextScopedOptions(null, null, null, null);
         }
 
         /// <summary>
@@ -47,11 +45,7 @@ namespace FileContextCore.Infrastructure.Internal
         /// </summary>
         protected FileContextOptionsExtension([NotNull] FileContextOptionsExtension copyFrom)
         {
-            serializer = copyFrom.serializer;
-            filemanager = copyFrom.filemanager;
-            location = copyFrom.location;
-            
-            _storeName = copyFrom._storeName;
+            _options = (FileContextScopedOptions)copyFrom._options.Clone();
             _databaseRoot = copyFrom._databaseRoot;
         }
 
@@ -78,7 +72,7 @@ namespace FileContextCore.Infrastructure.Internal
         ///     any release. You should only use it directly in your code with extreme caution and knowing that
         ///     doing so can result in application failures when updating to a new Entity Framework Core release.
         /// </summary>
-        public virtual string StoreName => _storeName;
+        public virtual FileContextScopedOptions Options => _options;
 
         /// <summary>
         ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
@@ -86,28 +80,13 @@ namespace FileContextCore.Infrastructure.Internal
         ///     any release. You should only use it directly in your code with extreme caution and knowing that
         ///     doing so can result in application failures when updating to a new Entity Framework Core release.
         /// </summary>
-        public virtual FileContextOptionsExtension WithStoreName([NotNull] string storeName)
+        public virtual FileContextOptionsExtension WithCustomOptions(string databaseName, string serializer, string fileManager, string location)
         {
             var clone = Clone();
-
-            clone._storeName = storeName;
-
-            return clone;
-        }
-
-        /// <summary>
-        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
-        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
-        ///     any release. You should only use it directly in your code with extreme caution and knowing that
-        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
-        /// </summary>
-        public virtual FileContextOptionsExtension WithCustomOptions(string serializer, string filemanager, string location)
-        {
-            var clone = Clone();
-
-            clone.serializer = serializer;
-            clone.filemanager = filemanager;
-            clone.location = location;
+            clone._options.Location = location;
+            clone._options.DatabaseName = databaseName;
+            clone._options.FileManager = fileManager;
+            clone._options.Serializer = serializer;
 
             return clone;
         }
@@ -143,7 +122,7 @@ namespace FileContextCore.Infrastructure.Internal
         /// </summary>
         public virtual void ApplyServices(IServiceCollection services)
         {
-            services.AddEntityFrameworkFileContextDatabase(this);
+            services.AddEntityFrameworkFileContextDatabase();
         }
 
         /// <summary>
@@ -178,7 +157,10 @@ namespace FileContextCore.Infrastructure.Internal
                     {
                         var builder = new StringBuilder();
 
-                        builder.Append("StoreName=").Append(Extension._storeName).Append(' ');
+                        builder.Append("Location=").Append(Extension.Options.Location).Append(' ');
+                        builder.Append("DatabaseName=").Append(Extension.Options.DatabaseName).Append(' ');
+                        builder.Append("Serializer=").Append(Extension.Options.Serializer).Append(' ');
+                        builder.Append("FileManager=").Append(Extension.Options.FileManager).Append(' ');
 
                         _logFragment = builder.ToString();
                     }

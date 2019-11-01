@@ -302,7 +302,7 @@ namespace FileContextCore.Storage.Internal
 
         private void InitFileManager()
         {
-            string fmgr = _options.FileManager;
+            string fmgr = _options.FileManager ?? "default";
 
             if (fmgr.Length >= 9 && fmgr.Substring(0, 9) == "encrypted")
             {
