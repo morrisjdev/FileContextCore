@@ -22,7 +22,7 @@ namespace FileContextCore.FileManager
             type = _type;
             filetype = _filetype;
             key = _key;
-			databasename = _databasename;
+			databasename = _databasename ?? "";
             this._location = _location;
         }
 

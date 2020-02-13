@@ -147,6 +147,15 @@ The encrypted file manager encrypts the files with a password.
 optionsBuilder.UseFileContextDatabase("json", "encrypted:<password>");
 ```
 
+## Configuration string
+
+If you want to define the options of file context in a single string you can use the default connection string syntax of databases.
+
+```css
+optionsBuilder.UseFileContextDatabaseConnectionString("serializer=xml;databasename=Test;location:test;filemanager:default");
+```
+
+
 ## Custom file-location
 
 By default the files are stored in a subfolder of your running application called `appdata`.
@@ -165,6 +174,14 @@ So you are able to use FileContext with multiple DbContext-configurations.
 ```cs
 optionsBuilder.UseFileContextDatabase(databasename: "database");
 ```
+
+## Version compability
+
+| FileContext Version | EF Core Version |
+|---------------------|-----------------|
+| 3.2.*              | 3.0.0           |
+| 3.0.1/3.0.0/2.2.6   | 2.2.6           |
+| 2.2.0               | 2.2.0           |
 
 ## Author
 

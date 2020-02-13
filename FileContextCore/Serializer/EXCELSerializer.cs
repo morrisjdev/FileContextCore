@@ -99,7 +99,7 @@ namespace FileContextCore.Serializer
 
         public Dictionary<TKey, object[]> Deserialize<TKey>(Dictionary<TKey, object[]> newList)
         {
-            for (int y = 2; y < worksheet.Dimension.Rows; y++)
+            for (int y = 2; y <= worksheet.Dimension.Rows; y++)
             {
                 List<object> value = new List<object>();
 
@@ -156,7 +156,7 @@ namespace FileContextCore.Serializer
 
         private void DeleteUnusedRows(int lastRow)
         {
-            if (worksheet.Dimension.Rows > lastRow)
+            if (worksheet.Dimension.Rows >= lastRow)
             {
                 int count = worksheet.Dimension.Rows - lastRow;
                 worksheet.DeleteRow(lastRow + 1, count);

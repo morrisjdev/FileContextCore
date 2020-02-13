@@ -34,10 +34,5 @@ namespace FileContextCore.Infrastructure.Internal
         ///     doing so can result in application failures when updating to a new Entity Framework Core release.
         /// </summary>
         FileContextDatabaseRoot DatabaseRoot { get; }
-
-        string DatabaseName { get; }
-        string Serializer { get; }
-        string Filemanager { get; }
-        string Location { get; }
     }
 }

@@ -25,6 +25,6 @@ namespace FileContextCore.Storage.Internal
         ///     doing so can result in application failures when updating to a new Entity Framework Core release.
         /// </summary>
         public static IFileContextStore GetStore([NotNull] this IFileContextStoreCache storeCache, [NotNull] IDbContextOptions options)
-            => storeCache.GetStore(options.Extensions.OfType<FileContextOptionsExtension>().First().StoreName);
+            => storeCache.GetStore(options.Extensions.OfType<FileContextOptionsExtension>().First().Options);
     }
 }

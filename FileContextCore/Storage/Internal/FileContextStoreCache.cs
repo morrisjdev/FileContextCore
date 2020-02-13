@@ -7,6 +7,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using FileContextCore.Infrastructure.Internal;
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace FileContextCore.Storage.Internal
 {
@@ -18,9 +19,9 @@ namespace FileContextCore.Storage.Internal
     /// </summary>
     public class FileContextStoreCache : IFileContextStoreCache
     {
-        private readonly IFileContextTableFactory _tableFactory;
+        [NotNull] private readonly ILoggingOptions _loggingOptions;
         private readonly bool _useNameMatching;
-        private readonly ConcurrentDictionary<string, IFileContextStore> _namedStores;
+        private readonly ConcurrentDictionary<IFileContextScopedOptions, IFileContextStore> _namedStores;
 
         /// <summary>
         ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
@@ -29,24 +30,23 @@ namespace FileContextCore.Storage.Internal
         ///     doing so can result in application failures when updating to a new Entity Framework Core release.
         /// </summary>
         public FileContextStoreCache(
-            [NotNull] IFileContextTableFactory tableFactory,
+            [NotNull] ILoggingOptions loggingOptions,
             [CanBeNull] IFileContextSingletonOptions options)
         {
-            _tableFactory = tableFactory;
-
+            _loggingOptions = loggingOptions;
             if (options?.DatabaseRoot != null)
             {
                 _useNameMatching = true;
 
                 LazyInitializer.EnsureInitialized(
                     ref options.DatabaseRoot.Instance,
-                    () => new ConcurrentDictionary<string, IFileContextStore>());
+                    () => new ConcurrentDictionary<IFileContextScopedOptions, IFileContextStore>());
 
-                _namedStores = (ConcurrentDictionary<string, IFileContextStore>)options.DatabaseRoot.Instance;
+                _namedStores = (ConcurrentDictionary<IFileContextScopedOptions, IFileContextStore>)options.DatabaseRoot.Instance;
             }
             else
             {
-                _namedStores = new ConcurrentDictionary<string, IFileContextStore>();
+                _namedStores = new ConcurrentDictionary<IFileContextScopedOptions, IFileContextStore>();
             }
         }
 
@@ -56,7 +56,9 @@ namespace FileContextCore.Storage.Internal
         ///     any release. You should only use it directly in your code with extreme caution and knowing that
         ///     doing so can result in application failures when updating to a new Entity Framework Core release.
         /// </summary>
-        public virtual IFileContextStore GetStore(string name)
-            => _namedStores.GetOrAdd(name, _ => new FileContextStore(_tableFactory, _useNameMatching));
+        public virtual IFileContextStore GetStore(IFileContextScopedOptions options)
+        {
+            return _namedStores.GetOrAdd(options, _ => new FileContextStore(new FileContextTableFactory(_loggingOptions, options), _useNameMatching));
+        }
     }
 }

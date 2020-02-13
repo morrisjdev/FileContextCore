@@ -70,7 +70,6 @@ namespace Microsoft.Extensions.DependencyInjection
                     b => b
                         .TryAddSingleton<IFileContextSingletonOptions, FileContextSingletonOptions>()
                         .TryAddSingleton<IFileContextStoreCache, FileContextStoreCache>()
-                        .TryAddSingleton<IFileContextTableFactory, FileContextTableFactory>()
                         .TryAddScoped<IFileContextDatabase, FileContextDatabase>());
 
             builder.TryAddCoreServices();

@@ -20,10 +20,14 @@ namespace FileContextCore.Serializer
                 return type.GetDefaultValue();
             }
 
+            if (type == typeof(DateTimeOffset))
+            {
+                return DateTimeOffset.Parse(input, CultureInfo.InvariantCulture);
+            }
+
             if (type == typeof(TimeSpan))
             {
                 return TimeSpan.Parse(input, CultureInfo.InvariantCulture);
-
             }
             
             if (type == typeof(Guid))

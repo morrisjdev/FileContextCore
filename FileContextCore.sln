@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileContextCore", "FileCont
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Example", "Example\Example.csproj", "{B6D2852A-973B-47F7-A390-7A1A5203E5F4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetOAuth", "AspNetOAuth\AspNetOAuth.csproj", "{A78088E6-B64B-4D98-96CE-2C30D82E3187}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASPNETDemo", "ASPNETDemo\ASPNETDemo.csproj", "{8E6BFB30-5AF1-46EF-81B7-A8200616E45A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{B6D2852A-973B-47F7-A390-7A1A5203E5F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B6D2852A-973B-47F7-A390-7A1A5203E5F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B6D2852A-973B-47F7-A390-7A1A5203E5F4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A78088E6-B64B-4D98-96CE-2C30D82E3187}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A78088E6-B64B-4D98-96CE-2C30D82E3187}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A78088E6-B64B-4D98-96CE-2C30D82E3187}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A78088E6-B64B-4D98-96CE-2C30D82E3187}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E6BFB30-5AF1-46EF-81B7-A8200616E45A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E6BFB30-5AF1-46EF-81B7-A8200616E45A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E6BFB30-5AF1-46EF-81B7-A8200616E45A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E6BFB30-5AF1-46EF-81B7-A8200616E45A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

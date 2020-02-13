@@ -28,6 +28,9 @@ namespace Example
             List<User> users2 = db.Users.Include("Contents.Entries").Include("Contents").Include("Contents").ToList();
 
             List<User> user3 = db2.Users.ToList();
+            db2.Users.RemoveRange(user3.Take(2));
+            db2.SaveChanges();
+
 
             db.Users.RemoveRange(db.Users.Skip(40));
             db.SaveChanges();

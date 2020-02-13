@@ -146,19 +146,11 @@ namespace FileContextCore.Storage.Internal
             var data = new List<FileContextTableSnapshot>();
             lock (_lock)
             {
-                if (_tables == null)
-                {
-                    var key = _useNameMatching ? (object)entityType.Name : entityType;
-                    EnsureTable(key, entityType);
-                }
-
                 foreach (var et in entityType.GetDerivedTypesInclusive().Where(et => !et.IsAbstract()))
                 {
                     var key = _useNameMatching ? (object)et.Name : et;
-                    if (_tables.TryGetValue(key, out var table))
-                    {
-                        data.Add(new FileContextTableSnapshot(et, table.SnapshotRows()));
-                    }
+                    var table = EnsureTable(key, et);
+                    data.Add(new FileContextTableSnapshot(et, table.SnapshotRows()));
                 }
             }
 

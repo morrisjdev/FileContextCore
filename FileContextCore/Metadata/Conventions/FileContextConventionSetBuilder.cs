@@ -52,7 +52,7 @@ namespace FileContextCore.Metadata.Conventions
             var serviceProvider = new ServiceCollection()
                 .AddEntityFrameworkFileContextDatabase()
                 .AddDbContext<DbContext>((p, o) =>
-                    o.UseFileContextDatabase(Guid.NewGuid().ToString())
+                    o.UseFileContextDatabase(databaseName: Guid.NewGuid().ToString())
                         .UseInternalServiceProvider(p))
                 .BuildServiceProvider();
 
