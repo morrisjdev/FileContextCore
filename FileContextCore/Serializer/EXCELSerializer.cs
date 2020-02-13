@@ -16,6 +16,7 @@ namespace FileContextCore.Serializer
         private IEntityType entityType;
         private string[] propertyKeys;
         private readonly Type[] typeList;
+        private int[] propertyColumnIndices;
         private readonly string password;
         private readonly string databaseName;
         private readonly string _location;
@@ -24,7 +25,7 @@ namespace FileContextCore.Serializer
         private static Dictionary<string, ExcelPackage> packages = new Dictionary<string, ExcelPackage>();
         private ExcelPackage package;
         private ExcelWorksheet worksheet;
-        
+
 
         FileInfo GetFilePath()
         {
@@ -44,6 +45,7 @@ namespace FileContextCore.Serializer
         {
             entityType = _entityType;
             propertyKeys = entityType.GetProperties().Select(p => p.GetColumnName()).ToArray();
+            propertyColumnIndices = new int[propertyKeys.Length];
             typeList = entityType.GetProperties().Select(p => p.GetValueConverter()?.ProviderClrType ?? p.ClrType).ToArray();
             password = _password;
             this.databaseName = databaseName;
@@ -81,6 +83,7 @@ namespace FileContextCore.Serializer
                 for (int i = 0; i < propertyKeys.Length; i++)
                 {
                     worksheet.Cells[1, i + 1].Value = propertyKeys[i];
+                    propertyColumnIndices[i] = i + 1;
                     worksheet.Column(i + 1).AutoFit();
                 }
 
@@ -95,6 +98,21 @@ namespace FileContextCore.Serializer
                     package.Save();
                 }
             }
+            else
+            {
+                for (int i = 0; i < propertyKeys.Length; i++)
+                {
+                    for (int x = 0; x < worksheet.Dimension.Columns; x++)
+                    {
+                        string val = worksheet.Cells[1, x + 1].GetValue<string>();
+                        if (propertyKeys[i].Equals(val, StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            propertyColumnIndices[i] = x + 1;
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
         public Dictionary<TKey, object[]> Deserialize<TKey>(Dictionary<TKey, object[]> newList)
@@ -105,12 +123,12 @@ namespace FileContextCore.Serializer
 
                 for (int x = 0; x < propertyKeys.Length; x++)
                 {
-                    object val = worksheet.Cells[y, x + 1].GetValue<string>().Deserialize(typeList[x]);
+                    object val = worksheet.Cells[y, propertyColumnIndices[x]].GetValue<string>().Deserialize(typeList[x]);
                     value.Add(val);
                 }
 
-                TKey key = SerializerHelper.GetKey<TKey, T>(_keyValueFactory, entityType, propertyName => 
-                    worksheet.Cells[y, propertyKeys.IndexOf(propertyName) + 1].GetValue<string>());
+                TKey key = SerializerHelper.GetKey<TKey, T>(_keyValueFactory, entityType, propertyName =>
+                    worksheet.Cells[y, propertyColumnIndices[propertyKeys.IndexOf(propertyName)]].GetValue<string>());
 
                 newList.Add(key, value.ToArray());
             }
