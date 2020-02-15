@@ -24,12 +24,7 @@ using Microsoft.EntityFrameworkCore.Utilities;
 
 namespace FileContextCore.Storage.Internal
 {
-    /// <summary>
-    ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
-    ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
-    ///     any release. You should only use it directly in your code with extreme caution and knowing that
-    ///     doing so can result in application failures when updating to a new Entity Framework Core release.
-    /// </summary>
+
     public class FileContextTable<TKey> : IFileContextTable
     {
         // WARNING: The in-memory provider is using EF internal code here. This should not be copied by other providers. See #15096
@@ -45,12 +40,7 @@ namespace FileContextCore.Storage.Internal
 
         private Dictionary<int, IFileContextIntegerValueGenerator> _integerGenerators;
 
-        /// <summary>
-        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
-        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
-        ///     any release. You should only use it directly in your code with extreme caution and knowing that
-        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
-        /// </summary>
+    
         public FileContextTable(
             // WARNING: The in-memory provider is using EF internal code here. This should not be copied by other providers. See #15096
             [NotNull] Microsoft.EntityFrameworkCore.ChangeTracking.Internal.IPrincipalKeyValueFactory<TKey> keyValueFactory,
@@ -67,12 +57,7 @@ namespace FileContextCore.Storage.Internal
             //_rows = new Dictionary<TKey, object[]>(keyValueFactory.EqualityComparer);
         }
 
-        /// <summary>
-        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
-        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
-        ///     any release. You should only use it directly in your code with extreme caution and knowing that
-        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
-        /// </summary>
+    
         public virtual FileContextIntegerValueGenerator<TProperty> GetIntegerValueGenerator<TProperty>(IProperty property)
         {
             if (_integerGenerators == null)
@@ -96,12 +81,7 @@ namespace FileContextCore.Storage.Internal
             return (FileContextIntegerValueGenerator<TProperty>)generator;
         }
 
-        /// <summary>
-        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
-        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
-        ///     any release. You should only use it directly in your code with extreme caution and knowing that
-        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
-        /// </summary>
+    
         public virtual IReadOnlyList<object[]> SnapshotRows()
             => _rows.Values.ToList();
 
@@ -111,12 +91,7 @@ namespace FileContextCore.Storage.Internal
         private static ValueComparer GetStructuralComparer(IProperty p)
             => p.GetStructuralValueComparer() ?? p.FindTypeMapping()?.StructuralComparer;
 
-        /// <summary>
-        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
-        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
-        ///     any release. You should only use it directly in your code with extreme caution and knowing that
-        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
-        /// </summary>
+    
         public virtual void Create(IUpdateEntry entry)
         {
             var row = entry.EntityType.GetProperties()
@@ -128,12 +103,7 @@ namespace FileContextCore.Storage.Internal
             BumpValueGenerators(row);
         }
 
-        /// <summary>
-        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
-        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
-        ///     any release. You should only use it directly in your code with extreme caution and knowing that
-        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
-        /// </summary>
+    
         public virtual void Delete(IUpdateEntry entry)
         {
             var key = CreateKey(entry);
@@ -180,12 +150,7 @@ namespace FileContextCore.Storage.Internal
             return false;
         }
 
-        /// <summary>
-        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
-        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
-        ///     any release. You should only use it directly in your code with extreme caution and knowing that
-        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
-        /// </summary>
+    
         public virtual void Update(IUpdateEntry entry)
         {
             var key = CreateKey(entry);

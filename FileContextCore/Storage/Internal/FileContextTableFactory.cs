@@ -18,12 +18,7 @@ using Microsoft.EntityFrameworkCore.Utilities;
 
 namespace FileContextCore.Storage.Internal
 {
-    /// <summary>
-    ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
-    ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
-    ///     any release. You should only use it directly in your code with extreme caution and knowing that
-    ///     doing so can result in application failures when updating to a new Entity Framework Core release.
-    /// </summary>
+
     public class FileContextTableFactory
         // WARNING: The in-memory provider is using EF internal code here. This should not be copied by other providers. See #15096
         : Microsoft.EntityFrameworkCore.ChangeTracking.Internal.IdentityMapFactoryFactoryBase, IFileContextTableFactory
@@ -34,12 +29,7 @@ namespace FileContextCore.Storage.Internal
         private readonly ConcurrentDictionary<IKey, Func<IFileContextTable>> _factories
             = new ConcurrentDictionary<IKey, Func<IFileContextTable>>();
 
-        /// <summary>
-        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
-        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
-        ///     any release. You should only use it directly in your code with extreme caution and knowing that
-        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
-        /// </summary>
+    
         public FileContextTableFactory([NotNull] ILoggingOptions loggingOptions, [NotNull] IFileContextScopedOptions options)
         {
             _options = options;
@@ -48,12 +38,7 @@ namespace FileContextCore.Storage.Internal
             _sensitiveLoggingEnabled = loggingOptions.IsSensitiveDataLoggingEnabled;
         }
 
-        /// <summary>
-        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
-        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
-        ///     any release. You should only use it directly in your code with extreme caution and knowing that
-        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
-        /// </summary>
+    
         public virtual IFileContextTable Create(IEntityType entityType)
             => _factories.GetOrAdd(entityType.FindPrimaryKey(), Create)();
 

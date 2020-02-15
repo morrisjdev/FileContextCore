@@ -16,12 +16,7 @@ using Microsoft.EntityFrameworkCore.Update;
 
 namespace FileContextCore.Storage.Internal
 {
-    /// <summary>
-    ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
-    ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
-    ///     any release. You should only use it directly in your code with extreme caution and knowing that
-    ///     doing so can result in application failures when updating to a new Entity Framework Core release.
-    /// </summary>
+
     public class FileContextStore : IFileContextStore
     {
         private readonly IFileContextTableFactory _tableFactory;
@@ -31,23 +26,13 @@ namespace FileContextCore.Storage.Internal
 
         private Dictionary<object, IFileContextTable> _tables;
 
-        /// <summary>
-        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
-        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
-        ///     any release. You should only use it directly in your code with extreme caution and knowing that
-        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
-        /// </summary>
+    
         public FileContextStore([NotNull] IFileContextTableFactory tableFactory)
             : this(tableFactory, useNameMatching: false)
         {
         }
 
-        /// <summary>
-        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
-        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
-        ///     any release. You should only use it directly in your code with extreme caution and knowing that
-        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
-        /// </summary>
+    
         public FileContextStore(
             [NotNull] IFileContextTableFactory tableFactory,
             bool useNameMatching)
@@ -56,12 +41,7 @@ namespace FileContextCore.Storage.Internal
             _useNameMatching = useNameMatching;
         }
 
-        /// <summary>
-        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
-        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
-        ///     any release. You should only use it directly in your code with extreme caution and knowing that
-        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
-        /// </summary>
+    
         public virtual FileContextIntegerValueGenerator<TProperty> GetIntegerValueGenerator<TProperty>(
             IProperty property)
         {
@@ -74,12 +54,7 @@ namespace FileContextCore.Storage.Internal
             }
         }
 
-        /// <summary>
-        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
-        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
-        ///     any release. You should only use it directly in your code with extreme caution and knowing that
-        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
-        /// </summary>
+    
         public virtual bool EnsureCreated(
             IUpdateAdapterFactory updateAdapterFactory,
             IDiagnosticsLogger<DbLoggerCategory.Update> updateLogger)
@@ -111,12 +86,7 @@ namespace FileContextCore.Storage.Internal
             }
         }
 
-        /// <summary>
-        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
-        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
-        ///     any release. You should only use it directly in your code with extreme caution and knowing that
-        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
-        /// </summary>
+    
         public virtual bool Clear()
         {
             lock (_lock)
@@ -135,12 +105,7 @@ namespace FileContextCore.Storage.Internal
         private static Dictionary<object, IFileContextTable> CreateTables()
             => new Dictionary<object, IFileContextTable>();
 
-        /// <summary>
-        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
-        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
-        ///     any release. You should only use it directly in your code with extreme caution and knowing that
-        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
-        /// </summary>
+    
         public virtual IReadOnlyList<FileContextTableSnapshot> GetTables(IEntityType entityType)
         {
             var data = new List<FileContextTableSnapshot>();
@@ -157,12 +122,7 @@ namespace FileContextCore.Storage.Internal
             return data;
         }
 
-        /// <summary>
-        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
-        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
-        ///     any release. You should only use it directly in your code with extreme caution and knowing that
-        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
-        /// </summary>
+    
         public virtual int ExecuteTransaction(
             IList<IUpdateEntry> entries,
             IDiagnosticsLogger<DbLoggerCategory.Update> updateLogger)

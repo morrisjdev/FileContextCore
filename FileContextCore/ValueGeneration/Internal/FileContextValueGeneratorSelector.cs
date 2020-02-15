@@ -34,12 +34,7 @@ namespace FileContextCore.ValueGeneration.Internal
     {
         private readonly IFileContextStore _inMemoryStore;
 
-        /// <summary>
-        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
-        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
-        ///     any release. You should only use it directly in your code with extreme caution and knowing that
-        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
-        /// </summary>
+    
         public FileContextValueGeneratorSelector(
             [NotNull] ValueGeneratorSelectorDependencies dependencies,
             [NotNull] IFileContextDatabase inMemoryDatabase)
@@ -48,12 +43,7 @@ namespace FileContextCore.ValueGeneration.Internal
             _inMemoryStore = inMemoryDatabase.Store;
         }
 
-        /// <summary>
-        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
-        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
-        ///     any release. You should only use it directly in your code with extreme caution and knowing that
-        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
-        /// </summary>
+    
         public override ValueGenerator Select(IProperty property, IEntityType entityType)
         {
             Check.NotNull(property, nameof(property));
@@ -66,12 +56,7 @@ namespace FileContextCore.ValueGeneration.Internal
                 : base.Select(property, entityType);
         }
 
-        /// <summary>
-        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
-        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
-        ///     any release. You should only use it directly in your code with extreme caution and knowing that
-        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
-        /// </summary>
+    
         private ValueGenerator GetOrCreate(IProperty property)
         {
             Check.NotNull(property, nameof(property));
