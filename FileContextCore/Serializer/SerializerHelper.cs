@@ -48,6 +48,10 @@ namespace FileContextCore.Serializer
                 return arr.ToArray();
             }
             
+            if (type.IsEnum)
+            {
+                return Enum.Parse(type, input);
+            }
 
             return Convert.ChangeType(input, type, CultureInfo.InvariantCulture);
         }
