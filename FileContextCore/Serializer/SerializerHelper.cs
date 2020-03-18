@@ -13,12 +13,12 @@ namespace FileContextCore.Serializer
     {
         public static object Deserialize(this string input, Type type)
         {
-	        type = Nullable.GetUnderlyingType(type) ?? type;
-
             if (string.IsNullOrEmpty(input))
             {
                 return type.GetDefaultValue();
             }
+
+	    type = Nullable.GetUnderlyingType(type) ?? type;
 
             if (type == typeof(DateTimeOffset))
             {
