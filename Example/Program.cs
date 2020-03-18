@@ -49,7 +49,9 @@ namespace Example
             User us = new User()
             {
                 Name = "Morris Janatzek",
-                Username = ""
+                Username = "",
+                Type = User.UserType.Manager,
+                Test = 2
             };
 
             db.Users.Add(us);
