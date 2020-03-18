@@ -18,7 +18,7 @@ namespace FileContextCore.Serializer
                 return type.GetDefaultValue();
             }
 
-	    type = Nullable.GetUnderlyingType(type) ?? type;
+            type = Nullable.GetUnderlyingType(type) ?? type;
 
             if (type == typeof(DateTimeOffset))
             {
@@ -29,12 +29,12 @@ namespace FileContextCore.Serializer
             {
                 return TimeSpan.Parse(input, CultureInfo.InvariantCulture);
             }
-            
+
             if (type == typeof(Guid))
             {
                 return Guid.Parse(input);
             }
-            
+
             if (type.IsArray)
             {
                 Type arrType = type.GetElementType();
@@ -47,7 +47,7 @@ namespace FileContextCore.Serializer
 
                 return arr.ToArray();
             }
-            
+
             if (type.IsEnum)
             {
                 return Enum.Parse(type, input);
@@ -64,7 +64,7 @@ namespace FileContextCore.Serializer
                 {
                     string result = "";
 
-                    object[] arr = (object[])input;
+                    object[] arr = (object[]) input;
 
                     for (int i = 0; i < arr.Length; i++)
                     {
@@ -79,15 +79,18 @@ namespace FileContextCore.Serializer
                     return result;
                 }
 
-				return input is IFormattable formattable ? formattable.ToString(null, CultureInfo.InvariantCulture) : input.ToString();
-			}
+                return input is IFormattable formattable
+                    ? formattable.ToString(null, CultureInfo.InvariantCulture)
+                    : input.ToString();
+            }
 
             return "";
         }
 
-        public static TKey GetKey<TKey, T>(IPrincipalKeyValueFactory<T> keyValueFactory, IEntityType entityType, Func<string, string> valueSelector)
+        public static TKey GetKey<TKey, T>(IPrincipalKeyValueFactory<T> keyValueFactory, IEntityType entityType,
+            Func<string, string> valueSelector)
         {
-            return (TKey)keyValueFactory.CreateFromKeyValues(
+            return (TKey) keyValueFactory.CreateFromKeyValues(
                 entityType.FindPrimaryKey().Properties
                     .Select(p =>
                         valueSelector(p.GetColumnName())
