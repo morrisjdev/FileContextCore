@@ -25,6 +25,8 @@ namespace Example.Data.Entities
         [NotMapped]
         public string Ignored { get; set; }
 
+        public UserType Type { get; set; }
+        
         public Guid Test2 { get; set; }
 
         [NotMapped]
@@ -47,5 +49,10 @@ namespace Example.Data.Entities
         public virtual List<Content> Contents { get; set; }
 
         public virtual List<Setting> Settings { get; set; }
+
+        public enum UserType
+        {
+            Admin, User, Manager
+        }
     }
 }
