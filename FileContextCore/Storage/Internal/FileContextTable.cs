@@ -35,7 +35,7 @@ namespace FileContextCore.Storage.Internal
         private readonly Dictionary<TKey, object[]> _rows;
 
         private IFileManager fileManager;
-        private ISerializer serializer;
+        private ISerializer<TKey> serializer;
         private string filetype;
 
         private Dictionary<int, IFileContextIntegerValueGenerator> _integerGenerators;
@@ -246,20 +246,22 @@ namespace FileContextCore.Storage.Internal
         {
             if (_options.Serializer == "xml")
             {
-                serializer = new XMLSerializer<TKey>(_entityType, _keyValueFactory);
+                serializer = new XMLSerializer<TKey>();
             }
             else if (_options.Serializer == "bson")
             {
-                serializer = new BSONSerializer<TKey>(_entityType, _keyValueFactory);
+                serializer = new BSONSerializer<TKey>();
             }
             else if (_options.Serializer == "csv")
             {
-                serializer = new CSVSerializer<TKey>(_entityType, _keyValueFactory);
+                serializer = new CSVSerializer<TKey>();
             }
             else
             {
-                serializer = new JSONSerializer<TKey>(_entityType, _keyValueFactory);
+                serializer = new JSONSerializer<TKey>();
             }
+            
+            serializer.Initialize(_entityType, _keyValueFactory);
         }
 
         private Action<Dictionary<TKey, object[]>> UpdateMethod;

@@ -36,7 +36,7 @@ namespace FileContextCore.FileManager
 
             Directory.CreateDirectory(path);
 
-            return Path.Combine(path, name + "." + filetype + ".crypted");
+            return Path.Combine(path, name + "." + filetype + ".encrypted");
         }
 
         public string LoadContent()

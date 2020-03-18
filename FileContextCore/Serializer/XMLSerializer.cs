@@ -12,21 +12,23 @@ using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 
 namespace FileContextCore.Serializer
 {
-    class XMLSerializer<T> : ISerializer
+    class XMLSerializer<T> : ISerializer<T>
     {
         private IEntityType entityType;
-        private readonly IPrincipalKeyValueFactory<T> _keyValueFactory;
+        private IPrincipalKeyValueFactory<T> _keyValueFactory;
         private string[] propertyKeys;
-        private readonly Type[] typeList;
+        private Type[] typeList;
 
-        public XMLSerializer(IEntityType _entityType, IPrincipalKeyValueFactory<T> _keyValueFactory)
+        public XMLSerializer() { }
+
+        public void Initialize(IEntityType _entityType, IPrincipalKeyValueFactory<T> _keyValueFactory)
         {
             entityType = _entityType;
             this._keyValueFactory = _keyValueFactory;
             propertyKeys = entityType.GetProperties().Select(p => p.GetColumnName()).ToArray();
             typeList = entityType.GetProperties().Select(p => p.GetValueConverter()?.ProviderClrType ?? p.ClrType).ToArray();
         }
-
+        
         public Dictionary<TKey, object[]> Deserialize<TKey>(string list, Dictionary<TKey, object[]> newList)
         {
             if (list != "")

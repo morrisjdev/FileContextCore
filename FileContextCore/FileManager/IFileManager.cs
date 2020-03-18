@@ -1,6 +1,6 @@
 ﻿namespace FileContextCore.FileManager
 {
-    interface IFileManager
+    public interface IFileManager
     {
         string GetFileName();
 

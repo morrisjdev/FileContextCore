@@ -8,14 +8,16 @@ using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 
 namespace FileContextCore.Serializer
 {
-    class JSONSerializer<T> : ISerializer
+    class JSONSerializer<T> : ISerializer<T>
     {
         private IEntityType entityType;
-        private readonly IPrincipalKeyValueFactory<T> _keyValueFactory;
+        private IPrincipalKeyValueFactory<T> _keyValueFactory;
         private string[] propertyKeys;
-        private readonly Type[] typeList;
+        private Type[] typeList;
 
-        public JSONSerializer(IEntityType _entityType, IPrincipalKeyValueFactory<T> _keyValueFactory)
+        public JSONSerializer() { }
+        
+        public void Initialize(IEntityType _entityType, IPrincipalKeyValueFactory<T> _keyValueFactory)
         {
             entityType = _entityType;
             this._keyValueFactory = _keyValueFactory;
