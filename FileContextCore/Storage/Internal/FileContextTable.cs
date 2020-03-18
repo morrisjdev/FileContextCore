@@ -54,7 +54,6 @@ namespace FileContextCore.Storage.Internal
             _options = options;
 
             _rows = Init();
-            //_rows = new Dictionary<TKey, object[]>(keyValueFactory.EqualityComparer);
         }
 
     

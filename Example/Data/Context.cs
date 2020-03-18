@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.IO;
+using Microsoft.EntityFrameworkCore;
 using Example.Data.Entities;
 using FileContextCore;
 
@@ -44,6 +45,8 @@ namespace Example.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<User>()
+                .ToTable("custom_user_table");
         }
     }
 }

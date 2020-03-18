@@ -11,6 +11,11 @@ namespace FileContextCore
         {
             foreach (char c in Path.GetInvalidFileNameChars())
             {
+                if (c == '\\' || c == '/')
+                {
+                    continue;
+                }
+                
                 input = input.Replace(c, '_');
             }
 
