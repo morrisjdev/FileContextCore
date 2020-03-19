@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Example", "Example\Example.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASPNETDemo", "ASPNETDemo\ASPNETDemo.csproj", "{8E6BFB30-5AF1-46EF-81B7-A8200616E45A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CascadeExample", "CascadeExample\CascadeExample.csproj", "{3D51BF95-B38E-4221-AAAE-5D093FD163DA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{8E6BFB30-5AF1-46EF-81B7-A8200616E45A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8E6BFB30-5AF1-46EF-81B7-A8200616E45A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E6BFB30-5AF1-46EF-81B7-A8200616E45A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3D51BF95-B38E-4221-AAAE-5D093FD163DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D51BF95-B38E-4221-AAAE-5D093FD163DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D51BF95-B38E-4221-AAAE-5D093FD163DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D51BF95-B38E-4221-AAAE-5D093FD163DA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
