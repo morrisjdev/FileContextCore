@@ -1,9 +1,6 @@
-﻿using System.IO;
-using Microsoft.EntityFrameworkCore;
-using Example.Data.Entities;
+﻿using Example.Data.Entities;
 using FileContextCore;
-using FileContextCore.FileManager;
-using FileContextCore.Serializer;
+using Microsoft.EntityFrameworkCore;
 
 namespace Example.Data
 {
@@ -23,28 +20,28 @@ namespace Example.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            //Default: JSON-Serialize
-            // optionsBuilder.UseFileContextDatabase();
+            //Default: JSON-Serializer
+            optionsBuilder.UseFileContextDatabase();
 
             // optionsBuilder.UseFileContextDatabase<JSONSerializer, DefaultFileManager>();
 
-            //optionsBuilder.UseFileContextDatabase("bson");
+            // optionsBuilder.UseFileContextDatabase<BSONSerializer, DefaultFileManager>();
 
             //JSON-Serialize + simple Encryption
-            //optionsBuilder.UseFileContextDatabase("json", "encrypted");
+            // optionsBuilder.UseFileContextDatabase<JSONSerializer, EncryptedFileManager>();
 
             //XML
-            //optionsBuilder.UseFileContextDatabase("xml");
-            //optionsBuilder.UseFileContextDatabase("xml", "private");
+            // optionsBuilder.UseFileContextDatabase<XMLSerializer, DefaultFileManager>();
+            // optionsBuilder.UseFileContextDatabase<XMLSerializer, PrivateFileManager>();
 
             //CSV
-            //optionsBuilder.UseFileContextDatabase("csv", location: @"D:\t");
+            // optionsBuilder.UseFileContextDatabase<CSVSerializer, DefaultFileManager>();
+
+            //Custom location
+            // optionsBuilder.UseFileContextDatabase(location: @"D:\t");
 
             //Excel
-            //optionsBuilder.UseFileContextDatabase("excel", databaseName: "test");
-
-            //ConnectionString
-            //optionsBuilder.UseFileContextDatabaseConnectionString("SeriAlizer=xml;databasenaMe=Test");
+            // optionsBuilder.UseFileContextDatabase<EXCELStoreManager>(databaseName: "test");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -8,15 +8,15 @@ This framework bases on the idea of FileContext by DevMentor ([https://github.co
 ## Advantages
 
 - No database needed
-- easy configuration
-- rapid data-modelling, -modification
-- share data through version-control
-- supports all serializable .NET types
-- integrates seamlessly into EF Core
-- different serializer supported (XML, JSON, CSV, Excel)
-- supports encryption
-- supports relations
-- supports multiple databases
+- Easy configuration
+- Rapid data-modelling, -modification
+- Share data through version-control
+- Supports all serializable .NET types
+- Integrates seamlessly into EF Core
+- Different serializer supported (XML, JSON, CSV, Excel)
+- Supports encryption
+- Supports relations
+- Supports multiple databases
 
 !This extension is not intended to be used in production systems!
 
@@ -75,7 +75,7 @@ You can use a different serializer to support other serialization methods.
 Serializes data using System.XML
 
 ```cs
-optionsBuilder.UseFileContextDatabase("xml");
+optionsBuilder.UseFileContextDatabase<XMLSerializer, DefaultFileManager>();
 ```
 
 ### CSVSerializer
@@ -83,7 +83,7 @@ optionsBuilder.UseFileContextDatabase("xml");
 Serializes data using CsvHelper ([https://joshclose.github.io/CsvHelper/](https://joshclose.github.io/CsvHelper/))
 
 ```cs
-optionsBuilder.UseFileContextDatabase("csv");
+optionsBuilder.UseFileContextDatabase<CSVSerializer, DefaultFileManager>();
 ```
 
 ### JSONSerializer
@@ -91,7 +91,7 @@ optionsBuilder.UseFileContextDatabase("csv");
 Serializes data using Newtonsoft Json.NET ([http://www.newtonsoft.com/json](http://www.newtonsoft.com/json))
 
 ```cs
-optionsBuilder.UseFileContextDatabase("json");
+optionsBuilder.UseFileContextDatabase<JSONSerializer, DefaultFileManager>();
 ```
 or just
 ```
@@ -103,7 +103,7 @@ optionsBuilder.UseFileContextDatabase();
 Serializes data to bson using Newtonsoft Json.NET ([http://www.newtonsoft.com/json](http://www.newtonsoft.com/json))
 
 ```cs
-optionsBuilder.UseFileContextDatabase("bson");
+optionsBuilder.UseFileContextDatabase<BSONSerializer, DefaultFileManager>();
 ```
 
 ### EXCELSerializer
@@ -113,12 +113,12 @@ Saves files into an .xlsx-file and enables the quick editing of the data using E
 Uses [EEPlus](http://epplus.codeplex.com/documentation) implementation for .Net Core ([https://github.com/VahidN/EPPlus.Core](https://github.com/VahidN/EPPlus.Core))
 
 ```cs
-optionsBuilder.UseFileContextDatabase("excel");
+optionsBuilder.UseFileContextDatabase<EXCELStoreManager>();
 ```
 
 If you want to secure the excel file with a password use:
 ```cs
-optionsBuilder.UseFileContextDatabase("excel:<password>");
+optionsBuilder.UseFileContextDatabase<EXCELStoreManager>(password: "<password>");
 ```
 
 To run on Linux-Systems
@@ -136,7 +136,7 @@ The file manager controls how the files are stored.
 The default file manager just creates normal files.
 
 ```cs
-optionsBuilder.UseFileContextDatabase("json", "default");
+optionsBuilder.UseFileContextDatabase<JSONSerializer, DefaultFileManager>();
 ```
 
 ### EncryptedFileManager
@@ -144,17 +144,8 @@ optionsBuilder.UseFileContextDatabase("json", "default");
 The encrypted file manager encrypts the files with a password.
 
 ```cs
-optionsBuilder.UseFileContextDatabase("json", "encrypted:<password>");
+optionsBuilder.UseFileContextDatabase<JSONSerializer, EncryptedFileManager>(password: "<password>");
 ```
-
-## Configuration string
-
-If you want to define the options of file context in a single string you can use the default connection string syntax of databases.
-
-```css
-optionsBuilder.UseFileContextDatabaseConnectionString("serializer=xml;databasename=Test;location:test;filemanager:default");
-```
-
 
 ## Custom file-location
 
@@ -175,13 +166,41 @@ So you are able to use FileContext with multiple DbContext-configurations.
 optionsBuilder.UseFileContextDatabase(databasename: "database");
 ```
 
+## Custom provider
+
+You can create custom serializer, file manager and store manager if you want.
+
+If you want to create a custom serializer implement the interface `ISerializer`.
+
+If you want to control storing of data implement interface `IFileManager`.
+
+If you want to create a store manager that does both implement `IStoreManager`.
+
+Feel free to create a PR with your new provider and I'll add it to FileContextCore.
+
 ## Version compability
 
 | FileContext Version | EF Core Version |
 |---------------------|-----------------|
+| 3.3.*              | 3.0.0           |
 | 3.2.*              | 3.0.0           |
 | 3.0.1/3.0.0/2.2.6   | 2.2.6           |
 | 2.2.0               | 2.2.0           |
+
+## Custom table/file name
+
+It seems that EF Core currently does not support to define a custom table name using annotations on models.
+Use the `OnModelCreating`-method to define a custom table name.
+
+````c#
+protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+    modelBuilder.Entity<User>()
+        .ToTable("custom_user_table");
+}
+````
+
+This will store the data in a file called `custom_user_table.json` for example.
 
 ## Author
 

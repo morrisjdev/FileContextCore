@@ -65,10 +65,8 @@ namespace FileContextCore.StoreManager
             {
                 _package = _packages[options.DatabaseName];
             }
-
-            string[] nameParts = entityType.Name.Split('.');
-            string name = nameParts[nameParts.Length - 1];
-
+            
+            string name = entityType.GetTableName();
             _worksheet = _package.Workbook.Worksheets[name];
 
             if (_worksheet == null)
