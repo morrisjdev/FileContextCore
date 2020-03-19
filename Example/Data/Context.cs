@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Example.Data.Entities;
 using FileContextCore;
+using FileContextCore.FileManager;
+using FileContextCore.Serializer;
 
 namespace Example.Data
 {
@@ -22,7 +24,9 @@ namespace Example.Data
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             //Default: JSON-Serialize
-            optionsBuilder.UseFileContextDatabase();
+            // optionsBuilder.UseFileContextDatabase();
+
+            // optionsBuilder.UseFileContextDatabase<JSONSerializer, DefaultFileManager>();
 
             //optionsBuilder.UseFileContextDatabase("bson");
 

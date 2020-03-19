@@ -3,26 +3,25 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using FileContextCore.Infrastructure.Internal;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 
 namespace FileContextCore.Serializer
 {
-    class JSONSerializer<T> : ISerializer<T>
+    public class JSONSerializer : ISerializer
     {
-        private IEntityType entityType;
-        private IPrincipalKeyValueFactory<T> _keyValueFactory;
-        private string[] propertyKeys;
-        private Type[] typeList;
-
-        public JSONSerializer() { }
+        private IEntityType _entityType;
+        private object _keyValueFactory;
+        private string[] _propertyKeys;
+        private Type[] _typeList;
         
-        public void Initialize(IEntityType _entityType, IPrincipalKeyValueFactory<T> _keyValueFactory)
+        public void Initialize(IFileContextScopedOptions _, IEntityType entityType, object keyValueFactory)
         {
-            entityType = _entityType;
-            this._keyValueFactory = _keyValueFactory;
-            propertyKeys = entityType.GetProperties().Select(p => p.GetColumnName()).ToArray();
-            typeList = entityType.GetProperties().Select(p => p.GetValueConverter()?.ProviderClrType ?? p.ClrType).ToArray();
+            _keyValueFactory = keyValueFactory;
+            _entityType = entityType;
+            _propertyKeys = _entityType.GetProperties().Select(p => p.GetColumnName()).ToArray();
+            _typeList = _entityType.GetProperties().Select(p => p.GetValueConverter()?.ProviderClrType ?? p.ClrType).ToArray();
         }
 
         public Dictionary<TKey, object[]> Deserialize<TKey>(string list, Dictionary<TKey, object[]> newList)
@@ -31,17 +30,18 @@ namespace FileContextCore.Serializer
             {
                 JArray array = JArray.Parse(list);
 
-                foreach (JObject json in array)
+                foreach (var jToken in array)
                 {
+                    var json = (JObject) jToken;
                     List<object> value = new List<object>();
 
-                    for (int i = 0; i < propertyKeys.Length; i++)
+                    for (int i = 0; i < _propertyKeys.Length; i++)
                     {
-                        object val = json.Value<string>(propertyKeys[i]).Deserialize(typeList[i]);
+                        object val = json.Value<string>(_propertyKeys[i]).Deserialize(_typeList[i]);
                         value.Add(val);
                     }
 
-                    TKey key = SerializerHelper.GetKey<TKey, T>(_keyValueFactory, entityType,
+                    TKey key = SerializerHelper.GetKey<TKey>(_keyValueFactory, _entityType,
                         propertyName => json.Value<string>(propertyName));
 
                     newList.Add(key, value.ToArray());
@@ -59,9 +59,9 @@ namespace FileContextCore.Serializer
             {
                 JObject json = new JObject();
 
-                for (int i = 0; i < propertyKeys.Length; i++)
+                for (int i = 0; i < _propertyKeys.Length; i++)
                 {
-                    JProperty property = new JProperty(propertyKeys[i], val.Value[i].Serialize());
+                    JProperty property = new JProperty(_propertyKeys[i], val.Value[i].Serialize());
                     json.Add(property);
                 }
 
@@ -70,5 +70,7 @@ namespace FileContextCore.Serializer
 
             return array.ToString();
         }
+
+        public string FileType => "json";
     }
 }

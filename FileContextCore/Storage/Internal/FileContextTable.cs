@@ -12,6 +12,7 @@ using FileContextCore.FileManager;
 using FileContextCore.Infrastructure.Internal;
 using FileContextCore.Internal;
 using FileContextCore.Serializer;
+using FileContextCore.StoreManager;
 using FileContextCore.Utilities;
 using FileContextCore.ValueGeneration.Internal;
 using JetBrains.Annotations;
@@ -34,13 +35,10 @@ namespace FileContextCore.Storage.Internal
         private readonly IFileContextScopedOptions _options;
         private readonly Dictionary<TKey, object[]> _rows;
 
-        private IFileManager fileManager;
-        private ISerializer<TKey> serializer;
-        private string filetype;
+        private IStoreManager _storeManager;
 
         private Dictionary<int, IFileContextIntegerValueGenerator> _integerGenerators;
 
-    
         public FileContextTable(
             // WARNING: The in-memory provider is using EF internal code here. This should not be copied by other providers. See #15096
             [NotNull] Microsoft.EntityFrameworkCore.ChangeTracking.Internal.IPrincipalKeyValueFactory<TKey> keyValueFactory,
@@ -211,7 +209,7 @@ namespace FileContextCore.Storage.Internal
 
         public void Save()
         {
-            UpdateMethod(_rows);
+            _storeManager.Serialize(ConvertToProvider(_rows));
         }
 
         /// <summary>
@@ -242,98 +240,13 @@ namespace FileContextCore.Storage.Internal
                 new[] { entry });
         }
 
-        private void InitSerializer()
-        {
-            if (_options.Serializer == "xml")
-            {
-                serializer = new XMLSerializer<TKey>();
-            }
-            else if (_options.Serializer == "bson")
-            {
-                serializer = new BSONSerializer<TKey>();
-            }
-            else if (_options.Serializer == "csv")
-            {
-                serializer = new CSVSerializer<TKey>();
-            }
-            else
-            {
-                serializer = new JSONSerializer<TKey>();
-            }
-            
-            serializer.Initialize(_entityType, _keyValueFactory);
-        }
-
-        private Action<Dictionary<TKey, object[]>> UpdateMethod;
-
-        private void InitFileManager()
-        {
-            string fmgr = _options.FileManager ?? "default";
-
-            if (fmgr.Length >= 9 && fmgr.Substring(0, 9) == "encrypted")
-            {
-                string password = "";
-
-                if (fmgr.Length > 9)
-                {
-                    password = fmgr.Substring(10);
-                }
-
-                fileManager = new EncryptedFileManager(_entityType, filetype, password, _options.DatabaseName, _options.Location);
-            }
-            else if (fmgr == "private")
-            {
-                fileManager = new PrivateFileManager(_entityType, filetype, _options.DatabaseName, _options.Location);
-            }
-            else
-            {
-                fileManager = new DefaultFileManager(_entityType, filetype, _options.DatabaseName, _options.Location);
-            }
-        }
-
         private Dictionary<TKey, object[]> Init()
         {
-            filetype = _options.Serializer ?? "json";
+            _storeManager = (IStoreManager)Activator.CreateInstance(_options.StoreManagerType);
+            _storeManager.Initialize(_options, _entityType, _keyValueFactory);
 
-            if (filetype.Length >= 5 && filetype.Substring(0, 5) == "excel")
-            {
-                return InitExcel(filetype);
-            }
-
-            InitSerializer();
-            InitFileManager();
-
-            UpdateMethod = new Action<Dictionary<TKey, object[]>>((list) =>
-            {
-                string cnt = serializer.Serialize(ConvertToProvider(list));
-                fileManager.SaveContent(cnt);
-            });
-
-            string content = fileManager.LoadContent();
             Dictionary<TKey, object[]> newList = new Dictionary<TKey, object[]>(_keyValueFactory.EqualityComparer);
-            Dictionary<TKey, object[]> result = ConvertFromProvider(serializer.Deserialize(content, newList));
-            return result;
-        }
-
-        private Dictionary<TKey, object[]> InitExcel(string filetype)
-        {
-            string password = "";
-
-            if (filetype.Length > 5)
-            {
-                password = filetype.Substring(6);
-            }
-
-            EXCELSerializer<TKey> excel = new EXCELSerializer<TKey>(_entityType, password, _options.DatabaseName, _options.Location, _keyValueFactory);
-
-            UpdateMethod = new Action<Dictionary<TKey, object[]>>((list) =>
-            {
-                excel.Serialize(ConvertToProvider(list));
-            });
-
-            Dictionary<TKey, object[]> newlist = new Dictionary<TKey, object[]>(_keyValueFactory.EqualityComparer);
-            Dictionary<TKey, object[]> excelresult = excel.Deserialize(newlist);
-            return excelresult;
+            return ConvertFromProvider(_storeManager.Deserialize(newList));
         }
 
         private Dictionary<TKey, object[]> ApplyValueConverter(Dictionary<TKey, object[]> list, Func<ValueConverter, Func<object, object>> conversionFunc)

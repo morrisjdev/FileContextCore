@@ -1,31 +1,29 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata;
-using Newtonsoft.Json.Bson;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
+using FileContextCore.Infrastructure.Internal;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Bson;
+using Newtonsoft.Json.Linq;
 
 namespace FileContextCore.Serializer
 {
-    class BSONSerializer<T> : ISerializer<T>
+    public class BSONSerializer : ISerializer
     {
-        private IEntityType entityType;
-        private IPrincipalKeyValueFactory<T> _keyValueFactory;
-        private string[] propertyKeys;
-        private Type[] typeList;
+        private IEntityType _entityType;
+        private object _keyValueFactory;
+        private string[] _propertyKeys;
+        private Type[] _typeList;
 
-        public BSONSerializer() { }
-
-        public void Initialize(IEntityType _entityType, IPrincipalKeyValueFactory<T> _keyValueFactory)
+        public void Initialize(IFileContextScopedOptions options, IEntityType entityType, object keyValueFactory)
         {
-            entityType = _entityType;
-            this._keyValueFactory = _keyValueFactory;
-            propertyKeys = entityType.GetProperties().Select(p => p.GetColumnName()).ToArray();
-            typeList = entityType.GetProperties().Select(p => p.GetValueConverter()?.ProviderClrType ?? p.ClrType).ToArray();
+            _entityType = entityType;
+            _keyValueFactory = keyValueFactory;
+            _propertyKeys = _entityType.GetProperties().Select(p => p.GetColumnName()).ToArray();
+            _typeList = _entityType.GetProperties().Select(p => p.GetValueConverter()?.ProviderClrType ?? p.ClrType).ToArray();
         }
         
         public Dictionary<TKey, object[]> Deserialize<TKey>(string list, Dictionary<TKey, object[]> newList)
@@ -36,7 +34,7 @@ namespace FileContextCore.Serializer
 
             using(BsonDataReader reader = new BsonDataReader(ms))
             {
-                Newtonsoft.Json.JsonSerializer serializer = new Newtonsoft.Json.JsonSerializer();
+                JsonSerializer serializer = new JsonSerializer();
                 JObject array = serializer.Deserialize<JObject>(reader);
 
                 if (array != null)
@@ -57,14 +55,14 @@ namespace FileContextCore.Serializer
             {
                 JObject json = (JObject)current.Value;
 
-                TKey key = SerializerHelper.GetKey<TKey, T>(_keyValueFactory, entityType,
+                TKey key = SerializerHelper.GetKey<TKey>(_keyValueFactory, _entityType,
                     propertyName => json.Value<string>(propertyName));
 
                 List<object> value = new List<object>();
 
-                for (int i = 0; i < propertyKeys.Length; i++)
+                for (int i = 0; i < _propertyKeys.Length; i++)
                 {
-                    object val = json.Value<string>(propertyKeys[i]).Deserialize(typeList[i]);
+                    object val = json.Value<string>(_propertyKeys[i]).Deserialize(_typeList[i]);
                     value.Add(val);
                 }
 
@@ -86,9 +84,9 @@ namespace FileContextCore.Serializer
                 {
                     writer.WriteStartObject();
 
-                    for (int i = 0; i < propertyKeys.Length; i++)
+                    for (int i = 0; i < _propertyKeys.Length; i++)
                     {
-                        writer.WritePropertyName(propertyKeys[i]);
+                        writer.WritePropertyName(_propertyKeys[i]);
                         writer.WriteValue(val.Value[i].Serialize());
                     }
 
@@ -100,5 +98,7 @@ namespace FileContextCore.Serializer
 
             return Convert.ToBase64String(ms.ToArray());
         }
+
+        public string FileType => "bson";
     }
 }

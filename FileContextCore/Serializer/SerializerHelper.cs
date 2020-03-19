@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace FileContextCore.Serializer
 {
-    static class SerializerHelper
+    public static class SerializerHelper
     {
         public static object Deserialize(this string input, Type type)
         {
@@ -87,9 +87,11 @@ namespace FileContextCore.Serializer
             return "";
         }
 
-        public static TKey GetKey<TKey, T>(IPrincipalKeyValueFactory<T> keyValueFactory, IEntityType entityType,
+        public static TKey GetKey<TKey>(object keyValueFactoryObject, IEntityType entityType,
             Func<string, string> valueSelector)
         {
+            IPrincipalKeyValueFactory<TKey> keyValueFactory = (IPrincipalKeyValueFactory<TKey>) keyValueFactoryObject;
+            
             return (TKey) keyValueFactory.CreateFromKeyValues(
                 entityType.FindPrimaryKey().Properties
                     .Select(p =>

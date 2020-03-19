@@ -3,45 +3,46 @@ using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using FileContextCore.Infrastructure.Internal;
 using Microsoft.EntityFrameworkCore;
 
 namespace FileContextCore.FileManager
 {
-    class EncryptedFileManager : IFileManager
+    public class EncryptedFileManager : IFileManager
     {
-        private readonly object thisLock = new object();
+        private readonly object _thisLock = new object();
 
-        IEntityType type;
-        private readonly string filetype;
-        private readonly string key;
-		private readonly string databasename;
-        private readonly string _location;
+        IEntityType _type;
+        private string _filetype;
+        private string _key;
+		private string _databasename;
+        private string _location;
 
-        public EncryptedFileManager(IEntityType _type, string _filetype, string _key, string _databasename, string _location)
+        public void Initialize(IFileContextScopedOptions options, IEntityType entityType, string fileType)
         {
-            type = _type;
-            filetype = _filetype;
-            key = _key;
-			databasename = _databasename ?? "";
-            this._location = _location;
+            _type = entityType;
+            _filetype = fileType;
+            _key = options.Password;
+            _databasename = options.DatabaseName ?? "";
+            _location = options.Location;
         }
-
+        
         public string GetFileName()
         {
-            string name = type.GetTableName().GetValidFileName();
+            string name = _type.GetTableName().GetValidFileName();
 
             string path = string.IsNullOrEmpty(_location)
-                ? Path.Combine(AppContext.BaseDirectory, "appdata", databasename)
+                ? Path.Combine(AppContext.BaseDirectory, "appdata", _databasename)
                 : _location;
 
             Directory.CreateDirectory(path);
 
-            return Path.Combine(path, name + "." + filetype + ".encrypted");
+            return Path.Combine(path, name + "." + _filetype + ".encrypted");
         }
 
         public string LoadContent()
         {
-            lock (thisLock)
+            lock (_thisLock)
             {
                 string path = GetFileName();
 
@@ -56,7 +57,7 @@ namespace FileContextCore.FileManager
 
         public void SaveContent(string content)
         {
-            lock (thisLock)
+            lock (_thisLock)
             {
                 string path = GetFileName();
                 File.WriteAllText(path, Encrypt(content));
@@ -65,7 +66,7 @@ namespace FileContextCore.FileManager
 
         public bool Clear()
         {
-            lock (thisLock)
+            lock (_thisLock)
             {
                 FileInfo fi = new FileInfo(GetFileName());
 
@@ -83,7 +84,7 @@ namespace FileContextCore.FileManager
 
         public bool FileExists()
         {
-            lock (thisLock)
+            lock (_thisLock)
             {
                 FileInfo fi = new FileInfo(GetFileName());
 
@@ -109,7 +110,7 @@ namespace FileContextCore.FileManager
             byte[] cipherBytes = Convert.FromBase64String(str);
             using (Aes encryptor = Aes.Create())
             {
-                Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(key, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
+                Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(_key, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
                 encryptor.Key = pdb.GetBytes(32);
                 encryptor.IV = pdb.GetBytes(16);
                 using (MemoryStream ms = new MemoryStream())
@@ -130,7 +131,7 @@ namespace FileContextCore.FileManager
             byte[] clearBytes = Encoding.Unicode.GetBytes(str);
             using (Aes encryptor = Aes.Create())
             {
-                Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(key, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
+                Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(_key, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
                 encryptor.Key = pdb.GetBytes(32);
                 encryptor.IV = pdb.GetBytes(16);
                 using (MemoryStream ms = new MemoryStream())

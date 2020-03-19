@@ -1,15 +1,15 @@
 ﻿using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
+using FileContextCore.Infrastructure.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace FileContextCore.StoreManager
 {
-    public interface IStoreManager<TKey>
+    public interface IStoreManager
     {
-        void Initialize(IEntityType _entityType, IPrincipalKeyValueFactory<TKey> _keyValueFactory);
+        void Initialize(IFileContextScopedOptions options, IEntityType entityType, object keyValueFactory);
         
-        Dictionary<TKey, object[]> Deserialize(Dictionary<TKey, object[]> newList);
+        Dictionary<TKey, object[]> Deserialize<TKey>(Dictionary<TKey, object[]> newList);
 
-        void Serialize(Dictionary<TKey, object[]> list);
+        void Serialize<TKey>(Dictionary<TKey, object[]> list);
     }
 }

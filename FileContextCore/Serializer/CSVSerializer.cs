@@ -5,28 +5,27 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using FileContextCore.Infrastructure.Internal;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 
 namespace FileContextCore.Serializer
 {
-    class CSVSerializer<T> : ISerializer<T>
+    public class CSVSerializer : ISerializer
     {
-        private IEntityType entityType;
-        private IPrincipalKeyValueFactory<T> _keyValueFactory;
-        private string[] propertyKeys;
-        private Type[] typeList;
+        private IEntityType _entityType;
+        private object _keyValueFactory;
+        private string[] _propertyKeys;
+        private Type[] _typeList;
 
-        public CSVSerializer() { }
-
-        public void Initialize(IEntityType _entityType, IPrincipalKeyValueFactory<T> _keyValueFactory)
+        public void Initialize(IFileContextScopedOptions options, IEntityType entityType, object keyValueFactory)
         {
-            entityType = _entityType;
-            this._keyValueFactory = _keyValueFactory;
-            propertyKeys = entityType.GetProperties().Select(p => p.GetColumnName()).ToArray();
-            typeList = entityType.GetProperties().Select(p => p.GetValueConverter()?.ProviderClrType ?? p.ClrType).ToArray();
+            _keyValueFactory = keyValueFactory;
+            _entityType = entityType;
+            _propertyKeys = entityType.GetProperties().Select(p => p.GetColumnName()).ToArray();
+            _typeList = entityType.GetProperties().Select(p => p.GetValueConverter()?.ProviderClrType ?? p.ClrType).ToArray();
         }
-        
+
         public Dictionary<TKey, object[]> Deserialize<TKey>(string list, Dictionary<TKey, object[]> newList)
         {
             if (string.IsNullOrEmpty(list))
@@ -44,13 +43,13 @@ namespace FileContextCore.Serializer
             {
                 List<object> value = new List<object>();
 
-                for (int i = 0; i < propertyKeys.Length; i++)
+                for (int i = 0; i < _propertyKeys.Length; i++)
                 {
-                    object val = reader.GetField(propertyKeys[i]).Deserialize(typeList[i]);
+                    object val = reader.GetField(_propertyKeys[i]).Deserialize(_typeList[i]);
                     value.Add(val);
                 }
 
-                TKey key = SerializerHelper.GetKey<TKey, T>(_keyValueFactory, entityType,
+                TKey key = SerializerHelper.GetKey<TKey>(_keyValueFactory, _entityType,
                     propertyName => reader.GetField(propertyName));
 
                 newList.Add(key, value.ToArray());
@@ -64,16 +63,16 @@ namespace FileContextCore.Serializer
             StringWriter sw = new StringWriter();
             CsvWriter writer = new CsvWriter(sw);
 
-            for (int i = 0; i < propertyKeys.Length; i++)
+            for (int i = 0; i < _propertyKeys.Length; i++)
             {
-                writer.WriteField(propertyKeys[i]);
+                writer.WriteField(_propertyKeys[i]);
             }
 
             writer.NextRecord();
 
             foreach (KeyValuePair<TKey, object[]> val in list)
             {
-                for (int i = 0; i < propertyKeys.Length; i++)
+                for (int i = 0; i < _propertyKeys.Length; i++)
                 {
                     writer.WriteField(val.Value[i].Serialize());
                 }
@@ -83,5 +82,7 @@ namespace FileContextCore.Serializer
 
             return sw.ToString();
         }
+        
+        public string FileType => "csv";
     }
 }

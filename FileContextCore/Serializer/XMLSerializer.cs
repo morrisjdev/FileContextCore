@@ -7,26 +7,27 @@ using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
+using FileContextCore.Infrastructure.Internal;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 
 namespace FileContextCore.Serializer
 {
-    class XMLSerializer<T> : ISerializer<T>
+    public class XMLSerializer : ISerializer
     {
-        private IEntityType entityType;
-        private IPrincipalKeyValueFactory<T> _keyValueFactory;
-        private string[] propertyKeys;
-        private Type[] typeList;
+        private IEntityType _entityType;
+        private object _keyValueFactory;
+        private string[] _propertyKeys;
+        private Type[] _typeList;
 
         public XMLSerializer() { }
 
-        public void Initialize(IEntityType _entityType, IPrincipalKeyValueFactory<T> _keyValueFactory)
+        public void Initialize(IFileContextScopedOptions options, IEntityType entityType, object keyValueFactory)
         {
-            entityType = _entityType;
-            this._keyValueFactory = _keyValueFactory;
-            propertyKeys = entityType.GetProperties().Select(p => p.GetColumnName()).ToArray();
-            typeList = entityType.GetProperties().Select(p => p.GetValueConverter()?.ProviderClrType ?? p.ClrType).ToArray();
+            _entityType = entityType;
+            _keyValueFactory = keyValueFactory;
+            _propertyKeys = _entityType.GetProperties().Select(p => p.GetColumnName()).ToArray();
+            _typeList = _entityType.GetProperties().Select(p => p.GetValueConverter()?.ProviderClrType ?? p.ClrType).ToArray();
         }
         
         public Dictionary<TKey, object[]> Deserialize<TKey>(string list, Dictionary<TKey, object[]> newList)
@@ -44,12 +45,12 @@ namespace FileContextCore.Serializer
 
                     List<object> value = new List<object>();
 
-                    for (int i = 0; i < propertyKeys.Length; i++)
+                    for (int i = 0; i < _propertyKeys.Length; i++)
                     {
-                        value.Add(values[propertyKeys[i]].Deserialize(typeList[i]));
+                        value.Add(values[_propertyKeys[i]].Deserialize(_typeList[i]));
                     }
 
-                    TKey key = SerializerHelper.GetKey<TKey, T>(_keyValueFactory, entityType, propertyName => values[propertyName]);
+                    TKey key = SerializerHelper.GetKey<TKey>(_keyValueFactory, _entityType, propertyName => values[propertyName]);
 
                     newList.Add(key, value.ToArray());
 
@@ -71,7 +72,7 @@ namespace FileContextCore.Serializer
             writer.WriteStartDocument();
             writer.WriteStartElement("ArrayOfContent");
 
-            string[] nameParts = entityType.Name.Split('.');
+            string[] nameParts = _entityType.Name.Split('.');
             string name = nameParts[nameParts.Length - 1].Replace("<", "").Replace(">", "");
 
             WriteList(writer, name, list);
@@ -83,15 +84,17 @@ namespace FileContextCore.Serializer
             return sw.ToString();
         }
 
+        public string FileType => "xml";
+
         private void WriteList<TKey>(XmlWriter writer, string name, Dictionary<TKey, object[]> list)
         {
             foreach (KeyValuePair<TKey, object[]> val in list)
             {
                 writer.WriteStartElement(name);
 
-                for (int i = 0; i < propertyKeys.Length; i++)
+                for (int i = 0; i < _propertyKeys.Length; i++)
                 {
-                    writer.WriteStartElement(propertyKeys[i]);
+                    writer.WriteStartElement(_propertyKeys[i]);
                     writer.WriteValue(val.Value[i].Serialize());
                     writer.WriteEndElement();
                 }

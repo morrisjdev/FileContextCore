@@ -1,4 +1,7 @@
-﻿namespace FileContextCore.FileManager
+﻿using FileContextCore.Infrastructure.Internal;
+using Microsoft.EntityFrameworkCore.Metadata;
+
+namespace FileContextCore.FileManager
 {
     public interface IFileManager
     {
@@ -11,5 +14,7 @@
         bool Clear();
 
         bool FileExists();
+        
+        void Initialize(IFileContextScopedOptions options, IEntityType entityType, string fileType);
     }
 }

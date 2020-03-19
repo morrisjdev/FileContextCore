@@ -1,29 +1,44 @@
-﻿using System.Collections.Generic;
-using CsvHelper;
+﻿using System;
+using System.Collections.Generic;
 using FileContextCore.FileManager;
+using FileContextCore.Infrastructure.Internal;
 using FileContextCore.Serializer;
-using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace FileContextCore.StoreManager
 {
-    public class DefaultStoreManager<TKey, TSerializer, TFileManager> : IStoreManager<TKey>
-        where TSerializer : ISerializer<TKey>
+    public class DefaultStoreManager<TSerializer, TFileManager> : IStoreManager
+        where TSerializer : ISerializer
         where TFileManager : IFileManager
     {
-        public void Initialize(IEntityType _entityType, IPrincipalKeyValueFactory<TKey> _keyValueFactory)
+        private ISerializer _serializer;
+        private IFileManager _fileManager;
+        private object _keyValueFactory;
+        private IEntityType _entityType;
+        
+        public void Initialize(IFileContextScopedOptions options, IEntityType entityType,
+            object keyValueFactory)
         {
-            throw new System.NotImplementedException();
+            _keyValueFactory = keyValueFactory;
+            _entityType = entityType;
+            
+            _serializer = (ISerializer)Activator.CreateInstance(typeof(TSerializer));
+            _serializer.Initialize(options, _entityType, _keyValueFactory);
+            
+            _fileManager = (IFileManager)Activator.CreateInstance(typeof(TFileManager));
+            _fileManager.Initialize(options, entityType, _serializer.FileType);
         }
 
-        public Dictionary<TKey, object[]> Deserialize(Dictionary<TKey, object[]> newList)
+        public Dictionary<TKey, object[]> Deserialize<TKey>(Dictionary<TKey, object[]> newList)
         {
-            throw new System.NotImplementedException();
+            string content = _fileManager.LoadContent();
+            return _serializer.Deserialize(content, newList);
         }
 
-        public void Serialize(Dictionary<TKey, object[]> list)
+        public void Serialize<TKey>(Dictionary<TKey, object[]> list)
         {
-            throw new System.NotImplementedException();
+            string cnt = _serializer.Serialize(list);
+            _fileManager.SaveContent(cnt);
         }
     }
 }

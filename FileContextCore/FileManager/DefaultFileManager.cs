@@ -1,43 +1,46 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata;
 using System;
 using System.IO;
+using FileContextCore.Infrastructure.Internal;
 using Microsoft.EntityFrameworkCore;
 
 namespace FileContextCore.FileManager
 {
-    class DefaultFileManager : IFileManager
+    public class DefaultFileManager : IFileManager
     {
-        private readonly object thisLock = new object();
+        private readonly object _thisLock = new object();
 
-        IEntityType type;
-        private readonly string filetype;
-		private readonly string databasename;
-        private readonly string _location;
+        IEntityType _type;
+        private string _filetype;
+		private string _databasename;
+        private string _location;
 
-        public DefaultFileManager(IEntityType _type, string _filetype, string _databasename, string location)
+        public DefaultFileManager() { }
+        
+        public void Initialize(IFileContextScopedOptions options, IEntityType entityType, string fileType)
         {
-            type = _type;
-            filetype = _filetype;
-			databasename = _databasename ?? "";
-            _location = location;
+            _type = entityType;
+            _filetype = fileType;
+            _databasename = options.DatabaseName ?? "";
+            _location = options.Location;
         }
 
         public string GetFileName()
         {
-            string name = type.GetTableName().GetValidFileName();
+            string name = _type.GetTableName().GetValidFileName();
 
             string path = string.IsNullOrEmpty(_location)
-                ? Path.Combine(AppContext.BaseDirectory, "appdata", databasename)
+                ? Path.Combine(AppContext.BaseDirectory, "appdata", _databasename)
                 : _location;
 
             Directory.CreateDirectory(path);
 
-            return Path.Combine(path, name + "." + filetype);
+            return Path.Combine(path, name + "." + _filetype);
         }
 
         public string LoadContent()
         {
-            lock (thisLock)
+            lock (_thisLock)
             {
                 string path = GetFileName();
 
@@ -52,7 +55,7 @@ namespace FileContextCore.FileManager
 
         public void SaveContent(string content)
         {
-            lock (thisLock)
+            lock (_thisLock)
             {
                 string path = GetFileName();
                 File.WriteAllText(path, content);
@@ -61,7 +64,7 @@ namespace FileContextCore.FileManager
 
         public bool Clear()
         {
-            lock (thisLock)
+            lock (_thisLock)
             {
                 FileInfo fi = new FileInfo(GetFileName());
 
@@ -70,16 +73,14 @@ namespace FileContextCore.FileManager
                     fi.Delete();
                     return true;
                 }
-                else
-                {
-                    return false;
-                }
+
+                return false;
             }
         }
 
         public bool FileExists()
         {
-            lock (thisLock)
+            lock (_thisLock)
             {
                 FileInfo fi = new FileInfo(GetFileName());
 

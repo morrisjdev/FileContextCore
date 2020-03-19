@@ -5,32 +5,27 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace FileContextCore.Infrastructure.Internal
 {
-    public class FileContextScopedOptions : IFileContextScopedOptions, ICloneable
+    public class FileContextScopedOptions : IFileContextScopedOptions
     {
-        public FileContextScopedOptions(string databaseName, string serializer, string fileManager, string location)
+        public FileContextScopedOptions(string databaseName, string location, string password, Type storeManagerType)
         {
-            Serializer = serializer;
             DatabaseName = databaseName;
-            FileManager = fileManager;
             Location = location;
+            Password = password;
+            StoreManagerType = storeManagerType;
         }
 
-        public string DatabaseName { get; set; }
+        public string DatabaseName { get; }
 
-        public string Serializer { get; set; }
+        public string Location { get; }
+        
+        public string Password { get; }
 
-        public string FileManager { get; set; }
-
-        public string Location { get; set; }
+        public Type StoreManagerType { get; }
 
         public override int GetHashCode()
         {
-            return (DatabaseName + Serializer + FileManager + Location).GetHashCode();
-        }
-
-        public object Clone()
-        {
-            return new FileContextScopedOptions(DatabaseName, Serializer, FileManager, Location);
+            return (DatabaseName + Location + Password + StoreManagerType).GetHashCode();
         }
 
         public override bool Equals(object obj)
@@ -41,8 +36,8 @@ namespace FileContextCore.Infrastructure.Internal
             }
 
             FileContextScopedOptions optionsCompare = (FileContextScopedOptions) obj;
-            return optionsCompare.Serializer == Serializer && optionsCompare.DatabaseName == DatabaseName &&
-                   optionsCompare.FileManager == FileManager && optionsCompare.Location == Location;
+            return optionsCompare.DatabaseName == DatabaseName && optionsCompare.Location == Location &&
+                   optionsCompare.Password == Password && optionsCompare.StoreManagerType == StoreManagerType;
         }
     }
 }

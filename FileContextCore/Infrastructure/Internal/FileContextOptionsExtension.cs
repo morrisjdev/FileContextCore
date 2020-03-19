@@ -3,13 +3,16 @@
 // Modified version by morrisjdev
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using FileContextCore.FileManager;
+using FileContextCore.Serializer;
 using FileContextCore.Storage;
+using FileContextCore.StoreManager;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FileContextCore.Infrastructure.Internal
@@ -24,13 +27,14 @@ namespace FileContextCore.Infrastructure.Internal
     
         public FileContextOptionsExtension()
         {
-            _options = new FileContextScopedOptions(null, null, null, null);
+            _options = new FileContextScopedOptions(null, null, null,
+                typeof(DefaultStoreManager<JSONSerializer, DefaultFileManager>));
         }
 
     
         protected FileContextOptionsExtension([NotNull] FileContextOptionsExtension copyFrom)
         {
-            _options = (FileContextScopedOptions)copyFrom._options.Clone();
+            _options = copyFrom._options;
             _databaseRoot = copyFrom._databaseRoot;
         }
 
@@ -45,14 +49,10 @@ namespace FileContextCore.Infrastructure.Internal
         public virtual FileContextScopedOptions Options => _options;
 
     
-        public virtual FileContextOptionsExtension WithCustomOptions(string databaseName, string serializer, string fileManager, string location)
+        public virtual FileContextOptionsExtension WithCustomOptions(string databaseName, string location, string password, Type storeManagerType)
         {
             var clone = Clone();
-            clone._options.Location = location;
-            clone._options.DatabaseName = databaseName;
-            clone._options.FileManager = fileManager;
-            clone._options.Serializer = serializer;
-
+            clone._options = new FileContextScopedOptions(databaseName, location, password, storeManagerType);
             return clone;
         }
 
@@ -104,8 +104,8 @@ namespace FileContextCore.Infrastructure.Internal
 
                         builder.Append("Location=").Append(Extension.Options.Location).Append(' ');
                         builder.Append("DatabaseName=").Append(Extension.Options.DatabaseName).Append(' ');
-                        builder.Append("Serializer=").Append(Extension.Options.Serializer).Append(' ');
-                        builder.Append("FileManager=").Append(Extension.Options.FileManager).Append(' ');
+                        builder.Append("StoreManager=").Append(Extension.Options.StoreManagerType).Append(' ');
+                        builder.Append("Password=").Append("<Password>").Append(' ');
 
                         _logFragment = builder.ToString();
                     }
