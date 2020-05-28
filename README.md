@@ -182,6 +182,7 @@ Feel free to create a PR with your new provider and I'll add it to FileContextCo
 
 | FileContext Version | EF Core Version |
 |---------------------|-----------------|
+| 3.4.*              | 3.1.0           |
 | 3.3.*              | 3.0.0           |
 | 3.2.*              | 3.0.0           |
 | 3.0.1/3.0.0/2.2.6   | 2.2.6           |
