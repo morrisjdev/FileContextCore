@@ -539,7 +539,9 @@ namespace FileContextCore.Query.Internal
                     return ((FileContextQueryExpression)projectionBindingExpression.QueryExpression)
                         .GetMappedProjection(projectionBindingExpression.ProjectionMember);
 
+#pragma warning disable 618
                 case NullConditionalExpression nullConditionalExpression:
+#pragma warning restore 618
                 {
                     var translation = Visit(nullConditionalExpression.AccessOperation);
 
