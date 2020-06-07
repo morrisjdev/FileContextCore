@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using FileContextCore.Infrastructure.Internal;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
+using System.Globalization;
 
 namespace FileContextCore.Serializer
 {
@@ -34,7 +34,7 @@ namespace FileContextCore.Serializer
             }
 
             TextReader tr = new StringReader(list);
-            CsvReader reader = new CsvReader(tr);
+            CsvReader reader = new CsvReader(tr, CultureInfo.CurrentCulture);
 
             reader.Read();
             reader.ReadHeader();
@@ -61,7 +61,7 @@ namespace FileContextCore.Serializer
         public string Serialize<TKey>(Dictionary<TKey, object[]> list)
         {
             StringWriter sw = new StringWriter();
-            CsvWriter writer = new CsvWriter(sw);
+            CsvWriter writer = new CsvWriter(sw, CultureInfo.CurrentCulture);
 
             for (int i = 0; i < _propertyKeys.Length; i++)
             {
