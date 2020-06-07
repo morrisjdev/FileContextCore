@@ -176,6 +176,8 @@ If you want to control storing of data implement interface `IFileManager`.
 
 If you want to create a store manager that does both implement `IStoreManager`.
 
+After adding a custom provider you have to add it as a transient dependency in the dependency injection.
+
 Feel free to create a PR with your new provider and I'll add it to FileContextCore.
 
 ## Version compability
