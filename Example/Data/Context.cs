@@ -1,6 +1,8 @@
 ﻿using Example.Data.Entities;
 using FileContextCore;
+using FileContextCore.StoreManager;
 using Microsoft.EntityFrameworkCore;
+using OfficeOpenXml;
 
 namespace Example.Data
 {
@@ -41,6 +43,7 @@ namespace Example.Data
             // optionsBuilder.UseFileContextDatabase(location: @"D:\t");
 
             //Excel
+            // ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             // optionsBuilder.UseFileContextDatabase<EXCELStoreManager>(databaseName: "test");
         }
 

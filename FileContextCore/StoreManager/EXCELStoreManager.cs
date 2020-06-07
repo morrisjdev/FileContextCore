@@ -173,7 +173,10 @@ namespace FileContextCore.StoreManager
             if (_worksheet.Dimension.Rows >= lastRow)
             {
                 int count = _worksheet.Dimension.Rows - lastRow;
-                _worksheet.DeleteRow(lastRow + 1, count);
+                if (count > 0)
+                {
+                    _worksheet.DeleteRow(lastRow + 1, count);
+                }
             }
         }
     }

@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Example.Data.Entities;
 using FileContextCore;
+using FileContextCore.StoreManager;
+using OfficeOpenXml;
 
 namespace Example.Data
 {
@@ -35,7 +37,8 @@ namespace Example.Data
             //optionsBuilder.UseFileContext("csv");
 
             //Excel
-            //optionsBuilder.UseFileContext("excel");
+            // ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            // optionsBuilder.UseFileContextDatabase<EXCELStoreManager>(databaseName: "excel");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
