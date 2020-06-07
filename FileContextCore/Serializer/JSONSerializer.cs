@@ -1,11 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using FileContextCore.Infrastructure.Internal;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Newtonsoft.Json.Linq;
 
 namespace FileContextCore.Serializer
 {
@@ -15,7 +14,7 @@ namespace FileContextCore.Serializer
         private object _keyValueFactory;
         private string[] _propertyKeys;
         private Type[] _typeList;
-        
+
         public void Initialize(IFileContextScopedOptions _, IEntityType entityType, object keyValueFactory)
         {
             _keyValueFactory = keyValueFactory;

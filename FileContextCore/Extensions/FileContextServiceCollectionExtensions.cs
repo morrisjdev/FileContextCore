@@ -4,10 +4,13 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using FileContextCore.Diagnostics.Internal;
+using FileContextCore.FileManager;
 using FileContextCore.Infrastructure.Internal;
 using FileContextCore.Metadata.Conventions;
 using FileContextCore.Query.Internal;
+using FileContextCore.Serializer;
 using FileContextCore.Storage.Internal;
+using FileContextCore.StoreManager;
 using FileContextCore.ValueGeneration.Internal;
 using FileContextCore.Utilities;
 using JetBrains.Annotations;
@@ -70,7 +73,16 @@ namespace Microsoft.Extensions.DependencyInjection
                     b => b
                         .TryAddSingleton<IFileContextSingletonOptions, FileContextSingletonOptions>()
                         .TryAddSingleton<IFileContextStoreCache, FileContextStoreCache>()
-                        .TryAddScoped<IFileContextDatabase, FileContextDatabase>());
+                        .TryAddScoped<IFileContextDatabase, FileContextDatabase>()
+                        .TryAddTransient<EXCELStoreManager, EXCELStoreManager>()
+                        .TryAddTransient<DefaultStoreManager, DefaultStoreManager>()
+                        .TryAddTransient<BSONSerializer, BSONSerializer>()
+                        .TryAddTransient<CSVSerializer, CSVSerializer>()
+                        .TryAddTransient<JSONSerializer, JSONSerializer>()
+                        .TryAddTransient<XMLSerializer, XMLSerializer>()
+                        .TryAddTransient<DefaultFileManager, DefaultFileManager>()
+                        .TryAddTransient<EncryptedFileManager, EncryptedFileManager>()
+                        .TryAddTransient<PrivateFileManager, PrivateFileManager>());
 
             builder.TryAddCoreServices();
 

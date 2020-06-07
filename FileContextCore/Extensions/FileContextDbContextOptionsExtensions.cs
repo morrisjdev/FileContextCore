@@ -91,7 +91,7 @@ namespace FileContextCore
                             ?? new FileContextOptionsExtension();
 
             extension = extension.WithCustomOptions(databaseName, location, password,
-                typeof(DefaultStoreManager<JSONSerializer, DefaultFileManager>));
+                typeof(DefaultStoreManager), typeof(JSONSerializer), typeof(DefaultFileManager));
 
             if (databaseRoot != null)
             {
@@ -183,7 +183,7 @@ namespace FileContextCore
                             ?? new FileContextOptionsExtension();
 
             extension = extension.WithCustomOptions(databaseName, location, password,
-                typeof(DefaultStoreManager<TSerializer, TFileManager>));
+                typeof(DefaultStoreManager), typeof(TSerializer), typeof(TFileManager));
 
             if (databaseRoot != null)
             {
@@ -270,7 +270,7 @@ namespace FileContextCore
             var extension = optionsBuilder.Options.FindExtension<FileContextOptionsExtension>()
                             ?? new FileContextOptionsExtension();
 
-            extension = extension.WithCustomOptions(databaseName, location, password, typeof(TStoreManager));
+            extension = extension.WithCustomOptions(databaseName, location, password, typeof(TStoreManager), null, null);
 
             if (databaseRoot != null)
             {

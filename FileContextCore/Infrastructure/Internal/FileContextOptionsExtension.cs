@@ -28,7 +28,7 @@ namespace FileContextCore.Infrastructure.Internal
         public FileContextOptionsExtension()
         {
             _options = new FileContextScopedOptions(null, null, null,
-                typeof(DefaultStoreManager<JSONSerializer, DefaultFileManager>));
+                typeof(DefaultStoreManager), typeof(JSONSerializer), typeof(DefaultFileManager));
         }
 
     
@@ -49,10 +49,10 @@ namespace FileContextCore.Infrastructure.Internal
         public virtual FileContextScopedOptions Options => _options;
 
     
-        public virtual FileContextOptionsExtension WithCustomOptions(string databaseName, string location, string password, Type storeManagerType)
+        public virtual FileContextOptionsExtension WithCustomOptions(string databaseName, string location, string password, Type storeManagerType, Type serializerType, Type fileManagerType)
         {
             var clone = Clone();
-            clone._options = new FileContextScopedOptions(databaseName, location, password, storeManagerType);
+            clone._options = new FileContextScopedOptions(databaseName, location, password, storeManagerType, serializerType, fileManagerType);
             return clone;
         }
 
@@ -104,6 +104,9 @@ namespace FileContextCore.Infrastructure.Internal
 
                         builder.Append("Location=").Append(Extension.Options.Location).Append(' ');
                         builder.Append("DatabaseName=").Append(Extension.Options.DatabaseName).Append(' ');
+                        builder.Append("StoreManager=").Append(Extension.Options.StoreManagerType).Append(' ');
+                        builder.Append("Serializer=").Append(Extension.Options.SerializerType).Append(' ');
+                        builder.Append("FileManager=").Append(Extension.Options.FileManagerType).Append(' ');
                         builder.Append("StoreManager=").Append(Extension.Options.StoreManagerType).Append(' ');
                         builder.Append("Password=").Append("<Password>").Append(' ');
 

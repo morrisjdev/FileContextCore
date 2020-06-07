@@ -1,18 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace FileContextCore.Infrastructure.Internal
 {
     public class FileContextScopedOptions : IFileContextScopedOptions
     {
-        public FileContextScopedOptions(string databaseName, string location, string password, Type storeManagerType)
+        public FileContextScopedOptions(string databaseName, string location, string password, Type storeManagerType, Type serializerType, Type fileManagerType)
         {
             DatabaseName = databaseName;
             Location = location;
             Password = password;
             StoreManagerType = storeManagerType;
+            SerializerType = serializerType;
+            FileManagerType = fileManagerType;
         }
 
         public string DatabaseName { get; }
@@ -22,10 +21,14 @@ namespace FileContextCore.Infrastructure.Internal
         public string Password { get; }
 
         public Type StoreManagerType { get; }
+        
+        public Type SerializerType { get; }
+        
+        public Type FileManagerType { get; }
 
         public override int GetHashCode()
         {
-            return (DatabaseName + Location + Password + StoreManagerType).GetHashCode();
+            return (DatabaseName + Location + Password + StoreManagerType + SerializerType + FileManagerType).GetHashCode();
         }
 
         public override bool Equals(object obj)
@@ -37,7 +40,8 @@ namespace FileContextCore.Infrastructure.Internal
 
             FileContextScopedOptions optionsCompare = (FileContextScopedOptions) obj;
             return optionsCompare.DatabaseName == DatabaseName && optionsCompare.Location == Location &&
-                   optionsCompare.Password == Password && optionsCompare.StoreManagerType == StoreManagerType;
+                   optionsCompare.Password == Password && optionsCompare.StoreManagerType == StoreManagerType && 
+                   optionsCompare.SerializerType == SerializerType && optionsCompare.FileManagerType == FileManagerType;
         }
     }
 }

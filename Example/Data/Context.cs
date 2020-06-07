@@ -1,8 +1,6 @@
 ﻿using Example.Data.Entities;
 using FileContextCore;
-using FileContextCore.StoreManager;
 using Microsoft.EntityFrameworkCore;
-using OfficeOpenXml;
 
 namespace Example.Data
 {

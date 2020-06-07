@@ -8,5 +8,7 @@ namespace FileContextCore.Infrastructure.Internal
        string Location { get; }
        string Password { get; }
        Type StoreManagerType { get; }
+       Type SerializerType { get; }
+       Type FileManagerType { get; }
     }
 }

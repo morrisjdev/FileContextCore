@@ -3,6 +3,7 @@
 // Modified version by morrisjdev
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using FileContextCore.Infrastructure.Internal;
@@ -15,15 +16,18 @@ namespace FileContextCore.Storage.Internal
     public class FileContextStoreCache : IFileContextStoreCache
     {
         [NotNull] private readonly ILoggingOptions _loggingOptions;
+        private readonly IServiceProvider _serviceProvider;
         private readonly bool _useNameMatching;
         private readonly ConcurrentDictionary<IFileContextScopedOptions, IFileContextStore> _namedStores;
 
     
         public FileContextStoreCache(
             [NotNull] ILoggingOptions loggingOptions,
-            [CanBeNull] IFileContextSingletonOptions options)
+            [CanBeNull] IFileContextSingletonOptions options,
+            IServiceProvider serviceProvider)
         {
             _loggingOptions = loggingOptions;
+            _serviceProvider = serviceProvider;
             if (options?.DatabaseRoot != null)
             {
                 _useNameMatching = true;
@@ -43,7 +47,7 @@ namespace FileContextCore.Storage.Internal
     
         public virtual IFileContextStore GetStore(IFileContextScopedOptions options)
         {
-            return _namedStores.GetOrAdd(options, _ => new FileContextStore(new FileContextTableFactory(_loggingOptions, options), _useNameMatching));
+            return _namedStores.GetOrAdd(options, _ => new FileContextStore(new FileContextTableFactory(_loggingOptions, options, _serviceProvider), _useNameMatching));
         }
     }
 }

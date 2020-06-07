@@ -7,25 +7,28 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace FileContextCore.StoreManager
 {
-    public class DefaultStoreManager<TSerializer, TFileManager> : IStoreManager
-        where TSerializer : ISerializer
-        where TFileManager : IFileManager
-    {
+    class DefaultStoreManager : IStoreManager {
+        private readonly IServiceProvider _serviceProvider;
         private ISerializer _serializer;
         private IFileManager _fileManager;
         private object _keyValueFactory;
         private IEntityType _entityType;
+
+        public DefaultStoreManager(IServiceProvider serviceProvider)
+        {
+            _serviceProvider = serviceProvider;
+        }
         
         public void Initialize(IFileContextScopedOptions options, IEntityType entityType,
             object keyValueFactory)
         {
             _keyValueFactory = keyValueFactory;
             _entityType = entityType;
-            
-            _serializer = (ISerializer)Activator.CreateInstance(typeof(TSerializer));
+
+            _serializer = (ISerializer)_serviceProvider.GetService(options.SerializerType);
             _serializer.Initialize(options, _entityType, _keyValueFactory);
-            
-            _fileManager = (IFileManager)Activator.CreateInstance(typeof(TFileManager));
+
+            _fileManager = (IFileManager)_serviceProvider.GetService(options.FileManagerType);
             _fileManager.Initialize(options, entityType, _serializer.FileType);
         }
 

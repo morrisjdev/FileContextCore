@@ -33,6 +33,7 @@ namespace FileContextCore.Storage.Internal
         private readonly bool _sensitiveLoggingEnabled;
         private readonly IEntityType _entityType;
         private readonly IFileContextScopedOptions _options;
+        private readonly IServiceProvider _serviceProvider;
         private readonly Dictionary<TKey, object[]> _rows;
 
         private IStoreManager _storeManager;
@@ -44,12 +45,14 @@ namespace FileContextCore.Storage.Internal
             [NotNull] Microsoft.EntityFrameworkCore.ChangeTracking.Internal.IPrincipalKeyValueFactory<TKey> keyValueFactory,
             bool sensitiveLoggingEnabled,
             IEntityType entityType,
-            IFileContextScopedOptions options)
+            IFileContextScopedOptions options,
+            IServiceProvider serviceProvider)
         {
             _keyValueFactory = keyValueFactory;
             _sensitiveLoggingEnabled = sensitiveLoggingEnabled;
             _entityType = entityType;
             _options = options;
+            _serviceProvider = serviceProvider;
 
             _rows = Init();
         }
@@ -242,7 +245,7 @@ namespace FileContextCore.Storage.Internal
 
         private Dictionary<TKey, object[]> Init()
         {
-            _storeManager = (IStoreManager)Activator.CreateInstance(_options.StoreManagerType);
+            _storeManager = (IStoreManager)_serviceProvider.GetService(_options.StoreManagerType);
             _storeManager.Initialize(_options, _entityType, _keyValueFactory);
 
             Dictionary<TKey, object[]> newList = new Dictionary<TKey, object[]>(_keyValueFactory.EqualityComparer);
