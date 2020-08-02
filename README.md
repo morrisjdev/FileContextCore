@@ -158,7 +158,7 @@ optionsBuilder.UseFileContextDatabase(location: @"C:\Users\mjanatzek\Documents\P
 
 ## Multiple Databases
 
-If noting is configured all files of your application will be stored in a flat folder.
+If nothing is configured all files of your application will be stored in a flat folder.
 You can optionally define a name for your database and all the corresponding data will saved in a subfolder.
 So you are able to use FileContext with multiple DbContext-configurations.
 
