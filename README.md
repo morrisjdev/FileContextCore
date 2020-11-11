@@ -60,7 +60,7 @@ protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 
 For a simple example check out: [Example](https://github.com/morrisjdev/FileContextCore/tree/master/Example)
 
-You can also play around with this example on dotnetfiddle.net: [Demo](https://dotnetfiddle.net/jvFdaY)
+You can also play around with this example on dotnetfiddle.net: [Demo](https://dotnetfiddle.net/BtoW5a)
 
 ## Configuration
 
@@ -163,7 +163,7 @@ You can optionally define a name for your database and all the corresponding dat
 So you are able to use FileContext with multiple DbContext-configurations.
 
 ```cs
-optionsBuilder.UseFileContextDatabase(databasename: "database");
+optionsBuilder.UseFileContextDatabase(databaseName: "database");
 ```
 
 ## Custom provider
