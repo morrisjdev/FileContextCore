@@ -6,7 +6,7 @@
     <SignAssembly Condition="'$(OS)' == 'Windows_NT'">true</SignAssembly>
     <AssemblyOriginatorKeyFile>FileContextCoreCert.snk</AssemblyOriginatorKeyFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>3.4.0</Version>
+    <Version>3.4.1</Version>
     <Company>morrisjdev</Company>
     <Authors>morrisjdev</Authors>
     <Description>File provider for Entity Framework Core (to be used for development purposes)</Description>
@@ -20,13 +20,13 @@
     <PackageProjectUrl>https://github.com/morrisjdev/FileContextCore</PackageProjectUrl>
     <NeutralLanguage>en-US</NeutralLanguage>
     <DelaySign>false</DelaySign>
-    <AssemblyVersion>3.4.0.0</AssemblyVersion>
-    <FileVersion>3.4.0.0</FileVersion>
+    <AssemblyVersion>3.4.1.0</AssemblyVersion>
+    <FileVersion>3.4.1.0</FileVersion>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CsvHelper" Version="15.0.5" />
+    <PackageReference Include="CsvHelper" Version="21.1.0" />
     <PackageReference Include="EPPlus" Version="5.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.0" />
