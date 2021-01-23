@@ -1,4 +1,5 @@
 # FileContextCore [![Build Status](https://travis-ci.org/morrisjdev/FileContextCore.svg?branch=master)](https://travis-ci.org/morrisjdev/FileContextCore) [![Maintainability](https://api.codeclimate.com/v1/badges/72cbed89392efad4c743/maintainability)](https://codeclimate.com/github/morrisjdev/FileContextCore/maintainability)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fmorrisjdev%2FFileContextCore.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fmorrisjdev%2FFileContextCore?ref=badge_shield)
 
 FileContextCore is a "Database"-Provider for Entity Framework Core and adds the ability to store information in files.
 It enables fast developments because of the advantage of just copy, edit and delete files.
@@ -208,3 +209,7 @@ This will store the data in a file called `custom_user_table.json` for example.
 ## Author
 
 [Morris Janatzek](http://morrisj.net) ([morrisjdev](https://github.com/morrisjdev))
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fmorrisjdev%2FFileContextCore.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fmorrisjdev%2FFileContextCore?ref=badge_large)
