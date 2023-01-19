@@ -128,7 +128,15 @@ namespace FileContextCore.Query.Internal
         static FileContextLinqOperatorProvider()
         {
             var enumerableMethods = typeof(Enumerable).GetTypeInfo()
-                .GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly).ToList();
+                .GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
+                .Where(x => x.GetParameters().Aggregate(true,
+                    (prev, p) => prev && p.ParameterType.ToString() switch
+                    {
+                        "System.Index" => false,
+                        "System.Range" => false,
+                        _ => true
+                    }))
+                .ToList();
 
             AsEnumerable = enumerableMethods.Single(
                 mi => mi.Name == nameof(Enumerable.AsEnumerable) && mi.IsGenericMethod && mi.GetParameters().Length == 1);
